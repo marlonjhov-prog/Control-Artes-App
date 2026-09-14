@@ -122,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- Tabla Principal -->
+            <!-- Tabla Principal Limpia y Clara -->
             <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-grow flex flex-col mb-1">
                 <div class="overflow-y-auto flex-grow max-h-[320px]">
                     <table class="w-full text-left border-collapse" id="registrosTable">
@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle y Matriz Dinámica -->
+        <!-- VISTA 2: Detalle y Matriz Limpia Dinámica -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
@@ -166,7 +166,7 @@
                 </div>
             </div>
 
-            <!-- Matriz de Control Dinámica (Oculta por defecto hasta que hay datos de IA) -->
+            <!-- Matriz de Control Dinámica (Oculta por defecto hasta que la IA procesa) -->
             <div id="matrix-container" class="hidden bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-shrink-0">
                 <div class="bg-primary px-3 py-1.5 flex justify-between items-center">
                     <h3 class="text-white text-[11px] font-bold tracking-wide flex items-center gap-1"><i class="fa-solid fa-table-cells"></i> Matriz de Control y Alérgenos</h3>
@@ -194,13 +194,13 @@
                 </div>
             </div>
 
-            <!-- Flujo de Liberación (6 Etapas Exactas con Cambio de Color Dinámico) -->
+            <!-- Flujo de Liberación (6 Etapas Obligatorias) -->
             <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex-shrink-0">
                 <h3 class="text-[11px] font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Liberación (6 Etapas Obligatorias)</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-6 gap-2"></div>
             </div>
 
-            <!-- Panel Inferior (Imagen de Google Drive + Alérgenos) -->
+            <!-- Panel Inferior (Visor de Evidencia + Alérgenos) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
                 
                 <!-- Visor de Evidencia / Imagen -->
@@ -366,7 +366,7 @@
 
             if (query.length === 0) {
                 dropdown.classList.add('hidden');
-                filterTable();
+                loadData();
                 return;
             }
 
@@ -414,7 +414,7 @@
             let aleText = registro['Alergenos_IA'] || '';
             const matrixContainer = document.getElementById('matrix-container');
 
-            // GESTIÓN DINÁMICA DE LA MATRIZ SUPERIOR (OCULTA HASTA QUE EXISTA ANÁLISIS)
+            // GESTIÓN DINÁMICA DE LA MATRIZ: SÓLO SE MUESTRA SI HAY DATOS DE IA
             if (ingText) {
                 matrixContainer.classList.remove('hidden');
                 document.getElementById('matrix-material').innerText = registro['Material'];
@@ -431,7 +431,7 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // GESTIÓN DE LA IMAGEN DESDE GOOGLE DRIVE
+            // VISOR DE IMAGEN (GOOGLE DRIVE)
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const btnChangeArt = document.getElementById('btn-change-art');
@@ -443,12 +443,11 @@
                 btnChangeArt.classList.remove('hidden');
             } else {
                 imgView.classList.add('hidden');
-                noImgMsg.classList.add('hidden'); // Permitir que aparezca el botón de carga por defecto si no hay imagen
                 noImgMsg.classList.remove('hidden');
                 btnChangeArt.classList.add('hidden');
             }
 
-            // 6 ETAPAS OBLIGATORIAS CON CAMBIO DE COLOR DINÁMICO
+            // 6 ETAPAS OBLIGATORIAS
             const etapasFijas = [
                 "Recepción", 
                 "Toma de muestras", 
@@ -465,7 +464,6 @@
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
                 let estado = etapaObj['Estado'];
                 
-                // Colores dinámicos según el estado de la etapa
                 let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'CON ALERTA' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700');
                 let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'CON ALERTA' ? 'text-warning' : 'text-slate-400');
 
@@ -497,7 +495,7 @@
             loadData();
         }
 
-        // FLUJO ESTRICTO: SI ES LA ETAPA "INGREDIENTES", ABRE SELECTOR DE ARCHIVO Y ANÁLISIS AUTOMÁTICO
+        // DISPARADOR ESTRICTO: CLIC EN "GESTIONAR" DE LA ETAPA INGREDIENTES ABRE ARCHIVO Y EJECUTA IA
         function gestionarEtapa(codigo, etapaNombre, estadoActual) {
             if (etapaNombre.toLowerCase() === 'ingredientes') {
                 document.getElementById('fileInput').click();
