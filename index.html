@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle -->
+        <!-- VISTA 2: Detalle Unificado -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
@@ -160,15 +160,9 @@
                     <h2 class="text-sm font-bold text-slate-800" id="detail-material"></h2>
                     <p class="text-[10px] text-slate-500">Inspección y Liberación de Calidad</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <!-- BOTÓN DINÁMICO DE INGRESOS -->
-                    <button id="btn-view-ingredients" onclick="openIngredientsModal()" class="hidden bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-md hover:opacity-95 transition-all flex items-center gap-1.5 animate-pulse">
-                        <i class="fa-solid fa-list-check"></i> Ver Ingredientes y Alérgenos
-                    </button>
-                    <div class="text-right bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-                        <span class="text-[9px] text-slate-500 uppercase font-semibold block">Avance</span>
-                        <span class="text-sm font-bold text-secondary" id="detail-progress">0%</span>
-                    </div>
+                <div class="text-right bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
+                    <span class="text-[9px] text-slate-500 uppercase font-semibold block">Avance</span>
+                    <span class="text-sm font-bold text-secondary" id="detail-progress">0%</span>
                 </div>
             </div>
 
@@ -181,7 +175,7 @@
             <!-- Panel Inferior -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
                 
-                <!-- Visor de Evidencia -->
+                <!-- Visor de Evidencia Corregido -->
                 <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between overflow-hidden">
                     <div class="flex justify-between items-center mb-1">
                         <h3 class="text-[11px] font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte Escaneado</h3>
@@ -390,14 +384,6 @@
 
             let ingText = registro['Ingredientes_IA'] || '';
             let aleText = registro['Alergenos_IA'] || '';
-            const btnViewIngredients = document.getElementById('btn-view-ingredients');
-
-            // GESTIÓN DINÁMICA DEL BOTÓN DE INGREDIENTES
-            if (ingText) {
-                btnViewIngredients.classList.remove('hidden');
-            } else {
-                btnViewIngredients.classList.add('hidden');
-            }
 
             let fullText = (ingText + " " + aleText).toUpperCase();
             document.getElementById('chk-leche').checked = fullText.includes('LECHE');
@@ -405,7 +391,7 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // VISOR DE IMAGEN (GOOGLE DRIVE)
+            // GESTIÓN CORREGIDA DEL VISOR DE IMAGEN (GOOGLE DRIVE)
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const btnChangeArt = document.getElementById('btn-change-art');
@@ -421,7 +407,7 @@
                 btnChangeArt.classList.add('hidden');
             }
 
-            // 6 ETAPAS OBLIGATORIAS (FORZANDO APROBADO A INGREDIENTES SI YA TIENE IA)
+            // 6 ETAPAS OBLIGATORIAS
             const etapasFijas = [
                 "Recepción", 
                 "Toma de muestras", 
@@ -437,7 +423,7 @@
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
                 
-                // Si la etapa es "Ingredientes" y ya hay texto analizado por IA, forzamos estado APROBADO
+                // Si la etapa es "Ingredientes" y ya hay datos analizados por IA, forzamos estado APROBADO
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
                     etapaObj.Estado = 'APROBADO';
                 }
@@ -445,6 +431,27 @@
                 let estado = etapaObj['Estado'];
                 let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'CON ALERTA' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700');
                 let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'CON ALERTA' ? 'text-warning' : 'text-slate-400');
+
+                // Si es la etapa "Ingredientes" y ya está aprobada, permitimos ver el reporte desde la misma tarjeta
+                let botonAccionHTML = '';
+                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
+                    botonAccionHTML = `
+                        <div class="grid grid-cols-2 gap-1 mt-2">
+                            <button onclick="openIngredientsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1 shadow-xs">
+                                <i class="fa-solid fa-eye"></i> Ver Reporte
+                            </button>
+                            <button onclick="document.getElementById('fileInput').click()" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[9px] font-semibold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-upload"></i> Reanalizar
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    botonAccionHTML = `
+                        <button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${estado}')" class="mt-2 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold py-0.5 rounded transition-colors flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-pen-to-square"></i> Gestionar
+                        </button>
+                    `;
+                }
 
                 etapasContainer.innerHTML += `
                     <div class="p-2.5 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-xs transition-all duration-300">
@@ -456,9 +463,7 @@
                             <h4 class="font-bold text-[10px] uppercase text-slate-800 mb-0.5 truncate">${nombreEtapa}</h4>
                             <p class="text-[9px] text-slate-500 truncate"><i class="fa-solid fa-user text-slate-400"></i> ${etapaObj['Responsable'] || 'Planta'}</p>
                         </div>
-                        <button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${estado}')" class="mt-2 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold py-0.5 rounded transition-colors flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-pen-to-square"></i> Gestionar
-                        </button>
+                        ${botonAccionHTML}
                     </div>
                 `;
             });
@@ -467,6 +472,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
+        // MODAL UNIFICADO PARA VER INGREDIENTES Y ALÉRGENOS DESDE LA TARJETA
         function openIngredientsModal() {
             const registro = appData.registros.find(r => r['Código'] == currentItemCode);
             if (!registro) return;
@@ -475,7 +481,7 @@
             let aleText = registro['Alergenos_IA'] || 'Ninguno';
 
             Swal.fire({
-                title: '<span class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-secondary mr-2"></i> Reporte de Ingredientes y Alérgenos (IA)</span>',
+                title: '<span class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-secondary mr-2"></i> Ingredientes y Alérgenos (IA)</span>',
                 html: `
                     <div class="text-left space-y-3 mt-3 text-xs">
                         <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
