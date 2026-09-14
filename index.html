@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle -->
+        <!-- VISTA 2: Detalle Unificado -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
@@ -175,18 +175,13 @@
             <!-- Panel Inferior -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
                 
-                <!-- Visor de Evidencia con Zoom y Pantalla Completa -->
+                <!-- Visor de Evidencia Sincronizado -->
                 <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between overflow-hidden">
                     <div class="flex justify-between items-center mb-1">
                         <h3 class="text-[11px] font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte Escaneado</h3>
-                        <div class="flex items-center gap-2">
-                            <button onclick="openImageModal()" id="btn-zoom-art" class="hidden text-[10px] text-secondary hover:underline font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-magnifying-glass-plus"></i> Zoom / Ampliar
-                            </button>
-                            <button onclick="document.getElementById('fileInput').click()" id="btn-change-art" class="hidden text-[10px] text-slate-600 hover:underline font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-pen-to-square"></i> Cambiar
-                            </button>
-                        </div>
+                        <button onclick="openImageModal()" id="btn-zoom-art" class="hidden text-[10px] text-secondary hover:underline font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar / Zoom
+                        </button>
                     </div>
                     
                     <div id="evidence-container" class="border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative min-h-[130px]">
@@ -396,23 +391,23 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // VISOR DE IMAGEN (GOOGLE DRIVE)
+            // GESTIÓN ROBUSTA DE LA IMAGEN DE EVIDENCIA DESDE GOOGLE DRIVE
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
-            const btnChangeArt = document.getElementById('btn-change-art');
             const btnZoomArt = document.getElementById('btn-zoom-art');
+            
+            // Verificamos cualquiera de los nombres comunes que puede traer el Apps Script para la URL de Drive
+            let evidenciaUrl = registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || '';
 
-            if (registro['Evidencia_URL']) {
-                imgView.src = registro['Evidencia_URL'];
+            if (evidenciaUrl && evidenciaUrl.startsWith('http')) {
+                imgView.src = evidenciaUrl;
                 imgView.classList.remove('hidden');
                 noImgMsg.classList.add('hidden');
-                btnChangeArt.classList.remove('hidden');
-                btnZoomArt.classList.remove('hidden');
+                if(btnZoomArt) btnZoomArt.classList.remove('hidden');
             } else {
                 imgView.classList.add('hidden');
                 noImgMsg.classList.remove('hidden');
-                btnChangeArt.classList.add('hidden');
-                btnZoomArt.classList.add('hidden');
+                if(btnZoomArt) btnZoomArt.classList.add('hidden');
             }
 
             // 6 ETAPAS OBLIGATORIAS
@@ -439,17 +434,13 @@
                 let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'CON ALERTA' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700');
                 let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'CON ALERTA' ? 'text-warning' : 'text-slate-400');
 
+                // TARJETA DE INGREDIENTES LIMPIA: SIN DUPLICAR ACCIONES, CON "VISUALIZAR" O "GESTIONAR"
                 let botonAccionHTML = '';
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
                     botonAccionHTML = `
-                        <div class="grid grid-cols-2 gap-1 mt-2">
-                            <button onclick="openIngredientsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1 shadow-xs" title="Ver reporte">
-                                <i class="fa-solid fa-eye"></i> Ver Reporte
-                            </button>
-                            <button onclick="document.getElementById('fileInput').click()" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[9px] font-semibold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1" title="Reanalizar">
-                                <i class="fa-solid fa-upload"></i> Cambiar
-                            </button>
-                        </div>
+                        <button onclick="openIngredientsModal()" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1 rounded transition-colors flex items-center justify-center gap-1 shadow-xs" title="Visualizar ingredientes y alérgenos">
+                            <i class="fa-solid fa-eye"></i> Visualizar
+                        </button>
                     `;
                 } else {
                     botonAccionHTML = `
@@ -466,7 +457,7 @@
                                 <i class="fa-solid fa-circle-check ${iconColor} text-xs"></i>
                                 <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-white border">${estado}</span>
                             </div>
-                            <h4 class="font-bold text-[10px] uppercase text-slate-800 mb-0.5 truncate">${nombreEtapa}</h4>
+                            <h4 class="font-bold text-[10px] uppercase text-slate-800 mb-0.5 truncate">${nombreEtopathName = nombreEtapa}</h4>
                             <p class="text-[9px] text-slate-500 truncate"><i class="fa-solid fa-user text-slate-400"></i> ${etapaObj['Responsable'] || 'Planta'}</p>
                         </div>
                         ${botonAccionHTML}
@@ -478,30 +469,17 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // MODAL PARA AMPLIAR / ZOOM DE LA IMAGEN DE EVIDENCIA
-        function openImageModal() {
-            const imgView = document.getElementById('scanned-image-view');
-            if (!imgView.src || imgView.classList.contains('hidden')) return;
-
-            Swal.fire({
-                title: '<span class="text-sm font-bold">Arte / Etiqueta Escaneada</span>',
-                html: `<div class="overflow-auto max-h-[70vh] flex justify-center"><img src="${imgView.src}" class="max-w-full rounded shadow-md object-contain"></div>`,
-                width: '700px',
-                confirmButtonText: 'Cerrar',
-                confirmButtonColor: '#3b82f6'
-            });
-        }
-
-        // MODAL DE INGREDIENTES Y ALÉRGENOS
+        // MODAL DE VISUALIZACIÓN: INGREDIENTES, ALÉRGENOS E IMAGEN AMPLIADA CON ZOOM
         function openIngredientsModal() {
             const registro = appData.registros.find(r => r['Código'] == currentItemCode);
             if (!registro) return;
 
             let ingText = registro['Ingredientes_IA'] || 'No analizado';
             let aleText = registro['Alergenos_IA'] || 'Ninguno';
+            let imgUrl = registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || '';
 
             Swal.fire({
-                title: '<span class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-secondary mr-2"></i> Ingredientes y Alérgenos (IA)</span>',
+                title: '<span class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-secondary mr-2"></i> Reporte de Ingredientes y Alérgenos (IA)</span>',
                 html: `
                     <div class="text-left space-y-3 mt-3 text-xs">
                         <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -512,8 +490,30 @@
                             <strong class="text-red-900 block mb-1 uppercase font-semibold text-[10px]"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos Declarados:</strong>
                             <p class="text-red-800 font-bold">${aleText}</p>
                         </div>
+                        ${imgUrl ? `
+                        <div class="mt-2 text-center border-t pt-2">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Arte Escaneado (Haga clic para ampliar):</span>
+                            <div class="overflow-auto max-h-48 border rounded bg-slate-50 p-1 flex justify-center">
+                                <img src="${imgUrl}" class="max-h-44 object-contain rounded cursor-zoom-in hover:scale-105 transition-transform" onclick="window.open('${imgUrl}', '_blank')" title="Ampliar imagen en pestaña nueva">
+                            </div>
+                        </div>` : ''}
                     </div>
                 `,
+                width: '600px',
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+
+        // MODAL PARA AMPLIAR LA IMAGEN DE EVIDENCIA DESDE EL PANEL INFERIOR
+        function openImageModal() {
+            const imgView = document.getElementById('scanned-image-view');
+            if (!imgView.src || imgView.classList.contains('hidden')) return;
+
+            Swal.fire({
+                title: '<span class="text-sm font-bold">Arte / Etiqueta Escaneada</span>',
+                html: `<div class="overflow-auto max-h-[75vh] flex justify-center"><img src="${imgView.src}" class="max-w-full rounded shadow-md object-contain"></div>`,
+                width: '750px',
                 confirmButtonText: 'Cerrar',
                 confirmButtonColor: '#3b82f6'
             });
