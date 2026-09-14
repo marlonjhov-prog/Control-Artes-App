@@ -31,6 +31,7 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
         body { height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col justify-between">
@@ -56,7 +57,7 @@
         </div>
     </nav>
 
-    <!-- Main Container (Sin scroll general) -->
+    <!-- Main Container -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-3 flex flex-col justify-between overflow-hidden">
         
         <!-- Spinner -->
@@ -65,7 +66,7 @@
             <p class="text-slate-500 text-xs font-medium">Sincronizando flujos desde Google Cloud...</p>
         </div>
 
-        <!-- VISTA 1: Dashboard y KPIs (Sin Scroll) -->
+        <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden flex flex-col h-full justify-between space-y-3 overflow-hidden">
             
             <!-- KPIs Compactos -->
@@ -121,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- Tabla Principal (Tipografía mejorada, sin scroll general) -->
+            <!-- Tabla Principal -->
             <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-grow flex flex-col mb-1">
                 <div class="overflow-y-auto flex-grow max-h-[320px]">
                     <table class="w-full text-left border-collapse" id="registrosTable">
@@ -141,7 +142,7 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle y Matriz -->
+        <!-- VISTA 2: Detalle y Matriz Dinámica -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
@@ -165,8 +166,8 @@
                 </div>
             </div>
 
-            <!-- Matriz de Control -->
-            <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-shrink-0">
+            <!-- Matriz de Control Dinámica (Oculta por defecto hasta que hay datos de IA) -->
+            <div id="matrix-container" class="hidden bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-shrink-0">
                 <div class="bg-primary px-3 py-1.5 flex justify-between items-center">
                     <h3 class="text-white text-[11px] font-bold tracking-wide flex items-center gap-1"><i class="fa-solid fa-table-cells"></i> Matriz de Control y Alérgenos</h3>
                     <span class="text-[9px] text-slate-300 font-mono">IA Sincronizada</span>
@@ -185,21 +186,21 @@
                             <tr class="border-b border-slate-100">
                                 <td id="matrix-material" class="p-2 font-bold text-slate-800 text-[11px]"></td>
                                 <td id="matrix-estado" class="p-2 font-semibold"></td>
-                                <td id="matrix-ingredientes" class="p-2 text-slate-600 italic text-[11px]">Sin analizar</td>
-                                <td id="matrix-alergenos" class="p-2 text-slate-600 font-medium text-[11px]">Sin declarar</td>
+                                <td id="matrix-ingredientes" class="p-2 text-slate-600 italic text-[11px]"></td>
+                                <td id="matrix-alergenos" class="p-2 text-slate-600 font-medium text-[11px]"></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Flujo de Liberación (6 Etapas Exactas) -->
+            <!-- Flujo de Liberación (6 Etapas Exactas con Cambio de Color Dinámico) -->
             <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex-shrink-0">
                 <h3 class="text-[11px] font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Liberación (6 Etapas Obligatorias)</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-6 gap-2"></div>
             </div>
 
-            <!-- Panel Inferior (Imagen Grande + Alérgenos) -->
+            <!-- Panel Inferior (Imagen de Google Drive + Alérgenos) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
                 
                 <!-- Visor de Evidencia / Imagen -->
@@ -222,18 +223,6 @@
                     </div>
 
                     <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
-                    
-                    <div id="ai-action-container" class="hidden mt-2 pt-1 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] text-slate-500 italic"><i class="fa-solid fa-circle-info mr-1"></i> Imagen lista para IA</span>
-                        <div class="flex gap-1.5">
-                            <button onclick="uploadImage()" id="btn-upload" class="bg-slate-800 text-white font-medium py-1 px-2.5 rounded text-[11px] hidden items-center gap-1">
-                                <i class="fa-brands fa-google-drive"></i> Guardar
-                            </button>
-                            <button onclick="triggerGeminiVision()" id="btn-ai" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1 px-3 rounded text-[11px] flex items-center gap-1.5 shadow-xs">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Analizar IA
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Alérgenos -->
@@ -421,14 +410,20 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${registro['Avance general (%)']}%`;
 
-            document.getElementById('matrix-material').innerText = registro['Material'];
-            document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] border border-blue-200 font-semibold">${registro['Estado general'] || 'EN PROCESO'}</span>`;
-            
             let ingText = registro['Ingredientes_IA'] || '';
             let aleText = registro['Alergenos_IA'] || '';
+            const matrixContainer = document.getElementById('matrix-container');
 
-            document.getElementById('matrix-ingredientes').innerHTML = ingText ? `<span class="bg-yellow-100 text-yellow-900 px-1.5 py-0.5 rounded text-[11px]">${ingText}</span>` : '<span class="text-slate-400 italic">Pendiente de lectura IA</span>';
-            document.getElementById('matrix-alergenos').innerHTML = aleText ? `<span class="bg-red-100 text-red-900 font-bold px-1.5 py-0.5 rounded text-[11px]">${aleText}</span>` : '<span class="text-slate-400 italic">No declarados</span>';
+            // GESTIÓN DINÁMICA DE LA MATRIZ SUPERIOR (OCULTA HASTA QUE EXISTA ANÁLISIS)
+            if (ingText) {
+                matrixContainer.classList.remove('hidden');
+                document.getElementById('matrix-material').innerText = registro['Material'];
+                document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] border border-blue-200 font-semibold">${registro['Estado general'] || 'EN PROCESO'}</span>`;
+                document.getElementById('matrix-ingredientes').innerHTML = `<span class="bg-yellow-100 text-yellow-900 px-1.5 py-0.5 rounded text-[11px]">${ingText}</span>`;
+                document.getElementById('matrix-alergenos').innerHTML = `<span class="bg-red-100 text-red-900 font-bold px-1.5 py-0.5 rounded text-[11px]">${aleText}</span>`;
+            } else {
+                matrixContainer.classList.add('hidden');
+            }
 
             let fullText = (ingText + " " + aleText).toUpperCase();
             document.getElementById('chk-leche').checked = fullText.includes('LECHE');
@@ -448,11 +443,12 @@
                 btnChangeArt.classList.remove('hidden');
             } else {
                 imgView.classList.add('hidden');
+                noImgMsg.classList.add('hidden'); // Permitir que aparezca el botón de carga por defecto si no hay imagen
                 noImgMsg.classList.remove('hidden');
                 btnChangeArt.classList.add('hidden');
             }
 
-            // 6 ETAPAS OBLIGATORIAS
+            // 6 ETAPAS OBLIGATORIAS CON CAMBIO DE COLOR DINÁMICO
             const etapasFijas = [
                 "Recepción", 
                 "Toma de muestras", 
@@ -468,11 +464,13 @@
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
                 let estado = etapaObj['Estado'];
-                let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'EN PROCESO' ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-slate-50 border-slate-200 text-slate-700');
-                let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'EN PROCESO' ? 'text-secondary' : 'text-slate-400');
+                
+                // Colores dinámicos según el estado de la etapa
+                let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'CON ALERTA' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700');
+                let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'CON ALERTA' ? 'text-warning' : 'text-slate-400');
 
                 etapasContainer.innerHTML += `
-                    <div class="p-2.5 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-xs">
+                    <div class="p-2.5 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-xs transition-all duration-300">
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <i class="fa-solid fa-circle-check ${iconColor} text-xs"></i>
@@ -502,10 +500,8 @@
         // FLUJO ESTRICTO: SI ES LA ETAPA "INGREDIENTES", ABRE SELECTOR DE ARCHIVO Y ANÁLISIS AUTOMÁTICO
         function gestionarEtapa(codigo, etapaNombre, estadoActual) {
             if (etapaNombre.toLowerCase() === 'ingredientes') {
-                // Abrir directamente el selector de archivos para cargar la imagen y procesar con IA
                 document.getElementById('fileInput').click();
             } else {
-                // Comportamiento normal para las demás etapas
                 Swal.fire({
                     title: `<span class="text-sm font-bold">Gestión: ${etapaNombre}</span>`,
                     html: `
@@ -544,7 +540,6 @@
                     imgView.classList.remove('hidden');
                     noImgMsg.classList.add('hidden');
                     
-                    // Disparar automáticamente la subida y el análisis por IA al seleccionar el archivo
                     uploadImageAndAnalyze();
                 }
                 reader.readAsDataURL(file);
@@ -559,7 +554,6 @@
             reader.onload = async function(e) {
                 const base64Data = e.target.result.split(',')[1];
                 try {
-                    // 1. Subir a Drive
                     const resUpload = await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify({
@@ -574,7 +568,6 @@
 
                     if (resultUpload.status !== 'success') throw new Error("Fallo al subir a Google Drive");
 
-                    // 2. Analizar con Gemini AI
                     const resAI = await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify({
@@ -589,7 +582,6 @@
                         const ingredientes = resultAI.data.ingredientes || 'No especificado';
                         const alergenos = resultAI.data.alergenos || 'Ninguno';
 
-                        // 3. Guardar resultados en Sheets
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
                             body: JSON.stringify({
@@ -600,7 +592,6 @@
                             })
                         });
 
-                        // 4. Marcar automáticamente la etapa "Ingredientes" como APROBADA
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
                             body: JSON.stringify({
