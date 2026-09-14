@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle y Matriz Limpia Dinámica -->
+        <!-- VISTA 2: Detalle con Botón Dinámico de Ingredientes -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
@@ -160,37 +160,15 @@
                     <h2 class="text-sm font-bold text-slate-800" id="detail-material"></h2>
                     <p class="text-[10px] text-slate-500">Inspección y Liberación de Calidad</p>
                 </div>
-                <div class="text-right bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-                    <span class="text-[9px] text-slate-500 uppercase font-semibold block">Avance</span>
-                    <span class="text-sm font-bold text-secondary" id="detail-progress">0%</span>
-                </div>
-            </div>
-
-            <!-- Matriz de Control Dinámica (Oculta por defecto hasta que se analizan ingredientes) -->
-            <div id="matrix-container" class="hidden bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-shrink-0">
-                <div class="bg-primary px-3 py-1.5 flex justify-between items-center">
-                    <h3 class="text-white text-[11px] font-bold tracking-wide flex items-center gap-1"><i class="fa-solid fa-table-cells"></i> Matriz de Control y Alérgenos</h3>
-                    <span class="text-[9px] text-slate-300 font-mono">IA Sincronizada</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-600 uppercase border-b border-slate-200 text-[10px]">
-                                <th class="p-2 font-semibold">Material</th>
-                                <th class="p-2 font-semibold">Estado</th>
-                                <th class="p-2 font-semibold">Ingredientes (IA)</th>
-                                <th class="p-2 font-semibold">Alérgenos Detectados</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-slate-100">
-                                <td id="matrix-material" class="p-2 font-bold text-slate-800 text-[11px]"></td>
-                                <td id="matrix-estado" class="p-2 font-semibold"></td>
-                                <td id="matrix-ingredientes" class="p-2 text-slate-600 italic text-[11px]"></td>
-                                <td id="matrix-alergenos" class="p-2 text-slate-600 font-medium text-[11px]"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="flex items-center gap-3">
+                    <!-- BOTÓN DINÁMICO DE INGRESOS (SOLO APARECE CUANDO LA IA ANALIZA) -->
+                    <button id="btn-view-ingredients" onclick="openIngredientsModal()" class="hidden bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-md hover:opacity-95 transition-all flex items-center gap-1.5 animate-pulse">
+                        <i class="fa-solid fa-list-check"></i> Ver Ingredientes y Alérgenos
+                    </button>
+                    <div class="text-right bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
+                        <span class="text-[9px] text-slate-500 uppercase font-semibold block">Avance</span>
+                        <span class="text-sm font-bold text-secondary" id="detail-progress">0%</span>
+                    </div>
                 </div>
             </div>
 
@@ -412,17 +390,13 @@
 
             let ingText = registro['Ingredientes_IA'] || '';
             let aleText = registro['Alergenos_IA'] || '';
-            const matrixContainer = document.getElementById('matrix-container');
+            const btnViewIngredients = document.getElementById('btn-view-ingredients');
 
-            // MATRIZ OCULTA POR DEFECTO: SOLO APARECE SI LA IA YA ANALIZÓ LOS INGREDIENTES
+            // GESTIÓN DINÁMICA DEL BOTÓN DE INGREDIENTES (SÓLO APARECE SI LA IA YA ANALIZÓ)
             if (ingText) {
-                matrixContainer.classList.remove('hidden');
-                document.getElementById('matrix-material').innerText = registro['Material'];
-                document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] border border-blue-200 font-semibold">${registro['Estado general'] || 'EN PROCESO'}</span>`;
-                document.getElementById('matrix-ingredientes').innerHTML = `<span class="bg-yellow-100 text-yellow-900 px-1.5 py-0.5 rounded text-[11px]">${ingText}</span>`;
-                document.getElementById('matrix-alergenos').innerHTML = `<span class="bg-red-100 text-red-900 font-bold px-1.5 py-0.5 rounded text-[11px]">${aleText}</span>`;
+                btnViewIngredients.classList.remove('hidden');
             } else {
-                matrixContainer.classList.add('hidden');
+                btnViewIngredients.classList.add('hidden');
             }
 
             let fullText = (ingText + " " + aleText).toUpperCase();
@@ -486,6 +460,33 @@
 
             document.getElementById('dashboard-view').classList.add('hidden');
             document.getElementById('detail-view').classList.remove('hidden');
+        }
+
+        // MODAL DINÁMICO PARA VER INGREDIENTES Y ALÉRGENOS AL HACER CLIC EN EL BOTÓN
+        function openIngredientsModal() {
+            const registro = appData.registros.find(r => r['Código'] == currentItemCode);
+            if (!registro) return;
+
+            let ingText = registro['Ingredientes_IA'] || 'No analizado';
+            let aleText = registro['Alergenos_IA'] || 'Ninguno';
+
+            Swal.fire({
+                title: '<span class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-secondary mr-2"></i> Reporte de Ingredientes y Alérgenos (IA)</span>',
+                html: `
+                    <div class="text-left space-y-3 mt-3 text-xs">
+                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <strong class="text-yellow-900 block mb-1 uppercase font-semibold text-[10px]"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes Detectados:</strong>
+                            <p class="text-slate-700 italic">${ingText}</p>
+                        </div>
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <strong class="text-red-900 block mb-1 uppercase font-semibold text-[10px]"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos Declarados:</strong>
+                            <p class="text-red-800 font-bold">${aleText}</p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#3b82f6'
+            });
         }
 
         function showDashboard() {
@@ -601,7 +602,7 @@
                             })
                         });
 
-                        Swal.fire('¡Éxito!', 'Imagen cargada, analizada por IA y etapa de Ingredientes aprobada.', 'success');
+                        Swal.fire('¡Éxito!', 'Imagen analizada y etapa de Ingredientes aprobada.', 'success');
                         selectedFile = null;
                         loadData();
                     } else {
