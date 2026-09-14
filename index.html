@@ -25,7 +25,6 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        /* Eliminamos overflow-hidden del body para permitir scroll natural sin espacios en blanco */
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
@@ -60,7 +59,7 @@
         <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             
-            <!-- KPIs Mejorados y Ajustados -->
+            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
@@ -159,29 +158,22 @@
                 <div id="etapas-horizontal-container" class="grid grid-cols-2 md:grid-cols-6 gap-3"></div>
             </div>
 
-            <!-- Panel Inferior: Evidencia (Izquierda) + Alérgenos (Derecha) -->
+            <!-- Panel Inferior: Evidencia + Alérgenos -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA (Maximizado, Sin Botones Extra) -->
+                <!-- VISOR DE EVIDENCIA (Solo visor interactivo) -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-[350px]">
                     <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary text-base"></i> Evidencia y Arte Escaneado
                     </h3>
                     
-                    <!-- Contenedor del visor -->
                     <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative group cursor-pointer" onclick="openImageZoom()">
-                        
-                        <!-- Mensaje si no hay imagen -->
                         <div id="no-evidence-msg" class="text-center p-4">
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                             <p class="text-[10px] text-slate-400 mt-1">Cargue la etiqueta desde la etapa "Ingredientes"</p>
                         </div>
-                        
-                        <!-- Imagen (Toma todo el espacio posible sin deformarse) -->
-                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" title="Haga clic para ampliar a pantalla completa">
-                        
-                        <!-- Overlay Icon -->
+                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" title="Haga clic para ampliar">
                         <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div class="bg-white/90 text-slate-800 p-2 rounded-full shadow-lg">
                                 <i class="fa-solid fa-magnifying-glass-plus text-xl"></i>
@@ -224,7 +216,6 @@
             </div>
         </div>
         
-        <!-- Input oculto indispensable para subir el archivo -->
         <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     </main>
 
@@ -234,12 +225,15 @@
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
         let selectedFile = null;
+        
+        // CACHÉ LOCAL: Evita que la imagen desaparezca si el servidor demora en devolver el URL
+        window.localImageCache = {};
 
         document.addEventListener('DOMContentLoaded', () => { loadData(); });
 
         async function loadData() {
             document.getElementById('sync-icon').classList.add('fa-spin');
-            if(!document.getElementById('dashboard-view').classList.contains('hidden')){
+            if(!document.getElementById('dashboard-view').classList.contains('hidden') && !currentItemCode){
                 document.getElementById('dashboard-view').classList.add('hidden');
                 document.getElementById('loading-spinner').classList.remove('hidden');
             }
@@ -255,17 +249,21 @@
                     renderTable();
                     
                     document.getElementById('loading-spinner').classList.add('hidden');
-                    if(currentItemCode) openDetail(currentItemCode);
-                    else document.getElementById('dashboard-view').classList.remove('hidden');
+                    
+                    // Si estamos dentro de un detalle, actualizamos la vista sin cerrarla
+                    if(currentItemCode) {
+                        openDetail(currentItemCode);
+                    } else {
+                        document.getElementById('dashboard-view').classList.remove('hidden');
+                    }
                 }
             } catch (error) {
-                Swal.fire('Error', 'Problema de conexión con Google Cloud. Intente recargar.', 'error');
+                console.error("Error sincronizando:", error);
             } finally {
                 document.getElementById('sync-icon').classList.remove('fa-spin');
             }
         }
 
-        // --- LÓGICA REPARADA DE KPIs ---
         function renderKPIs() {
             const total = appData.registros.length;
             if (total === 0) return;
@@ -275,10 +273,8 @@
             let pendientes = 0;
 
             appData.registros.forEach(reg => {
-                // Buscamos cualquier variación del nombre de la columna "Avance"
                 let avValue = reg['Avance general (%)'] || reg['Avance'] || reg['Avance general'] || 0;
                 let av = parseInt(avValue) || 0;
-                
                 sumaAvance += av;
                 if (av === 100) aprobados++;
                 else pendientes++;
@@ -294,6 +290,7 @@
             if (path) {
                 path.style.strokeDasharray = `${promedio}, 100`;
                 if(promedio === 100) path.classList.replace('text-secondary', 'text-accent');
+                else path.classList.replace('text-accent', 'text-secondary');
             }
         }
 
@@ -307,7 +304,8 @@
                 let bgAvance = avance === 100 ? 'bg-accent' : (avance > 40 ? 'bg-secondary' : 'bg-warning');
 
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.className = 'hover:bg-slate-50 transition-colors cursor-pointer';
+                tr.onclick = () => openDetail(reg['Código']);
                 tr.innerHTML = `
                     <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300">${reg['Código']}</span></td>
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
@@ -321,7 +319,7 @@
                         </div>
                     </td>
                     <td class="p-4 text-center">
-                        <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors">
+                        <button class="bg-secondary text-white hover:bg-blue-700 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors pointer-events-none">
                             Auditar
                         </button>
                     </td>
@@ -339,17 +337,11 @@
             }
         }
 
-        // --- CONVERTIR URL DRIVE PARA QUE SEA VISIBLE ---
         function extractDirectImageUrl(url) {
             if (!url) return '';
-            // Si ya es un enlace directo o base64, lo retorna
             if (url.includes('data:image') || url.includes('uc?export=view')) return url;
-            
-            // Convierte enlace /file/d/ID/view a formato directo
             const match = url.match(/\/d\/(.+?)\//);
-            if (match && match[1]) {
-                return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-            }
+            if (match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
             return url;
         }
 
@@ -376,12 +368,13 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // --- RENDER DE IMAGEN DE EVIDENCIA ---
+            // --- VISOR DE IMAGEN ROBUSTO (Usa el de Google Drive o el de la Caché Local) ---
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const zoomOverlay = document.getElementById('zoom-overlay');
             
-            let urlOrigen = registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || '';
+            // Priorizamos la caché local por si Google Sheets tarda en responder.
+            let urlOrigen = window.localImageCache[codigo] || registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || registro['Imagen'] || '';
             let urlDirecta = extractDirectImageUrl(urlOrigen);
 
             if (urlDirecta) {
@@ -396,7 +389,7 @@
                 noImgMsg.classList.remove('hidden');
             }
 
-            // --- 6 ETAPAS OBLIGATORIAS ---
+            // --- ETAPAS ---
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
             let etapasContainer = document.getElementById('etapas-horizontal-container');
             etapasContainer.innerHTML = '';
@@ -404,7 +397,6 @@
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
                 
-                // Forzar aprobado en interfaz si hay análisis
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && ingText !== 'No analizado') {
                     etapaObj.Estado = 'APROBADO';
                 }
@@ -416,7 +408,6 @@
                 let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
                 let iconColor = isApproved ? 'text-accent' : (isWarning ? 'text-warning' : 'text-slate-400');
 
-                // LÓGICA DE BOTÓN ÚNICO EN "INGREDIENTES"
                 let botonAccionHTML = '';
                 if (nombreEtapa.toLowerCase() === 'ingredientes') {
                     if (isApproved) {
@@ -459,7 +450,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- MODAL INTERACTIVO: VISUALIZAR Y MODIFICAR ---
+        // --- MODAL DE INGREDIENTES CON OPCIÓN DE RE-CARGA ---
         function openIngredientsModal() {
             const registro = appData.registros.find(r => r['Código'] == currentItemCode);
             if (!registro) return;
@@ -494,24 +485,24 @@
             });
         }
 
-        // Disparador desde dentro del modal para modificar
         function triggerFileMod() {
             Swal.close();
             document.getElementById('fileInput').click();
         }
 
-        // --- VISOR DE ZOOM A PANTALLA COMPLETA ---
+        // --- ZOOM A PANTALLA COMPLETA ---
         function openImageZoom() {
             const imgView = document.getElementById('scanned-image-view');
             if (!imgView.src || imgView.classList.contains('hidden')) return;
 
             Swal.fire({
                 title: '<span class="text-base font-bold text-slate-600">Arte Escaneado</span>',
-                html: `<div class="flex justify-center bg-slate-100 rounded-lg p-2"><img src="${imgView.src}" class="max-w-full max-h-[75vh] object-contain shadow-md rounded"></div>`,
-                width: '80%',
+                html: `<div class="flex justify-center bg-slate-100 rounded-lg p-2"><img src="${imgView.src}" class="max-w-full max-h-[80vh] object-contain shadow-md rounded"></div>`,
+                width: '85%',
                 confirmButtonText: 'Cerrar Visor',
                 confirmButtonColor: '#3b82f6',
-                padding: '1em'
+                padding: '1em',
+                customClass: { popup: 'rounded-xl' }
             });
         }
 
@@ -556,7 +547,11 @@
                 selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Actualizar visor inmediatamente con la imagen local (Base64)
+                    
+                    // 1. GUARDAMOS EN CACHÉ PARA EVITAR QUE DESAPAREZCA CON EL LOADDATA()
+                    window.localImageCache[currentItemCode] = e.target.result;
+                    
+                    // 2. ACTUALIZAMOS EL VISOR
                     const imgView = document.getElementById('scanned-image-view');
                     const noImgMsg = document.getElementById('no-evidence-msg');
                     const zoomOverlay = document.getElementById('zoom-overlay');
@@ -566,7 +561,8 @@
                     zoomOverlay.classList.remove('hidden');
                     noImgMsg.classList.add('hidden');
                     
-                    uploadImageAndAnalyze(e.target.result.split(',')[1]); // Mandar a IA
+                    // 3. ENVIAR A LA IA
+                    uploadImageAndAnalyze(e.target.result.split(',')[1]);
                 }
                 reader.readAsDataURL(file);
             }
@@ -581,7 +577,6 @@
             });
 
             try {
-                // 1. Subir Imagen
                 const resUpload = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -595,7 +590,6 @@
                 const resultUpload = await resUpload.json();
                 if (resultUpload.status !== 'success') throw new Error("Fallo al subir archivo a la nube.");
 
-                // 2. Analizar Imagen
                 const resAI = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -610,13 +604,11 @@
                     const ingredientes = resultAI.data.ingredientes || 'No especificado';
                     const alergenos = resultAI.data.alergenos || 'Ninguno';
 
-                    // 3. Guardar Textos
                     await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: ingredientes, alergenos: alergenos })
                     });
 
-                    // 4. Actualizar Etapa a Aprobado
                     await fetch(SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO', avance: 100 })
@@ -624,8 +616,10 @@
 
                     Swal.fire('¡Aprobado!', 'Etiqueta procesada. Ingredientes y alérgenos registrados.', 'success');
                     selectedFile = null;
-                    document.getElementById('fileInput').value = ""; // Reset input
-                    loadData();
+                    document.getElementById('fileInput').value = ""; 
+                    
+                    // Recargamos el backend. (La imagen NO desaparecerá gracias al localImageCache)
+                    loadData(); 
                 } else {
                     throw new Error("Alta demanda en los servidores de IA. Intente en unos segundos.");
                 }
@@ -645,7 +639,7 @@
                 const result = await res.json();
                 if (result.status === 'success') {
                     Swal.close();
-                    loadData(); // Recargar para actualizar KPIs
+                    loadData();
                 } else throw new Error();
             } catch (error) {
                 Swal.fire('Error', 'No se pudo guardar el estado.', 'error');
