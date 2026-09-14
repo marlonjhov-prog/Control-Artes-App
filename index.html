@@ -24,7 +24,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Oculta cursor de arrastre cuando no está presionado */
+        /* Cursor para el zoom de imagen */
         #zoom-container { cursor: grab; }
         #zoom-container:active { cursor: grabbing; }
     </style>
@@ -100,7 +100,7 @@
                 </div>
             </div>
 
-            <!-- Buscador y Tabla -->
+            <!-- Buscador y Tabla Principal -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                 <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
@@ -116,12 +116,12 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="registrosTable">
                         <thead class="bg-slate-100">
-                            <tr class="text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                            <tr class="text-slate-600 text-[11px] uppercase tracking-wider border-b border-slate-200">
                                 <th class="p-4 font-bold">Código</th>
                                 <th class="p-4 font-bold">Material / Producto</th>
                                 <th class="p-4 font-bold">Proveedor</th>
                                 <th class="p-4 font-bold">Avance</th>
-                                <th class="p-4 font-bold text-center">Acciones</th>
+                                <th class="p-4 font-bold text-center">Acciones (Auditar / Modificar / Eliminar)</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
@@ -175,7 +175,8 @@
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                             <p class="text-[10px] text-slate-400 mt-1">Cargue la etiqueta desde la etapa "Ingredientes"</p>
                         </div>
-                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" title="Haga clic para abrir visor avanzado">
+                        <!-- Imagen con object-contain para no distorsionar -->
+                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" title="Haga clic para abrir visor con Zoom">
                         <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm">
                                 <i class="fa-solid fa-magnifying-glass-plus"></i> Abrir Visor
@@ -211,7 +212,7 @@
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
                         <i class="fa-solid fa-shield-halved mt-0.5"></i>
-                        <p><strong>Inspección Automática Inteligente:</strong> Gemini IA cruza los datos con la normativa Codex Alimentarius y valida correspondencia con SAP.</p>
+                        <p><strong>Inspección Automática Inteligente:</strong> Gemini IA valida la etiqueta visual contra el producto de SAP y aplica normativa Codex Alimentarius.</p>
                     </div>
                 </div>
             </div>
@@ -221,25 +222,29 @@
     </main>
 
     <script>
+        // URL DE TU WEB APP EN APPS SCRIPT
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
         let selectedFile = null;
         
+        // Memoria para que la imagen no desaparezca al recargar KPIs
         window.localImageCache = {};
 
         document.addEventListener('DOMContentLoaded', () => { loadData(); });
 
         async function loadData() {
             document.getElementById('sync-icon').classList.add('fa-spin');
+            
             if(!document.getElementById('dashboard-view').classList.contains('hidden') && !currentItemCode){
                 document.getElementById('dashboard-view').classList.add('hidden');
                 document.getElementById('loading-spinner').classList.remove('hidden');
             }
 
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=getData`);
+                // Fetch con redirect "follow" explícito para evitar problemas de CORS silenciosos
+                const response = await fetch(`${SCRIPT_URL}?action=getData`, { redirect: "follow" });
                 const result = await response.json();
                 
                 if (result.status === 'success') {
@@ -249,11 +254,20 @@
                     renderTable();
                     
                     document.getElementById('loading-spinner').classList.add('hidden');
-                    if(currentItemCode) openDetail(currentItemCode);
-                    else document.getElementById('dashboard-view').classList.remove('hidden');
+                    if(currentItemCode) {
+                        openDetail(currentItemCode);
+                    } else {
+                        document.getElementById('dashboard-view').classList.remove('hidden');
+                    }
                 }
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error de Fetch/CORS:", error);
+                document.getElementById('loading-spinner').classList.add('hidden');
+                Swal.fire({
+                    title: 'Error de Conexión', 
+                    html: 'No se pudo contactar con Google Cloud (Error CORS).<br><br><b>Solución:</b> Ve a tu Google Apps Script, crea una <b>Nueva Versión</b> de implementación asegurándote que se ejecute como "Yo" y acceso "Cualquier persona".', 
+                    icon: 'error'
+                });
             } finally {
                 document.getElementById('sync-icon').classList.remove('fa-spin');
             }
@@ -263,9 +277,7 @@
             const total = appData.registros.length;
             if (total === 0) return;
 
-            let sumaAvance = 0;
-            let aprobados = 0;
-            let pendientes = 0;
+            let sumaAvance = 0, aprobados = 0, pendientes = 0;
 
             appData.registros.forEach(reg => {
                 let avValue = reg['Avance general (%)'] || reg['Avance'] || reg['Avance general'] || 0;
@@ -301,7 +313,7 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
                 
-                // Nuevos botones en la tabla
+                // AQUÍ ESTÁN LOS 3 BOTONES JUNTOS EN LA TABLA
                 tr.innerHTML = `
                     <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300">${reg['Código']}</span></td>
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
@@ -316,9 +328,15 @@
                     </td>
                     <td class="p-4">
                         <div class="flex items-center justify-center gap-2">
-                            <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 w-8 h-8 rounded-lg flex items-center justify-center transition-colors shadow-sm" title="Auditar Lote"><i class="fa-solid fa-microscope text-xs"></i></button>
-                            <button onclick="editMaterialInfo('${reg['Código']}')" class="bg-amber-500 text-white hover:bg-amber-600 w-8 h-8 rounded-lg flex items-center justify-center transition-colors shadow-sm" title="Modificar Datos"><i class="fa-solid fa-pen text-xs"></i></button>
-                            <button onclick="deleteMaterial('${reg['Código']}')" class="bg-danger text-white hover:bg-red-700 w-8 h-8 rounded-lg flex items-center justify-center transition-colors shadow-sm" title="Eliminar"><i class="fa-solid fa-trash text-xs"></i></button>
+                            <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded flex items-center justify-center gap-1 transition-colors shadow-sm text-xs font-bold" title="Auditar Lote">
+                                <i class="fa-solid fa-microscope text-xs"></i> Auditar
+                            </button>
+                            <button onclick="editMaterialInfo('${reg['Código']}')" class="bg-amber-500 text-white hover:bg-amber-600 px-2 py-1.5 rounded flex items-center justify-center transition-colors shadow-sm" title="Modificar Datos">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteMaterial('${reg['Código']}')" class="bg-danger text-white hover:bg-red-700 px-2 py-1.5 rounded flex items-center justify-center transition-colors shadow-sm" title="Eliminar">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -366,6 +384,7 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
+            // --- MANEJO DE IMAGEN EN CACHÉ ---
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const zoomOverlay = document.getElementById('zoom-overlay');
@@ -403,18 +422,19 @@
                 let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
                 let iconColor = isApproved ? 'text-accent' : (isWarning ? 'text-warning' : 'text-slate-400');
 
+                // BOTÓN ÚNICO EN LA ETAPA INGREDIENTES
                 let botonAccionHTML = '';
                 if (nombreEtapa.toLowerCase() === 'ingredientes') {
                     if (isApproved) {
                         botonAccionHTML = `
                             <button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-eye"></i> Visualizar
+                                <i class="fa-solid fa-eye"></i> Visualizar Reporte
                             </button>
                         `;
                     } else {
                         botonAccionHTML = `
                             <button onclick="document.getElementById('fileInput').click()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-upload"></i> Gestionar Carga
+                                <i class="fa-solid fa-upload"></i> Subir Etiqueta
                             </button>
                         `;
                     }
@@ -445,15 +465,15 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- VISOR DE ZOOM (SCROLL Y DRAG) ---
+        // --- VISOR DE IMAGEN CON SCROLL ZOOM Y DRAG ---
         function openImageZoom() {
             const imgView = document.getElementById('scanned-image-view');
             if (!imgView.src || imgView.classList.contains('hidden')) return;
 
             Swal.fire({
-                title: '<span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-magnifying-glass mr-2"></i>Use la rueda del ratón (Scroll) para acercar</span>',
+                title: '<span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mouse mr-2"></i>Usa la rueda del ratón (Scroll) para acercar</span>',
                 html: `
-                    <div id="zoom-container" class="flex justify-center items-center bg-slate-900 rounded-lg overflow-hidden h-[70vh] relative">
+                    <div id="zoom-container" class="flex justify-center items-center bg-slate-900 rounded-lg overflow-hidden h-[70vh] relative shadow-inner">
                         <img id="zoom-img" src="${imgView.src}" class="max-w-full max-h-full object-contain pointer-events-none" style="transform-origin: center center; transform: scale(1) translate(0px, 0px);">
                     </div>
                 `,
@@ -465,27 +485,19 @@
                 didOpen: () => {
                     const container = document.getElementById('zoom-container');
                     const img = document.getElementById('zoom-img');
-                    let scale = 1;
-                    let panning = false;
-                    let pointX = 0, pointY = 0;
-                    let startX = 0, startY = 0;
+                    let scale = 1, panning = false, pointX = 0, pointY = 0, startX = 0, startY = 0;
 
-                    // Zoom con la rueda del ratón
                     container.addEventListener('wheel', (e) => {
                         e.preventDefault();
-                        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                        const delta = e.deltaY > 0 ? -0.15 : 0.15;
                         scale += delta;
-                        scale = Math.min(Math.max(1, scale), 4); // Límite de zoom (1x a 4x)
-                        
-                        // Si regresamos a 1x, reseteamos posición
-                        if(scale === 1) { pointX = 0; pointY = 0; }
-                        
+                        scale = Math.min(Math.max(1, scale), 5); // Límite de zoom (1x a 5x)
+                        if(scale === 1) { pointX = 0; pointY = 0; } // Reseteo
                         img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
                     });
 
-                    // Paneo (Arrastrar imagen)
                     container.addEventListener('mousedown', (e) => {
-                        if(scale === 1) return; // Solo arrastra si hay zoom
+                        if(scale === 1) return;
                         panning = true;
                         startX = e.clientX - pointX;
                         startY = e.clientY - pointY;
@@ -505,6 +517,7 @@
             });
         }
 
+        // --- REPORTE DE INGREDIENTES Y OPCIÓN PARA MODIFICAR/RECARGAR ---
         function openIngredientsModal() {
             const registro = appData.registros.find(r => r['Código'] == currentItemCode);
             if (!registro) return;
@@ -525,7 +538,7 @@
                         </div>
                         <div class="pt-4 border-t border-slate-200 flex flex-col gap-2">
                             <button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm">
-                                <i class="fa-solid fa-rotate"></i> Volver a Cargar / Modificar Imagen
+                                <i class="fa-solid fa-upload"></i> Subir una imagen diferente (Modificar)
                             </button>
                         </div>
                     </div>
@@ -547,10 +560,11 @@
                 selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    window.localImageCache[currentItemCode] = e.target.result;
+                    window.localImageCache[currentItemCode] = e.target.result; // Forzamos caché visual temporal
                     const imgView = document.getElementById('scanned-image-view');
                     const noImgMsg = document.getElementById('no-evidence-msg');
                     const zoomOverlay = document.getElementById('zoom-overlay');
+                    
                     imgView.src = e.target.result;
                     imgView.classList.remove('hidden');
                     zoomOverlay.classList.remove('hidden');
@@ -562,26 +576,25 @@
             }
         }
 
-        // --- LÓGICA DE VALIDACIÓN CON ALERTA ROJA ---
+        // --- VALIDACIÓN DE INTELIGENCIA ARTIFICIAL Y ALERTA DE NO COINCIDENCIA ---
         async function uploadImageAndAnalyze(base64Data) {
-            const materialName = document.getElementById('detail-material').innerText; // El nombre esperado
+            const materialName = document.getElementById('detail-material').innerText;
 
             Swal.fire({ 
-                title: 'Analizando ingredientes y validando correspondencia...', 
-                html: 'Gemini IA está verificando si la etiqueta pertenece a:<br><b>' + materialName + '</b>',
+                title: 'IA Validando Etiqueta...', 
+                html: `Verificando correspondencia estricta con el lote:<br><b class="text-secondary">${materialName}</b>`,
                 allowOutsideClick: false, 
                 didOpen: () => { Swal.showLoading() } 
             });
 
             try {
-                // Pasamos "materialName" al backend para la evaluación inteligente
                 const resAI = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'analyzeImage',
                         mimeType: selectedFile.type,
                         base64: base64Data,
-                        materialName: materialName
+                        materialName: materialName // Clave para la IA
                     })
                 });
                 const resultAI = await resAI.json();
@@ -590,13 +603,13 @@
                     const data = resultAI.data || {};
                     let proceedToSave = true;
 
-                    // Si Gemini dice que la etiqueta no corresponde al producto
+                    // Si la IA detecta que la etiqueta no corresponde al producto en SAP
                     if (data.coincide === false || data.coincide === "false") {
-                        const detectedName = data.productoDetectado || "Otro producto";
+                        const detectedName = data.productoDetectado || "Producto desconocido";
                         
                         const confirmAlert = await Swal.fire({
-                            title: '⚠️ ALERTA DE CALIDAD',
-                            html: `La etiqueta escaneada parece ser de <b>'${detectedName}'</b>, pero este lote corresponde a <b>'${materialName}'</b>.<br><br>¿Estás seguro de que deseas guardar esta imagen?`,
+                            title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>',
+                            html: `La etiqueta escaneada parece ser de <b>'${detectedName}'</b>.<br>Este lote corresponde a <b>'${materialName}'</b>.<br><br>¿Estás seguro de que deseas forzar el guardado de esta imagen errónea?`,
                             icon: 'warning',
                             showCancelButton: true,
                             confirmButtonText: 'Forzar carga (Bajo mi responsabilidad)',
@@ -610,8 +623,7 @@
                     }
 
                     if (proceedToSave) {
-                        // Continuamos con el guardado (Upload + Datos)
-                        Swal.fire({ title: 'Guardando datos aprobados...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+                        Swal.fire({ title: 'Aprobado. Guardando auditoría...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
                         
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
@@ -626,20 +638,20 @@
                             body: JSON.stringify({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO', avance: 100 })
                         });
 
-                        Swal.fire('¡Aprobado!', 'Etiqueta validada y guardada con éxito.', 'success');
+                        Swal.fire('¡Éxito!', 'Etiqueta validada y datos guardados.', 'success');
                         selectedFile = null;
                         document.getElementById('fileInput').value = ""; 
-                        loadData(); 
+                        loadData(); // Refresca KPIs
                     } else {
-                        // El usuario canceló debido a la alerta
+                        // El usuario canceló debido a la alerta de la IA
                         selectedFile = null;
                         document.getElementById('fileInput').value = ""; 
-                        delete window.localImageCache[currentItemCode]; // Borramos imagen temporal
-                        openDetail(currentItemCode); // Refresca para limpiar la vista
+                        delete window.localImageCache[currentItemCode];
+                        openDetail(currentItemCode); // Refresca para ocultar la imagen local
                     }
 
                 } else {
-                    throw new Error("Alta demanda en los servidores de IA. Intente en unos segundos.");
+                    throw new Error("Alta demanda en la IA. Intente de nuevo.");
                 }
             } catch (error) {
                 Swal.fire('Atención', error.message, 'warning');
@@ -647,7 +659,53 @@
             }
         }
 
-        // --- EDICIÓN Y ELIMINACIÓN DE REGISTROS (TABLA PRINCIPAL) ---
+        // --- BOTONES PARA MODIFICAR Y ELIMINAR (FORMULARIOS) ---
+        function editMaterialInfo(codigo) {
+            const registro = appData.registros.find(r => r['Código'] == codigo);
+            if(!registro) return;
+
+            Swal.fire({
+                title: '<span class="text-lg font-black text-slate-800">Modificar Datos</span>',
+                html: `
+                    <div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700">
+                        <div><label>Código SAP (Fijo):</label><input value="${registro['Código']}" disabled class="w-full p-2 border rounded mt-1 bg-slate-100 text-slate-500 font-mono"></div>
+                        <div><label>Material / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
+                        <div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar Cambios',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#3b82f6',
+                preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor').value } }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Actualizado', 'Los datos del material han sido modificados (Conectar con backend).', 'success');
+                    // await fetch(...) para guardar edición en Google Sheets
+                    loadData();
+                }
+            });
+        }
+
+        function deleteMaterial(codigo) {
+            Swal.fire({
+                title: '¿Eliminar Material?',
+                text: `Se eliminará el código ${codigo} y todo su historial. Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Eliminado', 'El material ha sido retirado (Conectar con backend).', 'success');
+                    // await fetch(...) para borrar fila en Google Sheets
+                    loadData();
+                }
+            });
+        }
+
         function openNewMaterialModal() {
             Swal.fire({
                 title: '<span class="text-lg font-black">Nuevo Material</span>',
@@ -666,51 +724,6 @@
             }).then((result) => {
                 if (result.isConfirmed && result.value.codigo) {
                     Swal.fire('Registrado', 'Material ingresado a la cola.', 'success');
-                    loadData(); // Aquí debes conectar con el backend real de crear material si lo tienes
-                }
-            });
-        }
-
-        function editMaterialInfo(codigo) {
-            const registro = appData.registros.find(r => r['Código'] == codigo);
-            if(!registro) return;
-
-            Swal.fire({
-                title: '<span class="text-lg font-black text-slate-800">Modificar Datos</span>',
-                html: `
-                    <div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700">
-                        <div><label>Código SAP (No editable):</label><input value="${registro['Código']}" disabled class="w-full p-2 border rounded mt-1 bg-slate-100 text-slate-500"></div>
-                        <div><label>Descripción / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
-                        <div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Guardar Cambios',
-                confirmButtonColor: '#3b82f6',
-                preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor').value } }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Actualizado', 'Los datos del material han sido modificados.', 'success');
-                    // Aquí enlazar con el backend (GAS) si tienes la función de actualizar fila
-                    loadData();
-                }
-            });
-        }
-
-        function deleteMaterial(codigo) {
-            Swal.fire({
-                title: '¿Eliminar Material?',
-                text: `Vas a eliminar el código ${codigo}. Esta acción no se puede deshacer.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Eliminado', 'El material ha sido retirado.', 'success');
-                    // Aquí enlazar con el backend (GAS) si tienes la función de borrar fila
                     loadData();
                 }
             });
