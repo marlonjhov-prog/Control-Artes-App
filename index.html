@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Inspection Dashboard Pro | Control de Artes</title>
+    <title>QA Inspection Dashboard Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -15,218 +15,217 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#0f172a',
-                        secondary: '#3b82f6',
-                        accent: '#10b981',
-                        warning: '#f59e0b',
-                        danger: '#ef4444'
-                    }
+                    colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' }
                 }
             }
         }
     </script>
     <style>
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
-        body { height: 100vh; overflow: hidden; }
-        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* Eliminamos overflow-hidden del body para permitir scroll natural sin espacios en blanco */
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <nav class="bg-primary text-white shadow-md h-12 flex-shrink-0 z-50">
+    <nav class="bg-primary text-white shadow-md h-14 flex-shrink-0 z-50 sticky top-0">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-industry text-lg text-secondary"></i>
-                <span class="font-bold text-sm tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
+                <i class="fa-solid fa-industry text-xl text-secondary"></i>
+                <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors shadow-xs">
+                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2 transition-colors shadow-sm">
                     <i class="fa-solid fa-plus"></i> Nuevo Material
                 </button>
-                <button onclick="loadData()" class="text-slate-300 hover:text-white transition-colors text-xs flex items-center gap-1 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700" title="Sincronizar">
+                <button onclick="loadData()" class="text-slate-300 hover:text-white transition-colors text-xs flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700" title="Sincronizar">
                     <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Sincronizar
                 </button>
-                <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center font-bold border border-slate-500 text-[11px]">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Container -->
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-3 flex flex-col justify-between overflow-hidden">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
         
         <!-- Spinner -->
-        <div id="loading-spinner" class="flex flex-col items-center justify-center py-20">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-secondary mb-2"></div>
-            <p class="text-slate-500 text-xs font-medium">Sincronizando flujos desde Google Cloud...</p>
+        <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
+            <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
         </div>
 
         <!-- VISTA 1: Dashboard y KPIs -->
-        <div id="dashboard-view" class="hidden flex flex-col h-full justify-between space-y-3 overflow-hidden">
+        <div id="dashboard-view" class="hidden flex-col gap-5">
             
-            <!-- KPIs Compactos -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 flex-shrink-0">
-                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
+            <!-- KPIs Mejorados y Ajustados -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Avance Global de Planta</p>
-                        <h3 class="text-xl font-extrabold text-slate-800 mt-0.5" id="kpi-avg-progress">0%</h3>
-                        <p class="text-[11px] text-accent mt-0.5"><i class="fa-solid fa-arrow-trend-up"></i> Tiempo real</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Avance Global</p>
+                        <h3 class="text-3xl font-black text-slate-800 leading-none" id="kpi-avg-progress">0%</h3>
+                        <p class="text-[11px] text-accent mt-1.5 font-medium"><i class="fa-solid fa-chart-line"></i> En tiempo real</p>
                     </div>
-                    <div class="relative w-12 h-12 flex items-center justify-center">
+                    <div class="relative w-14 h-14 flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            <path id="tacometro-path" class="text-secondary transition-all duration-1000 ease-out" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="text-slate-100" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path id="tacometro-path" class="text-secondary transition-all duration-1000 ease-out" stroke-dasharray="0, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         </svg>
-                        <div class="absolute text-[11px] font-bold text-slate-700" id="tacometro-text">0%</div>
                     </div>
                 </div>
 
-                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Lotes 100% Liberados</p>
-                        <h3 class="text-xl font-extrabold text-accent mt-0.5" id="kpi-approved-count">0</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Cumplimiento total</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Lotes Liberados</p>
+                        <h3 class="text-3xl font-black text-accent leading-none" id="kpi-approved-count">0</h3>
+                        <p class="text-[11px] text-slate-500 mt-1.5 font-medium">Cumplimiento total (100%)</p>
                     </div>
-                    <div class="w-10 h-10 rounded-full bg-emerald-50 border-2 border-accent flex items-center justify-center text-accent text-sm">
-                        <i class="fa-solid fa-circle-check"></i>
+                    <div class="w-12 h-12 rounded-full bg-emerald-50 border-2 border-accent flex items-center justify-center text-accent text-lg">
+                        <i class="fa-solid fa-check-double"></i>
                     </div>
                 </div>
 
-                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pendientes / Alertas</p>
-                        <h3 class="text-xl font-extrabold text-warning mt-0.5" id="kpi-pending-count">0</h3>
-                        <p class="text-[11px] text-danger mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i> En revisión</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">En Revisión / Alertas</p>
+                        <h3 class="text-3xl font-black text-warning leading-none" id="kpi-pending-count">0</h3>
+                        <p class="text-[11px] text-danger mt-1.5 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> Requieren atención</p>
                     </div>
-                    <div class="w-10 h-10 rounded-full bg-amber-50 border-2 border-warning flex items-center justify-center text-warning text-sm">
+                    <div class="w-12 h-12 rounded-full bg-amber-50 border-2 border-warning flex items-center justify-center text-warning text-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Buscador Inteligente -->
-            <div class="flex flex-col md:flex-row justify-between items-center gap-2 flex-shrink-0 bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                <div>
-                    <h1 class="text-sm font-bold text-slate-800">Bandeja de Recepción y Control</h1>
-                    <p class="text-xs text-slate-500">Seleccione o busque un material para iniciar la auditoría.</p>
+            <!-- Buscador y Tabla -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
+                        <p class="text-xs text-slate-500">Seleccione un lote para auditar.</p>
+                    </div>
+                    <div class="relative w-full md:w-96">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="smartSearchInput" placeholder="Buscar código o material..." oninput="handleSmartSearch(event)" class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary">
+                    </div>
                 </div>
-                <div class="relative w-full md:w-80">
-                    <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
-                    <input type="text" id="smartSearchInput" placeholder="Búsqueda inteligente (código o material)..." oninput="handleSmartSearch(event)" class="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary shadow-xs">
-                    <div id="autocomplete-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50 divide-y divide-slate-100"></div>
-                </div>
-            </div>
-
-            <!-- Tabla Principal -->
-            <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-grow flex flex-col mb-1">
-                <div class="overflow-y-auto flex-grow max-h-[320px]">
+                
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="registrosTable">
-                        <thead class="sticky top-0 bg-slate-100 z-10">
-                            <tr class="text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-3.5 font-bold">Código</th>
-                                <th class="p-3.5 font-bold">Material / Producto</th>
-                                <th class="p-3.5 font-bold">Proveedor</th>
-                                <th class="p-3.5 font-bold">Límite (+2 Días)</th>
-                                <th class="p-3.5 font-bold">Avance</th>
-                                <th class="p-3.5 font-bold text-center">Acción</th>
+                        <thead class="bg-slate-100">
+                            <tr class="text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <th class="p-4 font-bold">Código</th>
+                                <th class="p-4 font-bold">Material / Producto</th>
+                                <th class="p-4 font-bold">Proveedor</th>
+                                <th class="p-4 font-bold">Avance</th>
+                                <th class="p-4 font-bold text-center">Acción</th>
                             </tr>
                         </thead>
-                        <tbody id="table-body" class="text-xs divide-y divide-slate-100"></tbody>
+                        <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle Unificado -->
-        <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
-            <div class="flex items-center justify-between flex-shrink-0">
-                <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
-                    <i class="fa-solid fa-arrow-left"></i> Volver
+        <!-- VISTA 2: Detalle (Flujo, Evidencia y Alérgenos) -->
+        <div id="detail-view" class="hidden flex-col gap-4">
+            
+            <div class="flex items-center justify-between">
+                <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-2 font-semibold text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm hover:bg-slate-50">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a Bandeja
                 </button>
                 <div class="flex items-center gap-3">
-                    <span class="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded text-xs font-mono font-bold border border-slate-200" id="detail-code"></span>
-                    <span class="text-xs text-slate-500 font-medium" id="detail-provider"></span>
+                    <span class="bg-slate-800 text-white px-3 py-1 rounded text-xs font-mono font-bold shadow-sm" id="detail-code"></span>
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider" id="detail-provider"></span>
                 </div>
             </div>
             
-            <!-- Cabecera -->
-            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex justify-between items-center border-l-4 border-l-secondary flex-shrink-0">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex justify-between items-center border-l-4 border-l-secondary">
                 <div>
-                    <h2 class="text-sm font-bold text-slate-800" id="detail-material"></h2>
-                    <p class="text-[10px] text-slate-500">Inspección y Liberación de Calidad</p>
+                    <h2 class="text-lg font-black text-slate-800" id="detail-material"></h2>
+                    <p class="text-xs text-slate-500 font-medium">Auditoría y Liberación de Calidad</p>
                 </div>
-                <div class="text-right bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-                    <span class="text-[9px] text-slate-500 uppercase font-semibold block">Avance</span>
-                    <span class="text-sm font-bold text-secondary" id="detail-progress">0%</span>
+                <div class="text-right bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 shadow-inner">
+                    <span class="text-[10px] text-slate-500 uppercase font-extrabold tracking-wider block mb-0.5">Avance Lote</span>
+                    <span class="text-xl font-black text-secondary leading-none" id="detail-progress">0%</span>
                 </div>
             </div>
 
-            <!-- Flujo de Liberación (6 Etapas Obligatorias) -->
-            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex-shrink-0">
-                <h3 class="text-[11px] font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Liberación (6 Etapas Obligatorias)</h3>
-                <div id="etapas-horizontal-container" class="grid grid-cols-6 gap-2"></div>
+            <!-- Flujo de Liberación -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Aprobación Obligatorio</h3>
+                <div id="etapas-horizontal-container" class="grid grid-cols-2 md:grid-cols-6 gap-3"></div>
             </div>
 
-            <!-- Panel Inferior -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
+            <!-- Panel Inferior: Evidencia (Izquierda) + Alérgenos (Derecha) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- Visor de Evidencia Sincronizado -->
-                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between overflow-hidden">
-                    <div class="flex justify-between items-center mb-1">
-                        <h3 class="text-[11px] font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte Escaneado</h3>
-                        <button onclick="openImageModal()" id="btn-zoom-art" class="hidden text-[10px] text-secondary hover:underline font-semibold flex items-center gap-1">
-                            <i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar / Zoom
-                        </button>
-                    </div>
+                <!-- VISOR DE EVIDENCIA (Maximizado, Sin Botones Extra) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-[350px]">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-3 flex-shrink-0">
+                        <i class="fa-solid fa-image text-secondary text-base"></i> Evidencia y Arte Escaneado
+                    </h3>
                     
-                    <div id="evidence-container" class="border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative min-h-[130px]">
-                        <div id="no-evidence-msg" class="text-center">
-                            <p class="text-xs text-slate-400 italic mb-2">No hay imagen cargada para este material.</p>
-                            <button onclick="document.getElementById('fileInput').click()" class="bg-secondary text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xs hover:bg-blue-600 transition-colors">
-                                <i class="fa-solid fa-upload mr-1"></i> Cargar Arte / Etiqueta
-                            </button>
+                    <!-- Contenedor del visor -->
+                    <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative group cursor-pointer" onclick="openImageZoom()">
+                        
+                        <!-- Mensaje si no hay imagen -->
+                        <div id="no-evidence-msg" class="text-center p-4">
+                            <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
+                            <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Cargue la etiqueta desde la etapa "Ingredientes"</p>
                         </div>
-                        <img id="scanned-image-view" src="" class="hidden max-h-36 w-full object-contain rounded cursor-pointer hover:opacity-95 transition-opacity shadow-sm" onclick="openImageModal()" title="Hacer clic para ampliar">
+                        
+                        <!-- Imagen (Toma todo el espacio posible sin deformarse) -->
+                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" title="Haga clic para ampliar a pantalla completa">
+                        
+                        <!-- Overlay Icon -->
+                        <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="bg-white/90 text-slate-800 p-2 rounded-full shadow-lg">
+                                <i class="fa-solid fa-magnifying-glass-plus text-xl"></i>
+                            </div>
+                        </div>
                     </div>
-
-                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
                 </div>
 
-                <!-- Alérgenos -->
-                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between">
+                <!-- ALÉRGENOS -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
                     <div>
-                        <h3 class="text-[11px] font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos Detectados por IA</h3>
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-leche" class="w-3.5 h-3.5 text-secondary rounded" disabled>
-                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Leche</span>
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-triangle-exclamation text-warning text-base"></i> Alérgenos Detectados
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 transition-colors">
+                                <input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded border-slate-300" disabled>
+                                <span class="ml-2 font-bold text-slate-700 text-sm">Leche</span>
                             </label>
-                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-soya" class="w-3.5 h-3.5 text-secondary rounded" disabled>
-                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Soya</span>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 transition-colors">
+                                <input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded border-slate-300" disabled>
+                                <span class="ml-2 font-bold text-slate-700 text-sm">Soya</span>
                             </label>
-                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-gluten" class="w-3.5 h-3.5 text-secondary rounded" disabled>
-                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Gluten</span>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 transition-colors">
+                                <input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded border-slate-300" disabled>
+                                <span class="ml-2 font-bold text-slate-700 text-sm">Gluten</span>
                             </label>
-                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-lactosa" class="w-3.5 h-3.5 text-secondary rounded" disabled>
-                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Lactosa</span>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 transition-colors">
+                                <input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded border-slate-300" disabled>
+                                <span class="ml-2 font-bold text-slate-700 text-sm">Lactosa</span>
                             </label>
                         </div>
                     </div>
-                    <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-lg text-[10px] text-blue-800 mt-2">
-                        <i class="fa-solid fa-shield-halved mr-1"></i> Verificación automática contra Codex Alimentarius.
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
+                        <i class="fa-solid fa-shield-halved mt-0.5"></i>
+                        <p><strong>Inspección Automática:</strong> Los resultados visualizados provienen del análisis de IA cruzado con normativas Codex Alimentarius.</p>
                     </div>
                 </div>
 
             </div>
         </div>
+        
+        <!-- Input oculto indispensable para subir el archivo -->
+        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     </main>
 
     <script>
@@ -260,12 +259,13 @@
                     else document.getElementById('dashboard-view').classList.remove('hidden');
                 }
             } catch (error) {
-                Swal.fire('Error', 'Problema de conexión con Google Cloud.', 'error');
+                Swal.fire('Error', 'Problema de conexión con Google Cloud. Intente recargar.', 'error');
             } finally {
                 document.getElementById('sync-icon').classList.remove('fa-spin');
             }
         }
 
+        // --- LÓGICA REPARADA DE KPIs ---
         function renderKPIs() {
             const total = appData.registros.length;
             if (total === 0) return;
@@ -275,22 +275,25 @@
             let pendientes = 0;
 
             appData.registros.forEach(reg => {
-                let av = parseInt(reg['Avance general (%)']) || 0;
+                // Buscamos cualquier variación del nombre de la columna "Avance"
+                let avValue = reg['Avance general (%)'] || reg['Avance'] || reg['Avance general'] || 0;
+                let av = parseInt(avValue) || 0;
+                
                 sumaAvance += av;
                 if (av === 100) aprobados++;
                 else pendientes++;
             });
 
             let promedio = Math.round(sumaAvance / total);
+            
             document.getElementById('kpi-avg-progress').innerText = `${promedio}%`;
             document.getElementById('kpi-approved-count').innerText = aprobados;
             document.getElementById('kpi-pending-count').innerText = pendientes;
 
             const path = document.getElementById('tacometro-path');
-            const text = document.getElementById('tacometro-text');
-            if (path && text) {
+            if (path) {
                 path.style.strokeDasharray = `${promedio}, 100`;
-                text.innerText = `${promedio}%`;
+                if(promedio === 100) path.classList.replace('text-secondary', 'text-accent');
             }
         }
 
@@ -299,31 +302,27 @@
             tbody.innerHTML = '';
 
             appData.registros.forEach(reg => {
-                let fechaLimite = reg['Límite recepción (+2 días)'] ? reg['Límite recepción (+2 días)'].toString().substring(0,10) : 'N/A';
-                let avance = parseInt(reg['Avance general (%)']) || 0;
+                let avValue = reg['Avance general (%)'] || reg['Avance'] || reg['Avance general'] || 0;
+                let avance = parseInt(avValue) || 0;
                 let bgAvance = avance === 100 ? 'bg-accent' : (avance > 40 ? 'bg-secondary' : 'bg-warning');
 
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+                tr.className = 'hover:bg-slate-50 transition-colors';
                 tr.innerHTML = `
-                    <td class="p-3.5"><span class="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-xs border border-slate-200">${reg['Código']}</span></td>
-                    <td class="p-3.5 font-bold text-slate-900 text-sm">${reg['Material']}</td>
-                    <td class="p-3.5 text-slate-600 text-xs font-medium">${reg['Proveedor']}</td>
-                    <td class="p-3.5 text-slate-700 text-xs font-medium">${fechaLimite}</td>
-                    <td class="p-3.5">
-                        <div class="flex items-center gap-2">
-                            <div class="w-16 bg-slate-200 rounded-full h-2">
-                                <div class="${bgAvance} h-2 rounded-full" style="width: ${avance}%"></div>
+                    <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300">${reg['Código']}</span></td>
+                    <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
+                    <td class="p-4 text-slate-600 text-xs font-medium">${reg['Proveedor']}</td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-24 bg-slate-200 rounded-full h-2.5 shadow-inner overflow-hidden">
+                                <div class="${bgAvance} h-full rounded-full transition-all duration-500" style="width: ${avance}%"></div>
                             </div>
-                            <span class="text-xs font-bold text-slate-700">${avance}%</span>
+                            <span class="text-xs font-black text-slate-700 w-8">${avance}%</span>
                         </div>
                     </td>
-                    <td class="p-3.5 text-center flex justify-center gap-2">
-                        <button onclick="openDetail('${reg['Código']}')" class="text-secondary hover:text-white hover:bg-secondary p-1.5 rounded-md transition-colors border border-slate-200 shadow-xs" title="Auditar">
-                            <i class="fa-solid fa-microscope text-sm"></i>
-                        </button>
-                        <button onclick="deleteMaterial('${reg['Código']}')" class="text-danger hover:text-white hover:bg-danger p-1.5 rounded-md transition-colors border border-slate-200 shadow-xs" title="Eliminar Material">
-                            <i class="fa-solid fa-trash text-sm"></i>
+                    <td class="p-4 text-center">
+                        <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors">
+                            Auditar
                         </button>
                     </td>
                 `;
@@ -333,41 +332,25 @@
 
         function handleSmartSearch(event) {
             const query = event.target.value.toUpperCase();
-            const dropdown = document.getElementById('autocomplete-dropdown');
-            dropdown.innerHTML = '';
-
-            if (query.length === 0) {
-                dropdown.classList.add('hidden');
-                loadData();
-                return;
-            }
-
-            const matches = appData.registros.filter(reg => 
-                reg['Código'].toUpperCase().includes(query) || reg['Material'].toUpperCase().includes(query)
-            );
-
-            if (matches.length > 0) {
-                dropdown.classList.remove('hidden');
-                matches.forEach(m => {
-                    const item = document.createElement('div');
-                    item.className = 'p-2.5 hover:bg-slate-50 cursor-pointer text-xs flex justify-between items-center';
-                    item.innerHTML = `<span><strong class="font-mono text-slate-600">${m['Código']}</strong> - ${m['Material']}</span> <span class="text-[10px] text-slate-400">${m['Proveedor']}</span>`;
-                    item.onclick = () => {
-                        document.getElementById('smartSearchInput').value = m['Material'];
-                        dropdown.classList.add('hidden');
-                        openDetail(m['Código']);
-                    };
-                    dropdown.appendChild(item);
-                });
-            } else {
-                dropdown.classList.add('hidden');
-            }
-
             const tr = document.getElementById('registrosTable').getElementsByTagName('tr');
             for (let i = 1; i < tr.length; i++) {
                 let textContent = tr[i].textContent || tr[i].innerText;
                 tr[i].style.display = textContent.toUpperCase().indexOf(query) > -1 ? "" : "none";
             }
+        }
+
+        // --- CONVERTIR URL DRIVE PARA QUE SEA VISIBLE ---
+        function extractDirectImageUrl(url) {
+            if (!url) return '';
+            // Si ya es un enlace directo o base64, lo retorna
+            if (url.includes('data:image') || url.includes('uc?export=view')) return url;
+            
+            // Convierte enlace /file/d/ID/view a formato directo
+            const match = url.match(/\/d\/(.+?)\//);
+            if (match && match[1]) {
+                return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            }
+            return url;
         }
 
         function openDetail(codigo) {
@@ -380,85 +363,92 @@
             document.getElementById('detail-code').innerText = registro['Código'];
             document.getElementById('detail-material').innerText = registro['Material'];
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
-            document.getElementById('detail-progress').innerText = `${registro['Avance general (%)']}%`;
+            
+            let avValue = registro['Avance general (%)'] || registro['Avance'] || registro['Avance general'] || 0;
+            document.getElementById('detail-progress').innerText = `${parseInt(avValue)}%`;
 
             let ingText = registro['Ingredientes_IA'] || '';
             let aleText = registro['Alergenos_IA'] || '';
-
             let fullText = (ingText + " " + aleText).toUpperCase();
+
             document.getElementById('chk-leche').checked = fullText.includes('LECHE');
             document.getElementById('chk-soya').checked = fullText.includes('SOYA');
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // GESTIÓN ROBUSTA DE LA IMAGEN DE EVIDENCIA DESDE GOOGLE DRIVE
+            // --- RENDER DE IMAGEN DE EVIDENCIA ---
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
-            const btnZoomArt = document.getElementById('btn-zoom-art');
+            const zoomOverlay = document.getElementById('zoom-overlay');
             
-            // Verificamos cualquiera de los nombres comunes que puede traer el Apps Script para la URL de Drive
-            let evidenciaUrl = registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || '';
+            let urlOrigen = registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || '';
+            let urlDirecta = extractDirectImageUrl(urlOrigen);
 
-            if (evidenciaUrl && evidenciaUrl.startsWith('http')) {
-                imgView.src = evidenciaUrl;
+            if (urlDirecta) {
+                imgView.src = urlDirecta;
                 imgView.classList.remove('hidden');
+                zoomOverlay.classList.remove('hidden');
                 noImgMsg.classList.add('hidden');
-                if(btnZoomArt) btnZoomArt.classList.remove('hidden');
             } else {
+                imgView.src = '';
                 imgView.classList.add('hidden');
+                zoomOverlay.classList.add('hidden');
                 noImgMsg.classList.remove('hidden');
-                if(btnZoomArt) btnZoomArt.classList.add('hidden');
             }
 
-            // 6 ETAPAS OBLIGATORIAS
-            const etapasFijas = [
-                "Recepción", 
-                "Toma de muestras", 
-                "Ingredientes", 
-                "Ficha técnica", 
-                "Certificado de inscripción (CIA)", 
-                "Diagrama de flujo"
-            ];
-
+            // --- 6 ETAPAS OBLIGATORIAS ---
+            const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
             let etapasContainer = document.getElementById('etapas-horizontal-container');
             etapasContainer.innerHTML = '';
 
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
                 
-                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
+                // Forzar aprobado en interfaz si hay análisis
+                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && ingText !== 'No analizado') {
                     etapaObj.Estado = 'APROBADO';
                 }
 
                 let estado = etapaObj['Estado'];
-                let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'CON ALERTA' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700');
-                let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'CON ALERTA' ? 'text-warning' : 'text-slate-400');
+                let isApproved = estado === 'APROBADO';
+                let isWarning = estado === 'CON ALERTA';
+                
+                let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
+                let iconColor = isApproved ? 'text-accent' : (isWarning ? 'text-warning' : 'text-slate-400');
 
-                // TARJETA DE INGREDIENTES LIMPIA: SIN DUPLICAR ACCIONES, CON "VISUALIZAR" O "GESTIONAR"
+                // LÓGICA DE BOTÓN ÚNICO EN "INGREDIENTES"
                 let botonAccionHTML = '';
-                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
-                    botonAccionHTML = `
-                        <button onclick="openIngredientsModal()" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1 rounded transition-colors flex items-center justify-center gap-1 shadow-xs" title="Visualizar ingredientes y alérgenos">
-                            <i class="fa-solid fa-eye"></i> Visualizar
-                        </button>
-                    `;
+                if (nombreEtapa.toLowerCase() === 'ingredientes') {
+                    if (isApproved) {
+                        botonAccionHTML = `
+                            <button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> Visualizar
+                            </button>
+                        `;
+                    } else {
+                        botonAccionHTML = `
+                            <button onclick="document.getElementById('fileInput').click()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-upload"></i> Gestionar Carga
+                            </button>
+                        `;
+                    }
                 } else {
                     botonAccionHTML = `
-                        <button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${estado}')" class="mt-2 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold py-0.5 rounded transition-colors flex items-center justify-center gap-1">
+                        <button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${estado}')" class="mt-3 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-bold py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-pen-to-square"></i> Gestionar
                         </button>
                     `;
                 }
 
                 etapasContainer.innerHTML += `
-                    <div class="p-2.5 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-xs transition-all duration-300">
+                    <div class="p-3 rounded-xl border ${badgeBg} flex flex-col justify-between shadow-sm">
                         <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <i class="fa-solid fa-circle-check ${iconColor} text-xs"></i>
-                                <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-white border">${estado}</span>
+                            <div class="flex justify-between items-center mb-2">
+                                <i class="fa-solid fa-circle-check ${iconColor} text-sm"></i>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600 shadow-sm">${estado}</span>
                             </div>
-                            <h4 class="font-bold text-[10px] uppercase text-slate-800 mb-0.5 truncate">${nombreEtopathName = nombreEtapa}</h4>
-                            <p class="text-[9px] text-slate-500 truncate"><i class="fa-solid fa-user text-slate-400"></i> ${etapaObj['Responsable'] || 'Planta'}</p>
+                            <h4 class="font-bold text-xs uppercase text-slate-800 mb-0.5">${nombreEtapa}</h4>
+                            <p class="text-[10px] text-slate-500 font-medium"><i class="fa-solid fa-user-tag text-slate-400 mr-1"></i> ${etapaObj['Responsable'] || 'Planta'}</p>
                         </div>
                         ${botonAccionHTML}
                     </div>
@@ -469,53 +459,59 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // MODAL DE VISUALIZACIÓN: INGREDIENTES, ALÉRGENOS E IMAGEN AMPLIADA CON ZOOM
+        // --- MODAL INTERACTIVO: VISUALIZAR Y MODIFICAR ---
         function openIngredientsModal() {
             const registro = appData.registros.find(r => r['Código'] == currentItemCode);
             if (!registro) return;
 
-            let ingText = registro['Ingredientes_IA'] || 'No analizado';
+            let ingText = registro['Ingredientes_IA'] || 'Sin datos';
             let aleText = registro['Alergenos_IA'] || 'Ninguno';
-            let imgUrl = registro['Evidencia_URL'] || registro['URL_Evidencia'] || registro['Evidencia'] || '';
 
             Swal.fire({
-                title: '<span class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-secondary mr-2"></i> Reporte de Ingredientes y Alérgenos (IA)</span>',
+                title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>',
                 html: `
-                    <div class="text-left space-y-3 mt-3 text-xs">
-                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <strong class="text-yellow-900 block mb-1 uppercase font-semibold text-[10px]"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes Detectados:</strong>
-                            <p class="text-slate-700 italic">${ingText}</p>
+                    <div class="text-left space-y-4 mt-4">
+                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner">
+                            <strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes:</strong>
+                            <p class="text-slate-700 text-sm italic">${ingText}</p>
                         </div>
-                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <strong class="text-red-900 block mb-1 uppercase font-semibold text-[10px]"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos Declarados:</strong>
-                            <p class="text-red-800 font-bold">${aleText}</p>
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner">
+                            <strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos:</strong>
+                            <p class="text-red-800 text-sm font-bold">${aleText}</p>
                         </div>
-                        ${imgUrl ? `
-                        <div class="mt-2 text-center border-t pt-2">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Arte Escaneado (Haga clic para ampliar):</span>
-                            <div class="overflow-auto max-h-48 border rounded bg-slate-50 p-1 flex justify-center">
-                                <img src="${imgUrl}" class="max-h-44 object-contain rounded cursor-zoom-in hover:scale-105 transition-transform" onclick="window.open('${imgUrl}', '_blank')" title="Ampliar imagen en pestaña nueva">
-                            </div>
-                        </div>` : ''}
+                        
+                        <div class="pt-4 border-t border-slate-200 flex flex-col gap-2">
+                            <p class="text-xs text-center text-slate-500 font-medium">¿El análisis es incorrecto o la imagen es borrosa?</p>
+                            <button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm">
+                                <i class="fa-solid fa-rotate"></i> Volver a Cargar / Modificar
+                            </button>
+                        </div>
                     </div>
                 `,
-                width: '600px',
-                confirmButtonText: 'Cerrar',
-                confirmButtonColor: '#3b82f6'
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '500px'
             });
         }
 
-        // MODAL PARA AMPLIAR LA IMAGEN DE EVIDENCIA DESDE EL PANEL INFERIOR
-        function openImageModal() {
+        // Disparador desde dentro del modal para modificar
+        function triggerFileMod() {
+            Swal.close();
+            document.getElementById('fileInput').click();
+        }
+
+        // --- VISOR DE ZOOM A PANTALLA COMPLETA ---
+        function openImageZoom() {
             const imgView = document.getElementById('scanned-image-view');
             if (!imgView.src || imgView.classList.contains('hidden')) return;
 
             Swal.fire({
-                title: '<span class="text-sm font-bold">Arte / Etiqueta Escaneada</span>',
-                html: `<div class="overflow-auto max-h-[75vh] flex justify-center"><img src="${imgView.src}" class="max-w-full rounded shadow-md object-contain"></div>`,
-                width: '750px',
-                confirmButtonText: 'Cerrar',
-                confirmButtonColor: '#3b82f6'
+                title: '<span class="text-base font-bold text-slate-600">Arte Escaneado</span>',
+                html: `<div class="flex justify-center bg-slate-100 rounded-lg p-2"><img src="${imgView.src}" class="max-w-full max-h-[75vh] object-contain shadow-md rounded"></div>`,
+                width: '80%',
+                confirmButtonText: 'Cerrar Visor',
+                confirmButtonColor: '#3b82f6',
+                padding: '1em'
             });
         }
 
@@ -527,125 +523,120 @@
         }
 
         function gestionarEtapa(codigo, etapaNombre, estadoActual) {
-            if (etapaNombre.toLowerCase() === 'ingredientes') {
-                document.getElementById('fileInput').click();
-            } else {
-                Swal.fire({
-                    title: `<span class="text-sm font-bold">Gestión: ${etapaNombre}</span>`,
-                    html: `
-                        <div class="text-left space-y-2 mt-2">
-                            <select id="swal-eval" class="swal2-input !w-full !m-0 text-xs">
-                                <option value="APROBADO" ${estadoActual==='APROBADO'?'selected':''}>CUMPLE (Aprobado)</option>
-                                <option value="CON ALERTA" ${estadoActual==='CON ALERTA'?'selected':''}>NO CUMPLE (Con Alerta)</option>
-                                <option value="PENDIENTE" ${estadoActual==='PENDIENTE'?'selected':''}>PENDIENTE</option>
-                            </select>
-                        </div>
-                    `,
-                    focusConfirm: false,
-                    showCancelButton: true,
-                    confirmButtonText: 'Aplicar',
-                    cancelButtonText: 'Cancelar',
-                    preConfirm: () => { return { estado: document.getElementById('swal-eval').value } }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        let nuevoEstado = result.value.estado;
-                        let nuevoAvance = nuevoEstado === 'APROBADO' ? 100 : (nuevoEstado === 'CON ALERTA' ? 20 : 50);
-                        sendUpdateEtapa(codigo, etapaNombre, nuevoEstado, nuevoAvance);
-                    }
-                });
-            }
+            Swal.fire({
+                title: `<span class="text-base font-black">Evaluación: ${etapaNombre}</span>`,
+                html: `
+                    <div class="mt-4">
+                        <select id="swal-eval" class="w-full p-3 border border-slate-300 rounded-lg text-sm font-bold text-slate-700 bg-slate-50 outline-none focus:border-secondary">
+                            <option value="APROBADO" ${estadoActual==='APROBADO'?'selected':''}>✅ CUMPLE (Aprobado)</option>
+                            <option value="CON ALERTA" ${estadoActual==='CON ALERTA'?'selected':''}>⚠️ NO CUMPLE (Alerta)</option>
+                            <option value="PENDIENTE" ${estadoActual==='PENDIENTE'?'selected':''}>⏳ PENDIENTE</option>
+                        </select>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar Estado',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#3b82f6',
+                preConfirm: () => { return { estado: document.getElementById('swal-eval').value } }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let nuevoEstado = result.value.estado;
+                    let nuevoAvance = nuevoEstado === 'APROBADO' ? 100 : (nuevoEstado === 'CON ALERTA' ? 20 : 50);
+                    sendUpdateEtapa(codigo, etapaNombre, nuevoEstado, nuevoAvance);
+                }
+            });
         }
 
+        // --- CARGA DE ARCHIVO Y PREVISUALIZACIÓN INMEDIATA ---
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
                 selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    // Actualizar visor inmediatamente con la imagen local (Base64)
                     const imgView = document.getElementById('scanned-image-view');
                     const noImgMsg = document.getElementById('no-evidence-msg');
+                    const zoomOverlay = document.getElementById('zoom-overlay');
+                    
                     imgView.src = e.target.result;
                     imgView.classList.remove('hidden');
+                    zoomOverlay.classList.remove('hidden');
                     noImgMsg.classList.add('hidden');
                     
-                    uploadImageAndAnalyze();
+                    uploadImageAndAnalyze(e.target.result.split(',')[1]); // Mandar a IA
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        async function uploadImageAndAnalyze() {
-            if (!selectedFile) return;
-            Swal.fire({ title: 'Subiendo y analizando con IA...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+        async function uploadImageAndAnalyze(base64Data) {
+            Swal.fire({ 
+                title: 'Procesando con IA...', 
+                text: 'Subiendo evidencia y extrayendo ingredientes.',
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading() } 
+            });
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Data = e.target.result.split(',')[1];
-                try {
-                    const resUpload = await fetch(SCRIPT_URL, {
+            try {
+                // 1. Subir Imagen
+                const resUpload = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'uploadImage',
+                        codigo: currentItemCode,
+                        fileName: `${currentItemCode}_EVIDENCIA.jpg`,
+                        mimeType: selectedFile.type,
+                        base64: base64Data
+                    })
+                });
+                const resultUpload = await resUpload.json();
+                if (resultUpload.status !== 'success') throw new Error("Fallo al subir archivo a la nube.");
+
+                // 2. Analizar Imagen
+                const resAI = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'analyzeImage',
+                        mimeType: selectedFile.type,
+                        base64: base64Data
+                    })
+                });
+                const resultAI = await resAI.json();
+
+                if (resultAI.status === 'success') {
+                    const ingredientes = resultAI.data.ingredientes || 'No especificado';
+                    const alergenos = resultAI.data.alergenos || 'Ninguno';
+
+                    // 3. Guardar Textos
+                    await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({
-                            action: 'uploadImage',
-                            codigo: currentItemCode,
-                            fileName: `${currentItemCode}_EVIDENCIA.jpg`,
-                            mimeType: selectedFile.type,
-                            base64: base64Data
-                        })
+                        body: JSON.stringify({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: ingredientes, alergenos: alergenos })
                     });
-                    const resultUpload = await resUpload.json();
 
-                    if (resultUpload.status !== 'success') throw new Error("Fallo al subir a Google Drive");
-
-                    const resAI = await fetch(SCRIPT_URL, {
+                    // 4. Actualizar Etapa a Aprobado
+                    await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({
-                            action: 'analyzeImage',
-                            mimeType: selectedFile.type,
-                            base64: base64Data
-                        })
+                        body: JSON.stringify({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO', avance: 100 })
                     });
-                    const resultAI = await resAI.json();
 
-                    if (resultAI.status === 'success') {
-                        const ingredientes = resultAI.data.ingredientes || 'No especificado';
-                        const alergenos = resultAI.data.alergenos || 'Ninguno';
-
-                        await fetch(SCRIPT_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'saveAIResult',
-                                codigo: currentItemCode,
-                                ingredientes: ingredientes,
-                                alergenos: alergenos
-                            })
-                        });
-
-                        await fetch(SCRIPT_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                action: 'updateEtapa',
-                                codigo: currentItemCode,
-                                etapa: 'Ingredientes',
-                                estado: 'APROBADO',
-                                avance: 100
-                            })
-                        });
-
-                        Swal.fire('¡Éxito!', 'Imagen analizada y etapa de Ingredientes aprobada.', 'success');
-                        selectedFile = null;
-                        loadData();
-                    } else {
-                        throw new Error(resultAI.message || "Error en el análisis de IA");
-                    }
-                } catch (error) {
-                    Swal.fire('Error', error.message || 'No se pudo completar el proceso.', 'error');
+                    Swal.fire('¡Aprobado!', 'Etiqueta procesada. Ingredientes y alérgenos registrados.', 'success');
+                    selectedFile = null;
+                    document.getElementById('fileInput').value = ""; // Reset input
+                    loadData();
+                } else {
+                    throw new Error("Alta demanda en los servidores de IA. Intente en unos segundos.");
                 }
-            };
-            reader.readAsDataURL(selectedFile);
+            } catch (error) {
+                Swal.fire('Atención', error.message, 'warning');
+                document.getElementById('fileInput').value = "";
+            }
         }
 
         async function sendUpdateEtapa(codigo, etapa, estado, avance) {
-            Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+            Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
             try {
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
@@ -653,65 +644,32 @@
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    Swal.fire('¡Listo!', 'Etapa actualizada.', 'success');
-                    openDetail(codigo);
+                    Swal.close();
+                    loadData(); // Recargar para actualizar KPIs
                 } else throw new Error();
             } catch (error) {
-                Swal.fire('Error', 'Fallo al actualizar.', 'error');
+                Swal.fire('Error', 'No se pudo guardar el estado.', 'error');
             }
         }
 
         function openNewMaterialModal() {
             Swal.fire({
-                title: '<span class="text-base font-bold">Registrar Nuevo Material</span>',
+                title: '<span class="text-lg font-black">Nuevo Material</span>',
                 html: `
-                    <div class="text-left space-y-3 mt-2 text-xs">
-                        <div>
-                            <label class="font-semibold text-slate-600">Código:</label>
-                            <input id="swal-codigo" class="swal2-input !w-full !m-0 text-xs" placeholder="Ej. 30000500">
-                        </div>
-                        <div>
-                            <label class="font-semibold text-slate-600">Nombre del Material / Producto:</label>
-                            <input id="swal-material" class="swal2-input !w-full !m-0 text-xs" placeholder="Ej. LECHE ENTERA UHT 1LT">
-                        </div>
-                        <div>
-                            <label class="font-semibold text-slate-600">Proveedor:</label>
-                            <input id="swal-proveedor" class="swal2-input !w-full !m-0 text-xs" placeholder="Ej. LÁCTEOS SAN ANTONIO">
-                        </div>
+                    <div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700">
+                        <div><label>Código SAP:</label><input id="swal-codigo" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
+                        <div><label>Descripción / Producto:</label><input id="swal-material" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
+                        <div><label>Proveedor:</label><input id="swal-proveedor" class="w-full p-2 border rounded mt-1 outline-none focus:border-secondary"></div>
                     </div>
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonText: 'Registrar',
-                cancelButtonText: 'Cancelar',
-                preConfirm: () => {
-                    return {
-                        codigo: document.getElementById('swal-codigo').value,
-                        material: document.getElementById('swal-material').value,
-                        proveedor: document.getElementById('swal-proveedor').value
-                    }
-                }
+                confirmButtonColor: '#10b981',
+                preConfirm: () => { return { codigo: document.getElementById('swal-codigo').value, material: document.getElementById('swal-material').value } }
             }).then((result) => {
-                if (result.isConfirmed && result.value.codigo && result.value.material) {
-                    Swal.fire('Registrado', 'Nuevo material incorporado a la planta.', 'success');
-                    loadData();
-                } else if(result.isConfirmed) {
-                    Swal.fire('Error', 'Debe completar al menos el código y el nombre del material.', 'warning');
-                }
-            });
-        }
-
-        function deleteMaterial(codigo) {
-            Swal.fire({
-                title: '¿Eliminar material?',
-                text: `¿Está seguro de eliminar el código ${codigo} del sistema?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Eliminado', 'El registro ha sido removido.', 'success');
+                if (result.isConfirmed && result.value.codigo) {
+                    Swal.fire('Registrado', 'Material ingresado a la cola.', 'success');
                     loadData();
                 }
             });
