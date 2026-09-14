@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle Unificado -->
+        <!-- VISTA 2: Detalle -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
@@ -175,13 +175,18 @@
             <!-- Panel Inferior -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
                 
-                <!-- Visor de Evidencia Corregido -->
+                <!-- Visor de Evidencia con Zoom y Pantalla Completa -->
                 <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between overflow-hidden">
                     <div class="flex justify-between items-center mb-1">
                         <h3 class="text-[11px] font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte Escaneado</h3>
-                        <button onclick="document.getElementById('fileInput').click()" id="btn-change-art" class="hidden text-[10px] text-secondary hover:underline font-semibold flex items-center gap-1">
-                            <i class="fa-solid fa-pen-to-square"></i> Cambiar Arte / Reanalizar
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openImageModal()" id="btn-zoom-art" class="hidden text-[10px] text-secondary hover:underline font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> Zoom / Ampliar
+                            </button>
+                            <button onclick="document.getElementById('fileInput').click()" id="btn-change-art" class="hidden text-[10px] text-slate-600 hover:underline font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Cambiar
+                            </button>
+                        </div>
                     </div>
                     
                     <div id="evidence-container" class="border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative min-h-[130px]">
@@ -191,7 +196,7 @@
                                 <i class="fa-solid fa-upload mr-1"></i> Cargar Arte / Etiqueta
                             </button>
                         </div>
-                        <img id="scanned-image-view" src="" class="hidden max-h-36 w-full object-contain rounded cursor-pointer hover:opacity-95 transition-opacity" onclick="window.open(this.src, '_blank')" title="Ampliar imagen">
+                        <img id="scanned-image-view" src="" class="hidden max-h-36 w-full object-contain rounded cursor-pointer hover:opacity-95 transition-opacity shadow-sm" onclick="openImageModal()" title="Hacer clic para ampliar">
                     </div>
 
                     <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
@@ -391,20 +396,23 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // GESTIÓN CORREGIDA DEL VISOR DE IMAGEN (GOOGLE DRIVE)
+            // VISOR DE IMAGEN (GOOGLE DRIVE)
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const btnChangeArt = document.getElementById('btn-change-art');
+            const btnZoomArt = document.getElementById('btn-zoom-art');
 
             if (registro['Evidencia_URL']) {
                 imgView.src = registro['Evidencia_URL'];
                 imgView.classList.remove('hidden');
                 noImgMsg.classList.add('hidden');
                 btnChangeArt.classList.remove('hidden');
+                btnZoomArt.classList.remove('hidden');
             } else {
                 imgView.classList.add('hidden');
                 noImgMsg.classList.remove('hidden');
                 btnChangeArt.classList.add('hidden');
+                btnZoomArt.classList.add('hidden');
             }
 
             // 6 ETAPAS OBLIGATORIAS
@@ -423,7 +431,6 @@
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
                 
-                // Si la etapa es "Ingredientes" y ya hay datos analizados por IA, forzamos estado APROBADO
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
                     etapaObj.Estado = 'APROBADO';
                 }
@@ -432,16 +439,15 @@
                 let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'CON ALERTA' ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700');
                 let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'CON ALERTA' ? 'text-warning' : 'text-slate-400');
 
-                // Si es la etapa "Ingredientes" y ya está aprobada, permitimos ver el reporte desde la misma tarjeta
                 let botonAccionHTML = '';
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText) {
                     botonAccionHTML = `
                         <div class="grid grid-cols-2 gap-1 mt-2">
-                            <button onclick="openIngredientsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1 shadow-xs">
+                            <button onclick="openIngredientsModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1 shadow-xs" title="Ver reporte">
                                 <i class="fa-solid fa-eye"></i> Ver Reporte
                             </button>
-                            <button onclick="document.getElementById('fileInput').click()" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[9px] font-semibold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-upload"></i> Reanalizar
+                            <button onclick="document.getElementById('fileInput').click()" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[9px] font-semibold py-1 px-1 rounded transition-colors flex items-center justify-center gap-1" title="Reanalizar">
+                                <i class="fa-solid fa-upload"></i> Cambiar
                             </button>
                         </div>
                     `;
@@ -472,7 +478,21 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // MODAL UNIFICADO PARA VER INGREDIENTES Y ALÉRGENOS DESDE LA TARJETA
+        // MODAL PARA AMPLIAR / ZOOM DE LA IMAGEN DE EVIDENCIA
+        function openImageModal() {
+            const imgView = document.getElementById('scanned-image-view');
+            if (!imgView.src || imgView.classList.contains('hidden')) return;
+
+            Swal.fire({
+                title: '<span class="text-sm font-bold">Arte / Etiqueta Escaneada</span>',
+                html: `<div class="overflow-auto max-h-[70vh] flex justify-center"><img src="${imgView.src}" class="max-w-full rounded shadow-md object-contain"></div>`,
+                width: '700px',
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#3b82f6'
+            });
+        }
+
+        // MODAL DE INGREDIENTES Y ALÉRGENOS
         function openIngredientsModal() {
             const registro = appData.registros.find(r => r['Código'] == currentItemCode);
             if (!registro) return;
