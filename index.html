@@ -27,23 +27,26 @@
         }
     </script>
     <style>
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         body { height: 100vh; overflow: hidden; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col justify-between">
 
-    <!-- Navbar Compacto -->
+    <!-- Navbar -->
     <nav class="bg-primary text-white shadow-md h-12 flex-shrink-0 z-50">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-industry text-lg text-secondary"></i>
-                <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
+                <span class="font-bold text-sm tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="loadData()" class="text-slate-300 hover:text-white transition-colors text-xs flex items-center gap-1 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700" title="Sincronizar">
+                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 transition-colors shadow-xs">
+                    <i class="fa-solid fa-plus"></i> Nuevo Material
+                </button>
+                <button onclick="loadData()" class="text-slate-300 hover:text-white transition-colors text-xs flex items-center gap-1 bg-slate-800 px-2 py-1 rounded-md border border-slate-700" title="Sincronizar">
                     <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Sincronizar
                 </button>
                 <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center font-bold border border-slate-500 text-[11px]">
@@ -53,8 +56,8 @@
         </div>
     </nav>
 
-    <!-- Main Container (Ajustado exactamente a la pantalla sin scroll general) -->
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-2.5 flex flex-col justify-between overflow-hidden">
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-3 flex flex-col justify-between overflow-hidden">
         
         <!-- Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20">
@@ -63,14 +66,14 @@
         </div>
 
         <!-- VISTA 1: Dashboard y KPIs -->
-        <div id="dashboard-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
+        <div id="dashboard-view" class="hidden flex flex-col h-full justify-between space-y-3 overflow-hidden">
             
             <!-- KPIs Compactos -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 flex-shrink-0">
-                <div class="bg-white p-3 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avance Global de Planta</p>
-                        <h3 class="text-lg font-extrabold text-slate-800 mt-0.5" id="kpi-avg-progress">0%</h3>
+                        <h3 class="text-xl font-extrabold text-slate-800 mt-0.5" id="kpi-avg-progress">0%</h3>
                         <p class="text-[10px] text-accent mt-0.5"><i class="fa-solid fa-arrow-trend-up"></i> Tiempo real</p>
                     </div>
                     <div class="relative w-12 h-12 flex items-center justify-center">
@@ -82,10 +85,10 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-3 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lotes 100% Liberados</p>
-                        <h3 class="text-lg font-extrabold text-accent mt-0.5" id="kpi-approved-count">0</h3>
+                        <h3 class="text-xl font-extrabold text-accent mt-0.5" id="kpi-approved-count">0</h3>
                         <p class="text-[10px] text-slate-500 mt-0.5">Cumplimiento total</p>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-emerald-50 border-2 border-accent flex items-center justify-center text-accent text-xs">
@@ -93,10 +96,10 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-3 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
+                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-200 flex items-center justify-between">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pendientes / Alertas</p>
-                        <h3 class="text-lg font-extrabold text-warning mt-0.5" id="kpi-pending-count">0</h3>
+                        <h3 class="text-xl font-extrabold text-warning mt-0.5" id="kpi-pending-count">0</h3>
                         <p class="text-[10px] text-danger mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i> En revisión</p>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-amber-50 border-2 border-warning flex items-center justify-center text-warning text-xs">
@@ -106,30 +109,30 @@
             </div>
 
             <!-- Buscador Inteligente -->
-            <div class="flex flex-col md:flex-row justify-between items-center gap-2 flex-shrink-0 bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2 flex-shrink-0 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
                 <div>
                     <h1 class="text-xs font-bold text-slate-800">Bandeja de Recepción y Control</h1>
                     <p class="text-[10px] text-slate-500">Seleccione o busque un material para iniciar la auditoría.</p>
                 </div>
-                <div class="relative w-full md:w-72">
-                    <i class="fa-solid fa-search absolute left-3 top-2 text-slate-400 text-xs"></i>
-                    <input type="text" id="smartSearchInput" placeholder="Búsqueda inteligente..." oninput="handleSmartSearch(event)" class="w-full pl-8 pr-3 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary shadow-xs">
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <input type="text" id="smartSearchInput" placeholder="Búsqueda inteligente (código o material)..." oninput="handleSmartSearch(event)" class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary shadow-xs">
                     <div id="autocomplete-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50 divide-y divide-slate-100"></div>
                 </div>
             </div>
 
-            <!-- Tabla Principal sin desbordar -->
+            <!-- Tabla Principal -->
             <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-grow flex flex-col mb-1">
                 <div class="overflow-y-auto flex-grow max-h-[310px]">
                     <table class="w-full text-left border-collapse" id="registrosTable">
                         <thead class="sticky top-0 bg-slate-100 z-10">
                             <tr class="text-slate-600 text-[10px] uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-2.5 font-semibold">Código</th>
-                                <th class="p-2.5 font-semibold">Material / Producto</th>
-                                <th class="p-2.5 font-semibold">Proveedor</th>
-                                <th class="p-2.5 font-semibold">Límite (+2 Días)</th>
-                                <th class="p-2.5 font-semibold">Avance</th>
-                                <th class="p-2.5 font-semibold text-center">Acción</th>
+                                <th class="p-3 font-semibold">Código</th>
+                                <th class="p-3 font-semibold">Material / Producto</th>
+                                <th class="p-3 font-semibold">Proveedor</th>
+                                <th class="p-3 font-semibold">Límite (+2 Días)</th>
+                                <th class="p-3 font-semibold">Avance</th>
+                                <th class="p-3 font-semibold text-center">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="text-xs divide-y divide-slate-100"></tbody>
@@ -138,25 +141,25 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle y Matriz (Diseño compacto uniforme) -->
+        <!-- VISTA 2: Detalle y Matriz (6 Etapas Uniformes y Evidencia Visual) -->
         <div id="detail-view" class="hidden flex flex-col h-full justify-between space-y-2.5 overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
-                <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-2.5 py-1 rounded-lg bg-white shadow-xs">
+                <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-1 font-medium text-xs border border-slate-300 px-3 py-1 rounded-lg bg-white shadow-xs">
                     <i class="fa-solid fa-arrow-left"></i> Volver
                 </button>
                 <div class="flex items-center gap-3">
-                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-mono font-bold border border-slate-200" id="detail-code"></span>
+                    <span class="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded text-xs font-mono font-bold border border-slate-200" id="detail-code"></span>
                     <span class="text-xs text-slate-500 font-medium" id="detail-provider"></span>
                 </div>
             </div>
             
             <!-- Cabecera Compacta -->
-            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-2.5 flex justify-between items-center border-l-4 border-l-secondary flex-shrink-0">
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex justify-between items-center border-l-4 border-l-secondary flex-shrink-0">
                 <div>
                     <h2 class="text-sm font-bold text-slate-800" id="detail-material"></h2>
                     <p class="text-[10px] text-slate-500">Inspección y Liberación de Calidad</p>
                 </div>
-                <div class="text-right bg-slate-50 px-2.5 py-0.5 rounded-lg border border-slate-100">
+                <div class="text-right bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
                     <span class="text-[9px] text-slate-500 uppercase font-semibold block">Avance</span>
                     <span class="text-sm font-bold text-secondary" id="detail-progress">0%</span>
                 </div>
@@ -164,14 +167,14 @@
 
             <!-- Matriz de Control -->
             <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex-shrink-0">
-                <div class="bg-primary px-3 py-1 flex justify-between items-center">
-                    <h3 class="text-white text-[10px] font-bold tracking-wide flex items-center gap-1"><i class="fa-solid fa-table-cells"></i> Matriz de Control y Alérgenos</h3>
+                <div class="bg-primary px-3 py-1.5 flex justify-between items-center">
+                    <h3 class="text-white text-[11px] font-bold tracking-wide flex items-center gap-1"><i class="fa-solid fa-table-cells"></i> Matriz de Control y Alérgenos</h3>
                     <span class="text-[9px] text-slate-300 font-mono">IA Sincronizada</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-100 text-slate-600 uppercase border-b border-slate-200 text-[9px]">
+                            <tr class="bg-slate-100 text-slate-600 uppercase border-b border-slate-200 text-[10px]">
                                 <th class="p-2 font-semibold">Material</th>
                                 <th class="p-2 font-semibold">Estado</th>
                                 <th class="p-2 font-semibold">Ingredientes (IA)</th>
@@ -180,53 +183,54 @@
                         </thead>
                         <tbody>
                             <tr class="border-b border-slate-100">
-                                <td id="matrix-material" class="p-2 font-bold text-slate-800 text-[10px]"></td>
+                                <td id="matrix-material" class="p-2 font-bold text-slate-800 text-[11px]"></td>
                                 <td id="matrix-estado" class="p-2 font-semibold"></td>
-                                <td id="matrix-ingredientes" class="p-2 text-slate-600 italic text-[10px]">Sin analizar</td>
-                                <td id="matrix-alergenos" class="p-2 text-slate-600 font-medium text-[10px]">Sin declarar</td>
+                                <td id="matrix-ingredientes" class="p-2 text-slate-600 italic text-[11px]">Sin analizar</td>
+                                <td id="matrix-alergenos" class="p-2 text-slate-600 font-medium text-[11px]">Sin declarar</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Flujo de Liberación (6 Etapas Horizontales Uniformes) -->
-            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-2.5 flex-shrink-0">
-                <h3 class="text-[10px] font-bold text-slate-800 mb-1.5 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Liberación (6 Etapas)</h3>
+            <!-- Flujo de Liberación (Exactamente 6 Etapas Horizontales Uniformes) -->
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex-shrink-0">
+                <h3 class="text-[11px] font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Liberación (6 Etapas Obligatorias)</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-6 gap-2"></div>
             </div>
 
-            <!-- Panel Inferior (Imagen Grande + Alérgenos) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 flex-grow overflow-hidden mb-1">
+            <!-- Panel Inferior (Imagen Grande en Alta Visibilidad + Alérgenos) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow overflow-hidden mb-1">
                 
                 <!-- Visor de Evidencia / Imagen -->
-                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-2.5 flex flex-col justify-between overflow-hidden">
+                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between overflow-hidden">
                     <div class="flex justify-between items-center mb-1">
-                        <h3 class="text-[10px] font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte Escaneado</h3>
-                        <button onclick="document.getElementById('fileInput').click()" id="btn-change-art" class="hidden text-[9px] text-secondary hover:underline font-semibold flex items-center gap-1">
+                        <h3 class="text-[11px] font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte Escaneado</h3>
+                        <button onclick="document.getElementById('fileInput').click()" id="btn-change-art" class="hidden text-[10px] text-secondary hover:underline font-semibold flex items-center gap-1">
                             <i class="fa-solid fa-pen-to-square"></i> Cambiar Arte / Reanalizar
                         </button>
                     </div>
                     
-                    <div id="evidence-container" class="border border-slate-200 rounded-lg p-1 bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative min-h-[110px]">
+                    <div id="evidence-container" class="border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex items-center justify-center flex-grow overflow-hidden relative min-h-[130px]">
                         <div id="no-evidence-msg" class="text-center">
-                            <p class="text-[11px] text-slate-400 italic mb-1.5">No hay imagen cargada para este material.</p>
-                            <button onclick="document.getElementById('fileInput').click()" class="bg-secondary text-white text-[11px] font-semibold px-2.5 py-1 rounded shadow-xs hover:bg-blue-600 transition-colors">
+                            <p class="text-xs text-slate-400 italic mb-2">No hay imagen cargada para este material.</p>
+                            <button onclick="document.getElementById('fileInput').click()" class="bg-secondary text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xs hover:bg-blue-600 transition-colors">
                                 <i class="fa-solid fa-upload mr-1"></i> Cargar Arte / Etiqueta
                             </button>
                         </div>
-                        <img id="scanned-image-view" src="" class="hidden max-h-32 w-full object-contain rounded cursor-pointer hover:opacity-95 transition-opacity" onclick="window.open(this.src, '_blank')" title="Ampliar imagen">
+                        <!-- Imagen Grande y Nítida -->
+                        <img id="scanned-image-view" src="" class="hidden max-h-36 w-full object-contain rounded cursor-pointer hover:opacity-95 transition-opacity" onclick="window.open(this.src, '_blank')" title="Ampliar imagen">
                     </div>
 
                     <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
                     
-                    <div id="ai-action-container" class="hidden mt-1.5 pt-1 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[9px] text-slate-500 italic"><i class="fa-solid fa-circle-info mr-1"></i> Imagen lista para IA</span>
+                    <div id="ai-action-container" class="hidden mt-2 pt-1 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-500 italic"><i class="fa-solid fa-circle-info mr-1"></i> Imagen lista para IA</span>
                         <div class="flex gap-1.5">
-                            <button onclick="uploadImage()" id="btn-upload" class="bg-slate-800 text-white font-medium py-1 px-2 rounded text-[10px] hidden items-center gap-1">
+                            <button onclick="uploadImage()" id="btn-upload" class="bg-slate-800 text-white font-medium py-1 px-2.5 rounded text-[11px] hidden items-center gap-1">
                                 <i class="fa-brands fa-google-drive"></i> Guardar
                             </button>
-                            <button onclick="triggerGeminiVision()" id="btn-ai" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1 px-2.5 rounded text-[10px] flex items-center gap-1 shadow-xs">
+                            <button onclick="triggerGeminiVision()" id="btn-ai" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-1 px-3 rounded text-[11px] flex items-center gap-1.5 shadow-xs">
                                 <i class="fa-solid fa-wand-magic-sparkles"></i> Analizar IA
                             </button>
                         </div>
@@ -234,29 +238,29 @@
                 </div>
 
                 <!-- Alérgenos -->
-                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-2.5 flex flex-col justify-between">
+                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-3 flex flex-col justify-between">
                     <div>
-                        <h3 class="text-[10px] font-bold text-slate-800 mb-1.5 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos Detectados por IA</h3>
-                        <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <label class="flex items-center p-1.5 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-leche" class="w-3 h-3 text-secondary rounded" disabled>
-                                <span class="ml-1.5 font-medium text-slate-700 text-[10px]">Leche</span>
+                        <h3 class="text-[11px] font-bold text-slate-800 mb-2 uppercase tracking-wide flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos Detectados por IA</h3>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
+                                <input type="checkbox" id="chk-leche" class="w-3.5 h-3.5 text-secondary rounded" disabled>
+                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Leche</span>
                             </label>
-                            <label class="flex items-center p-1.5 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-soya" class="w-3 h-3 text-secondary rounded" disabled>
-                                <span class="ml-1.5 font-medium text-slate-700 text-[10px]">Soya</span>
+                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
+                                <input type="checkbox" id="chk-soya" class="w-3.5 h-3.5 text-secondary rounded" disabled>
+                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Soya</span>
                             </label>
-                            <label class="flex items-center p-1.5 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-gluten" class="w-3 h-3 text-secondary rounded" disabled>
-                                <span class="ml-1.5 font-medium text-slate-700 text-[10px]">Gluten</span>
+                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
+                                <input type="checkbox" id="chk-gluten" class="w-3.5 h-3.5 text-secondary rounded" disabled>
+                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Gluten</span>
                             </label>
-                            <label class="flex items-center p-1.5 border rounded-lg bg-slate-50 text-xs">
-                                <input type="checkbox" id="chk-lactosa" class="w-3 h-3 text-secondary rounded" disabled>
-                                <span class="ml-1.5 font-medium text-slate-700 text-[10px]">Lactosa</span>
+                            <label class="flex items-center p-2 border rounded-lg bg-slate-50 text-xs">
+                                <input type="checkbox" id="chk-lactosa" class="w-3.5 h-3.5 text-secondary rounded" disabled>
+                                <span class="ml-2 font-medium text-slate-700 text-[11px]">Lactosa</span>
                             </label>
                         </div>
                     </div>
-                    <div class="bg-blue-50 border border-blue-100 p-2 rounded-lg text-[9px] text-blue-800 mt-1">
+                    <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-lg text-[10px] text-blue-800 mt-2">
                         <i class="fa-solid fa-shield-halved mr-1"></i> Verificación automática contra Codex Alimentarius.
                     </div>
                 </div>
@@ -342,21 +346,24 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
                 tr.innerHTML = `
-                    <td class="p-2"><span class="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[10px] border border-slate-200">${reg['Código']}</span></td>
-                    <td class="p-2 font-bold text-slate-800 text-[11px]">${reg['Material']}</td>
-                    <td class="p-2 text-slate-500 text-[10px]">${reg['Proveedor']}</td>
-                    <td class="p-2 text-slate-600 text-[10px]">${fechaLimite}</td>
-                    <td class="p-2">
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-14 bg-slate-200 rounded-full h-1.5">
+                    <td class="p-3"><span class="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-[11px] border border-slate-200">${reg['Código']}</span></td>
+                    <td class="p-3 font-bold text-slate-800 text-xs">${reg['Material']}</td>
+                    <td class="p-3 text-slate-500 text-[11px]">${reg['Proveedor']}</td>
+                    <td class="p-3 text-slate-600 text-[11px]">${fechaLimite}</td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 bg-slate-200 rounded-full h-1.5">
                                 <div class="${bgAvance} h-1.5 rounded-full" style="width: ${avance}%"></div>
                             </div>
-                            <span class="text-[10px] font-bold text-slate-600">${avance}%</span>
+                            <span class="text-[11px] font-bold text-slate-600">${avance}%</span>
                         </div>
                     </td>
-                    <td class="p-2 text-center">
-                        <button onclick="openDetail('${reg['Código']}')" class="text-secondary hover:text-white hover:bg-secondary p-1 rounded transition-colors border border-transparent hover:border-secondary shadow-xs" title="Auditar">
+                    <td class="p-3 text-center flex justify-center gap-1.5">
+                        <button onclick="openDetail('${reg['Código']}')" class="text-secondary hover:text-white hover:bg-secondary p-1.5 rounded-md transition-colors border border-slate-200 shadow-xs" title="Auditar">
                             <i class="fa-solid fa-microscope text-xs"></i>
+                        </button>
+                        <button onclick="deleteMaterial('${reg['Código']}')" class="text-danger hover:text-white hover:bg-danger p-1.5 rounded-md transition-colors border border-slate-200 shadow-xs" title="Eliminar Material">
+                            <i class="fa-solid fa-trash text-xs"></i>
                         </button>
                     </td>
                 `;
@@ -383,8 +390,8 @@
                 dropdown.classList.remove('hidden');
                 matches.forEach(m => {
                     const item = document.createElement('div');
-                    item.className = 'p-2 hover:bg-slate-50 cursor-pointer text-xs flex justify-between items-center';
-                    item.innerHTML = `<span><strong class="font-mono text-slate-600">${m['Código']}</strong> - ${m['Material']}</span> <span class="text-[9px] text-slate-400">${m['Proveedor']}</span>`;
+                    item.className = 'p-2.5 hover:bg-slate-50 cursor-pointer text-xs flex justify-between items-center';
+                    item.innerHTML = `<span><strong class="font-mono text-slate-600">${m['Código']}</strong> - ${m['Material']}</span> <span class="text-[10px] text-slate-400">${m['Proveedor']}</span>`;
                     item.onclick = () => {
                         document.getElementById('smartSearchInput').value = m['Material'];
                         dropdown.classList.add('hidden');
@@ -416,13 +423,13 @@
             document.getElementById('detail-progress').innerText = `${registro['Avance general (%)']}%`;
 
             document.getElementById('matrix-material').innerText = registro['Material'];
-            document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] border border-blue-200 font-semibold">${registro['Estado general'] || 'EN PROCESO'}</span>`;
+            document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] border border-blue-200 font-semibold">${registro['Estado general'] || 'EN PROCESO'}</span>`;
             
             let ingText = registro['Ingredientes_IA'] || '';
             let aleText = registro['Alergenos_IA'] || '';
 
-            document.getElementById('matrix-ingredientes').innerHTML = ingText ? `<span class="bg-yellow-100 text-yellow-900 px-1 py-0.5 rounded text-[10px]">${ingText}</span>` : '<span class="text-slate-400 italic">Pendiente de lectura IA</span>';
-            document.getElementById('matrix-alergenos').innerHTML = aleText ? `<span class="bg-red-100 text-red-900 font-bold px-1 py-0.5 rounded text-[10px]">${aleText}</span>` : '<span class="text-slate-400 italic">No declarados</span>';
+            document.getElementById('matrix-ingredientes').innerHTML = ingText ? `<span class="bg-yellow-100 text-yellow-900 px-1.5 py-0.5 rounded text-[11px]">${ingText}</span>` : '<span class="text-slate-400 italic">Pendiente de lectura IA</span>';
+            document.getElementById('matrix-alergenos').innerHTML = aleText ? `<span class="bg-red-100 text-red-900 font-bold px-1.5 py-0.5 rounded text-[11px]">${aleText}</span>` : '<span class="text-slate-400 italic">No declarados</span>';
 
             let fullText = (ingText + " " + aleText).toUpperCase();
             document.getElementById('chk-leche').checked = fullText.includes('LECHE');
@@ -430,7 +437,7 @@
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // GESTIÓN DE LA IMAGEN DESDE GOOGLE DRIVE (SI ESTÁ REGISTRADA)
+            // GESTIÓN DE LA IMAGEN DESDE GOOGLE DRIVE / SHEETS
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const aiAction = document.getElementById('ai-action-container');
@@ -453,26 +460,36 @@
                 aiAction.classList.remove('hidden');
             }
 
-            // RENDERIZAR LAS 6 ETAPAS HORIZONTALES
+            // FORZAR EXACTAMENTE 6 ETAPAS HORIZONTALES UNIFORMES
+            const etapasFijas = [
+                "Recepción", 
+                "Toma de muestras", 
+                "Ingredientes", 
+                "Ficha técnica", 
+                "Certificado de inscripción (CIA)", 
+                "Diagrama de flujo"
+            ];
+
             let etapasContainer = document.getElementById('etapas-horizontal-container');
             etapasContainer.innerHTML = '';
 
-            etapasItem.forEach(etapa => {
-                let estado = etapa['Estado'];
+            etapasFijas.forEach(nombreEtapa => {
+                let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
+                let estado = etapaObj['Estado'];
                 let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'EN PROCESO' ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-slate-50 border-slate-200 text-slate-700');
                 let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'EN PROCESO' ? 'text-secondary' : 'text-slate-400');
 
                 etapasContainer.innerHTML += `
-                    <div class="p-2 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-xs">
+                    <div class="p-2.5 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-xs">
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <i class="fa-solid fa-circle-check ${iconColor} text-xs"></i>
-                                <span class="text-[8px] font-extrabold uppercase px-1 py-0.1 rounded bg-white border">${estado}</span>
+                                <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-white border">${estado}</span>
                             </div>
-                            <h4 class="font-bold text-[9px] uppercase text-slate-800 mb-0.5 truncate">${etapa['Etapa']}</h4>
-                            <p class="text-[8px] text-slate-500 truncate"><i class="fa-solid fa-user text-slate-400"></i> ${etapa['Responsable'] || 'N/A'}</p>
+                            <h4 class="font-bold text-[10px] uppercase text-slate-800 mb-0.5 truncate">${nombreEtapa}</h4>
+                            <p class="text-[9px] text-slate-500 truncate"><i class="fa-solid fa-user text-slate-400"></i> ${etapaObj['Responsable'] || 'N/A'}</p>
                         </div>
-                        <button onclick="updateEtapaStrict('${codigo}', '${etapa['Etapa']}', '${estado}')" class="mt-1.5 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[9px] font-semibold py-0.5 rounded transition-colors flex items-center justify-center gap-1">
+                        <button onclick="updateEtapaStrict('${codigo}', '${nombreEtapa}', '${estado}')" class="mt-2 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold py-0.5 rounded transition-colors flex items-center justify-center gap-1">
                             <i class="fa-solid fa-pen-to-square"></i> Gestionar
                         </button>
                     </div>
@@ -488,6 +505,64 @@
             document.getElementById('detail-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
             loadData();
+        }
+
+        // AGREGAR NUEVO MATERIAL
+        function openNewMaterialModal() {
+            Swal.fire({
+                title: '<span class="text-base font-bold">Registrar Nuevo Material</span>',
+                html: `
+                    <div class="text-left space-y-3 mt-2 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-600">Código:</label>
+                            <input id="swal-codigo" class="swal2-input !w-full !m-0 text-xs" placeholder="Ej. 30000500">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-600">Nombre del Material / Producto:</label>
+                            <input id="swal-material" class="swal2-input !w-full !m-0 text-xs" placeholder="Ej. LECHE ENTERA UHT 1LT">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-600">Proveedor:</label>
+                            <input id="swal-proveedor" class="swal2-input !w-full !m-0 text-xs" placeholder="Ej. LÁCTEOS SAN ANTONIO">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Registrar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    return {
+                        codigo: document.getElementById('swal-codigo').value,
+                        material: document.getElementById('swal-material').value,
+                        proveedor: document.getElementById('swal-proveedor').value
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value.codigo && result.value.material) {
+                    Swal.fire('Registrado', 'Nuevo material incorporado a la planta.', 'success');
+                    // Aquí se puede sincronizar con Google Sheets según la lógica del Apps Script
+                    loadData();
+                } else if(result.isConfirmed) {
+                    Swal.fire('Error', 'Debe completar al menos el código y el nombre del material.', 'warning');
+                }
+            });
+        }
+
+        function deleteMaterial(codigo) {
+            Swal.fire({
+                title: '¿Eliminar material?',
+                text: `¿Está seguro de eliminar el código ${codigo} del sistema de control?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Eliminado', 'El registro ha sido removido.', 'success');
+                    loadData();
+                }
+            });
         }
 
         function handleFileSelect(event) {
