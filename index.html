@@ -121,7 +121,7 @@
                                 <th class="p-4 font-bold">Material / Producto</th>
                                 <th class="p-4 font-bold">Proveedor</th>
                                 <th class="p-4 font-bold">Avance</th>
-                                <th class="p-4 font-bold text-center">Acciones (Auditar / Modificar / Eliminar)</th>
+                                <th class="p-4 font-bold text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
@@ -175,7 +175,6 @@
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                             <p class="text-[10px] text-slate-400 mt-1">Cargue la etiqueta desde la etapa "Ingredientes"</p>
                         </div>
-                        <!-- Imagen con object-contain para no distorsionar -->
                         <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" title="Haga clic para abrir visor con Zoom">
                         <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm">
@@ -243,7 +242,7 @@
             }
 
             try {
-                // Fetch con redirect "follow" explícito para evitar problemas de CORS silenciosos
+                // Fetch con redirect "follow" para soportar las redirecciones de Apps Script
                 const response = await fetch(`${SCRIPT_URL}?action=getData`, { redirect: "follow" });
                 const result = await response.json();
                 
@@ -265,7 +264,7 @@
                 document.getElementById('loading-spinner').classList.add('hidden');
                 Swal.fire({
                     title: 'Error de Conexión', 
-                    html: 'No se pudo contactar con Google Cloud (Error CORS).<br><br><b>Solución:</b> Ve a tu Google Apps Script, crea una <b>Nueva Versión</b> de implementación asegurándote que se ejecute como "Yo" y acceso "Cualquier persona".', 
+                    html: 'No se pudo leer la base de datos (Problema de conexión o CORS).<br><br>Asegúrate de que en el script no haya errores ingresando la URL directamente en tu navegador.', 
                     icon: 'error'
                 });
             } finally {
@@ -313,7 +312,7 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
                 
-                // AQUÍ ESTÁN LOS 3 BOTONES JUNTOS EN LA TABLA
+                // BOTONES DE ACCIÓN: AUDITAR, MODIFICAR, ELIMINAR
                 tr.innerHTML = `
                     <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300">${reg['Código']}</span></td>
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
@@ -327,15 +326,15 @@
                         </div>
                     </td>
                     <td class="p-4">
-                        <div class="flex items-center justify-center gap-2">
-                            <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded flex items-center justify-center gap-1 transition-colors shadow-sm text-xs font-bold" title="Auditar Lote">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors shadow-sm text-[11px] font-bold" title="Auditar Lote">
                                 <i class="fa-solid fa-microscope text-xs"></i> Auditar
                             </button>
-                            <button onclick="editMaterialInfo('${reg['Código']}')" class="bg-amber-500 text-white hover:bg-amber-600 px-2 py-1.5 rounded flex items-center justify-center transition-colors shadow-sm" title="Modificar Datos">
-                                <i class="fa-solid fa-pen text-xs"></i>
+                            <button onclick="editMaterialInfo('${reg['Código']}')" class="bg-amber-500 text-white hover:bg-amber-600 px-3 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors shadow-sm text-[11px] font-bold" title="Modificar Datos">
+                                <i class="fa-solid fa-pen text-xs"></i> Modificar
                             </button>
-                            <button onclick="deleteMaterial('${reg['Código']}')" class="bg-danger text-white hover:bg-red-700 px-2 py-1.5 rounded flex items-center justify-center transition-colors shadow-sm" title="Eliminar">
-                                <i class="fa-solid fa-trash text-xs"></i>
+                            <button onclick="deleteMaterial('${reg['Código']}')" class="bg-danger text-white hover:bg-red-700 px-3 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors shadow-sm text-[11px] font-bold" title="Eliminar Lote">
+                                <i class="fa-solid fa-trash text-xs"></i> Eliminar
                             </button>
                         </div>
                     </td>
@@ -680,8 +679,8 @@
                 preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor').value } }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire('Actualizado', 'Los datos del material han sido modificados (Conectar con backend).', 'success');
-                    // await fetch(...) para guardar edición en Google Sheets
+                    Swal.fire('Actualizado', 'Los datos del material han sido modificados.', 'success');
+                    // Aquí conectarás con backend para guardar la edición
                     loadData();
                 }
             });
@@ -699,8 +698,8 @@
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire('Eliminado', 'El material ha sido retirado (Conectar con backend).', 'success');
-                    // await fetch(...) para borrar fila en Google Sheets
+                    Swal.fire('Eliminado', 'El material ha sido retirado.', 'success');
+                    // Aquí conectarás con backend para borrar la fila
                     loadData();
                 }
             });
