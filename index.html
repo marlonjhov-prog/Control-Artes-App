@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Inspection Dashboard | Control de Artes</title>
+    <title>QA Inspection Dashboard Pro | Control de Artes</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para Iconos -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -36,17 +36,17 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Navegación -->
+    <!-- Navbar -->
     <nav class="bg-primary text-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-microscope text-2xl text-secondary"></i>
-                    <span class="font-bold text-xl tracking-wide">QA Inspection <span class="text-secondary font-light">Dashboard</span></span>
+                    <i class="fa-solid fa-industry text-2xl text-secondary"></i>
+                    <span class="font-bold text-xl tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="loadData()" class="text-slate-300 hover:text-white transition-colors text-sm" title="Sincronizar">
-                        <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Actualizar
+                    <button onclick="loadData()" class="text-slate-300 hover:text-white transition-colors text-sm flex items-center gap-1.5" title="Sincronizar">
+                        <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Actualizar Planta
                     </button>
                     <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold border border-slate-500">
                         <i class="fa-solid fa-user-shield text-sm"></i>
@@ -56,21 +56,62 @@
         </div>
     </nav>
 
-    <!-- Contenido Principal -->
+    <!-- Main -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         
         <!-- Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-secondary mb-4"></div>
-            <p class="text-slate-500 font-medium">Sincronizando flujos desde Google Sheets...</p>
+            <p class="text-slate-500 font-medium">Conectando con Google Cloud y sincronizando datos de planta...</p>
         </div>
 
-        <!-- VISTA 1: Dashboard -->
+        <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            
+            <!-- SECCIÓN DE KPIs AVANZADOS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- KPI 1: Tacómetro de Avance Planta -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avance Global de Planta</p>
+                        <h3 class="text-3xl font-extrabold text-slate-800 mt-1" id="kpi-avg-progress">0%</h3>
+                        <p class="text-xs text-accent mt-1 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> Lotes en proceso continuo</p>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-blue-50 border-4 border-secondary flex items-center justify-center text-secondary font-bold text-lg shadow-inner">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Materiales Aprobados -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lotes 100% Liberados</p>
+                        <h3 class="text-3xl font-extrabold text-accent mt-1" id="kpi-approved-count">0</h3>
+                        <p class="text-xs text-slate-500 mt-1">Cumplimiento total de etapas</p>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-emerald-50 border-4 border-accent flex items-center justify-center text-accent font-bold text-lg">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Lotes con Alerta o Pendientes -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pendientes / Alertas</p>
+                        <h3 class="text-3xl font-extrabold text-warning mt-1" id="kpi-pending-count">0</h3>
+                        <p class="text-xs text-danger mt-1 flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Requieren atención</p>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-amber-50 border-4 border-warning flex items-center justify-center text-warning font-bold text-lg">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cabecera de Tabla -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pt-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-800">Bandeja de Recepción y Control</h1>
-                    <p class="text-slate-500 text-sm mt-1">Gestión de materiales y auditoría de etiquetas.</p>
+                    <h1 class="text-2xl font-bold text-slate-800">Bandeja de Recepción y Control de Artes</h1>
+                    <p class="text-slate-500 text-sm mt-1">Seleccione un material para gestionar etapas, validar cumplimiento y auditar alérgenos.</p>
                 </div>
                 <div class="relative w-full md:w-auto">
                     <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
@@ -78,6 +119,7 @@
                 </div>
             </div>
 
+            <!-- Tabla Principal -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="registrosTable">
@@ -88,7 +130,7 @@
                                 <th class="p-4 font-semibold">Proveedor</th>
                                 <th class="p-4 font-semibold">Límite (+2 Días)</th>
                                 <th class="p-4 font-semibold">Avance</th>
-                                <th class="p-4 font-semibold text-center">Auditar</th>
+                                <th class="p-4 font-semibold text-center">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
@@ -99,30 +141,32 @@
 
         <!-- VISTA 2: Detalle y Matriz de Auditoría -->
         <div id="detail-view" class="hidden space-y-6">
-            <div class="flex items-center gap-4 mb-2">
-                <button onclick="showDashboard()" class="text-slate-500 hover:text-primary transition-colors flex items-center gap-2 font-medium text-sm border border-slate-300 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50">
-                    <i class="fa-solid fa-arrow-left"></i> Volver a la bandeja
+            <div class="flex items-center gap-4">
+                <button onclick="showDashboard()" class="text-slate-600 hover:text-primary transition-colors flex items-center gap-2 font-medium text-sm border border-slate-300 px-3 py-1.5 rounded-lg bg-white shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a la Bandeja
                 </button>
             </div>
             
+            <!-- Tarjeta Cabecera Material -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-l-4 border-l-secondary">
                 <div>
-                    <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide border border-slate-200" id="detail-code"></span>
+                    <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold tracking-wide border border-slate-200" id="detail-code"></span>
                     <h2 class="text-2xl font-bold text-slate-800 mt-2" id="detail-material"></h2>
                     <p class="text-slate-500 text-sm mt-1 flex items-center gap-2">
                         <i class="fa-solid fa-industry text-slate-400"></i> <span id="detail-provider"></span>
                     </p>
                 </div>
-                <div class="text-left md:text-right bg-slate-50 p-4 rounded-lg border border-slate-100 min-w-[150px]">
-                    <p class="text-xs text-slate-500 mb-1 font-semibold uppercase">Avance General</p>
+                <div class="text-left md:text-right bg-slate-50 p-4 rounded-lg border border-slate-100 min-w-[160px]">
+                    <p class="text-xs text-slate-500 mb-1 font-semibold uppercase">Avance del Material</p>
                     <div class="text-3xl font-bold text-secondary" id="detail-progress">0%</div>
                 </div>
             </div>
 
-            <!-- MATRIZ DE RESUMEN (Tal como lo solicitaste) -->
+            <!-- Matriz Ejecutiva Horizontal -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-slate-800 px-6 py-3">
-                    <h3 class="text-white text-sm font-bold tracking-wide flex items-center gap-2"><i class="fa-solid fa-table"></i> Matriz de Control del Material</h3>
+                <div class="bg-primary px-6 py-3 flex justify-between items-center">
+                    <h3 class="text-white text-sm font-bold tracking-wide flex items-center gap-2"><i class="fa-solid fa-table-cells"></i> Matriz de Control y Declaración de Alérgenos</h3>
+                    <span class="text-xs text-slate-300 font-mono">Sincronizado con IA</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm border-collapse">
@@ -130,7 +174,7 @@
                             <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
                                 <th class="p-3.5 font-semibold">Material</th>
                                 <th class="p-3.5 font-semibold">Estado General</th>
-                                <th class="p-3.5 font-semibold">Ingredientes</th>
+                                <th class="p-3.5 font-semibold">Ingredientes (IA)</th>
                                 <th class="p-3.5 font-semibold">Declaración de Alérgenos</th>
                             </tr>
                         </thead>
@@ -146,39 +190,68 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <!-- Izquierda: Etapas -->
-                <div class="col-span-1 xl:col-span-2 space-y-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-list-check text-secondary"></i> Etapas de Liberación</h3>
-                        <div id="etapas-container" class="space-y-3"></div>
+            <!-- ETAPAS DE LIBERACIÓN EN MATRIZ HORIZONTAL (TIMELINE) -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-timeline text-secondary"></i> Flujo Horizontal de Liberación de Etapas</h3>
+                <div id="etapas-horizontal-container" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <!-- Generado dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Sección Inferior: Visor de Evidencias y IA -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                
+                <!-- Carga de Evidencias y Visor Google Drive -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><i class="fa-solid fa-folder-open text-secondary"></i> Evidencia Visual y Arte (Google Drive)</h3>
+                        <p class="text-xs text-slate-500 mb-4">Adjunte o verifique la imagen de la etiqueta física recibida en bodega.</p>
+                        
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-5 text-center hover:bg-slate-50 transition-colors relative mb-4">
+                            <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileSelect(event)">
+                            <div id="upload-prompt">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
+                                <p class="text-sm font-medium text-slate-600">Haz clic o arrastra la etiqueta aquí</p>
+                            </div>
+                            <img id="image-preview" src="" class="hidden w-full h-36 object-contain rounded-lg">
+                        </div>
+                    </div>
+                    
+                    <div id="image-actions" class="hidden flex gap-3">
+                        <button onclick="uploadImage()" id="btn-upload" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-brands fa-google-drive"></i> Subir a Drive
+                        </button>
+                        <button onclick="triggerGeminiVision()" id="btn-ai" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 shadow-md">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Analizar con IA
+                        </button>
                     </div>
                 </div>
 
-                <!-- Derecha: Imágenes y IA -->
-                <div class="col-span-1 space-y-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-image text-secondary"></i> Arte / Etiqueta</h3>
-                        
-                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors relative mb-4">
-                            <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileSelect(event)">
-                            <div id="upload-prompt">
-                                <i class="fa-solid fa-file-arrow-up text-3xl text-slate-400 mb-2"></i>
-                                <p class="text-sm font-medium text-slate-600">Haz clic o arrastra la etiqueta aquí</p>
-                            </div>
-                            <img id="image-preview" src="" class="hidden w-full h-40 object-contain rounded-lg">
-                        </div>
-                        
-                        <div id="image-actions" class="hidden flex flex-col gap-2">
-                            <button onclick="uploadImage()" id="btn-upload" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm">
-                                <i class="fa-brands fa-google-drive"></i> Guardar en Google Drive
-                            </button>
-                            <button onclick="triggerGeminiVision()" id="btn-ai" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-md">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Analizar con Gemini AI
-                            </button>
-                        </div>
+                <!-- Matriz Interactiva de Alérgenos (Checkboxes automáticos) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Validación Automática de Alérgenos</h3>
+                    <p class="text-xs text-slate-500 mb-4">La IA marca automáticamente los componentes detectados tras el análisis de la etiqueta.</p>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center p-3 border rounded-lg bg-slate-50">
+                            <input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded focus:ring-secondary" disabled>
+                            <span class="ml-2 text-sm font-medium text-slate-700">Leche</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg bg-slate-50">
+                            <input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded focus:ring-secondary" disabled>
+                            <span class="ml-2 text-sm font-medium text-slate-700">Soya</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg bg-slate-50">
+                            <input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded focus:ring-secondary" disabled>
+                            <span class="ml-2 text-sm font-medium text-slate-700">Gluten</span>
+                        </label>
+                        <label class="flex items-center p-3 border rounded-lg bg-slate-50">
+                            <input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded focus:ring-secondary" disabled>
+                            <span class="ml-2 text-sm font-medium text-slate-700">Declaración de Lactosa</span>
+                        </label>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
@@ -206,6 +279,7 @@
                 if (result.status === 'success') {
                     appData.registros = result.registros;
                     appData.etapas = result.etapas;
+                    renderKPIs();
                     renderTable();
                     
                     document.getElementById('loading-spinner').classList.add('hidden');
@@ -217,6 +291,28 @@
             } finally {
                 document.getElementById('sync-icon').classList.remove('fa-spin');
             }
+        }
+
+        // RENDERIZAR KPIs EJECUTIVOS
+        function renderKPIs() {
+            const total = appData.registros.length;
+            if (total === 0) return;
+
+            let sumaAvance = 0;
+            let aprobados = 0;
+            let pendientes = 0;
+
+            appData.registros.forEach(reg => {
+                let av = parseInt(reg['Avance general (%)']) || 0;
+                sumaAvance += av;
+                if (av === 100) aprobados++;
+                else pendientes++;
+            });
+
+            let promedio = Math.round(sumaAvance / total);
+            document.getElementById('kpi-avg-progress').innerText = `${promedio}%`;
+            document.getElementById('kpi-approved-count').innerText = aprobados;
+            document.getElementById('kpi-pending-count').innerText = pendientes;
         }
 
         function renderTable() {
@@ -269,40 +365,50 @@
 
             if(!registro) return;
 
-            // Llenar cabecera
             document.getElementById('detail-code').innerText = registro['Código'];
             document.getElementById('detail-material').innerText = registro['Material'];
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${registro['Avance general (%)']}%`;
 
-            // Llenar Matriz de Control Solicitada
+            // Matriz
             document.getElementById('matrix-material').innerText = registro['Material'];
-            document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs border border-blue-200">${registro['Estado general'] || 'EN PROCESO'}</span>`;
+            document.getElementById('matrix-estado').innerHTML = `<span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs border border-blue-200 font-semibold">${registro['Estado general'] || 'EN PROCESO'}</span>`;
             
-            // Cargar datos de IA persistidos en Sheets si existen
-            document.getElementById('matrix-ingredientes').innerHTML = registro['Ingredientes_IA'] ? `<span class="bg-yellow-100 text-yellow-900 px-1.5 py-0.5 rounded">${registro['Ingredientes_IA']}</span>` : '<span class="text-slate-400 italic">Pendiente de lectura IA</span>';
-            document.getElementById('matrix-alergenos').innerHTML = registro['Alergenos_IA'] ? `<span class="bg-red-100 text-red-900 font-bold px-1.5 py-0.5 rounded">${registro['Alergenos_IA']}</span>` : '<span class="text-slate-400 italic">No declarados</span>';
+            let ingText = registro['Ingredientes_IA'] || '';
+            let aleText = registro['Alergenos_IA'] || '';
 
-            // Llenar Etapas
-            const cont = document.getElementById('etapas-container');
-            cont.innerHTML = '';
+            document.getElementById('matrix-ingredientes').innerHTML = ingText ? `<span class="bg-yellow-100 text-yellow-900 px-1.5 py-0.5 rounded text-xs">${ingText}</span>` : '<span class="text-slate-400 italic">Pendiente de lectura IA</span>';
+            document.getElementById('matrix-alergenos').innerHTML = aleText ? `<span class="bg-red-100 text-red-900 font-bold px-1.5 py-0.5 rounded text-xs">${aleText}</span>` : '<span class="text-slate-400 italic">No declarados</span>';
+
+            // Actualizar Checkboxes automáticos de alérgenos según el texto detectado
+            let fullText = (ingText + " " + aleText).toUpperCase();
+            document.getElementById('chk-leche').checked = fullText.includes('LECHE');
+            document.getElementById('chk-soya').checked = fullText.includes('SOYA');
+            document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN');
+            document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
+
+            // RENDERIZAR ETAPAS EN MATRIZ HORIZONTAL (TIMELINE)
+            let etapasContainer = document.getElementById('etapas-horizontal-container');
+            etapasContainer.innerHTML = '';
+
             etapasItem.forEach(etapa => {
-                let avance = etapa['Avance (%)'] || 0;
                 let estado = etapa['Estado'];
-                let badgeColor = estado === 'APROBADO' ? 'bg-accent text-white border-accent' : (estado === 'EN PROCESO' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-slate-100 text-slate-600 border-slate-200');
+                let badgeBg = estado === 'APROBADO' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (estado === 'EN PROCESO' ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-slate-50 border-slate-200 text-slate-700');
+                let iconColor = estado === 'APROBADO' ? 'text-accent' : (estado === 'EN PROCESO' ? 'text-secondary' : 'text-slate-400');
 
-                cont.innerHTML += `
-                    <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-slate-700 text-sm">${etapa['Etapa']}</h4>
-                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-user text-slate-400 mr-1"></i> ${etapa['Responsable'] || 'N/A'} &bull; Act: ${etapa['Fecha actualización'] || '-'}</p>
+                etapasContainer.innerHTML += `
+                    <div class="p-4 rounded-xl border ${badgeBg} flex flex-col justify-between shadow-sm">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <i class="fa-solid fa-circle-check ${iconColor} text-lg"></i>
+                                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white border">${estado}</span>
+                            </div>
+                            <h4 class="font-bold text-xs uppercase text-slate-800 mb-1">${etapa['Etapa']}</h4>
+                            <p class="text-[11px] text-slate-500"><i class="fa-solid fa-user text-slate-400"></i> ${etapa['Responsable'] || 'N/A'}</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="px-2 py-1 rounded text-[10px] font-bold border ${badgeColor}">${estado}</span>
-                            <button onclick="updateEtapaUI('${codigo}', '${etapa['Etapa']}', '${estado}')" class="text-slate-400 hover:text-secondary p-1.5 bg-white border border-slate-200 rounded shadow-sm">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                        </div>
+                        <button onclick="updateEtapaStrict('${codigo}', '${etapa['Etapa']}', '${estado}')" class="mt-4 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-semibold py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs">
+                            <i class="fa-solid fa-pen-to-square"></i> Gestionar
+                        </button>
                     </div>
                 `;
             });
@@ -317,6 +423,7 @@
             currentItemCode = null;
             document.getElementById('detail-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
+            loadData();
         }
 
         function resetImageModule() {
@@ -327,32 +434,51 @@
             selectedFile = null;
         }
 
-        function updateEtapaUI(codigo, etapaNombre, estadoActual) {
+        // VALIDACIÓN ESTRICTA CUMPLE / NO CUMPLE CON EXIGENCIA DE ARCHIVO
+        function updateEtapaStrict(codigo, etapaNombre, estadoActual) {
             Swal.fire({
-                title: `<span class="text-lg">Actualizar: ${etapaNombre}</span>`,
+                title: `<span class="text-lg font-bold">Gestión de Calidad: ${etapaNombre}</span>`,
                 html: `
-                    <select id="swal-estado" class="swal2-input text-sm">
-                        <option value="PENDIENTE" ${estadoActual=='PENDIENTE'?'selected':''}>PENDIENTE</option>
-                        <option value="EN PROCESO" ${estadoActual=='EN PROCESO'?'selected':''}>EN PROCESO</option>
-                        <option value="CON ALERTA" ${estadoActual=='CON ALERTA'?'selected':''}>CON ALERTA</option>
-                        <option value="APROBADO" ${estadoActual=='APROBADO'?'selected':''}>APROBADO</option>
-                    </select>
+                    <div class="text-left space-y-4 mt-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Evaluación de Criterio:</label>
+                            <select id="swal-eval" class="swal2-input !w-full !m-0 text-sm">
+                                <option value="APROBADO">CUMPLE (Aprobado)</option>
+                                <option value="CON ALERTA">NO CUMPLE (Con Alerta / Rechazado)</option>
+                                <option value="PENDIENTE">PENDIENTE</option>
+                            </select>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-800">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> <strong>Requisito de Planta:</strong> Si selecciona "CUMPLE", es obligatorio haber cargado y guardado previamente el archivo de evidencia digital o física.
+                        </div>
+                    </div>
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: 'Guardar',
+                confirmButtonText: 'Aplicar Validación',
                 cancelButtonText: 'Cancelar',
-                preConfirm: () => { return { estado: document.getElementById('swal-estado').value } }
+                confirmButtonColor: '#3b82f6',
+                preConfirm: () => {
+                    return { estado: document.getElementById('swal-eval').value }
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let nuevoAvance = result.value.estado === 'APROBADO' ? 100 : (result.value.estado === 'EN PROCESO' ? 50 : 0);
-                    sendUpdateEtapa(codigo, etapaNombre, result.value.estado, nuevoAvance);
+                    let nuevoEstado = result.value.estado;
+                    
+                    // Si indica que CUMPLE pero no ha subido archivo en esta sesión, exigirlo estrictamente
+                    if (nuevoEstado === 'APROBADO' && !selectedFile) {
+                        Swal.fire('Evidencia Requerida', 'Para aprobar esta etapa, debe adjuntar y subir la evidencia correspondiente en el módulo de la derecha.', 'warning');
+                        return;
+                    }
+
+                    let nuevoAvance = nuevoEstado === 'APROBADO' ? 100 : (nuevoEstado === 'CON ALERTA' ? 20 : 50);
+                    sendUpdateEtapa(codigo, etapaNombre, nuevoEstado, nuevoAvance);
                 }
             });
         }
 
         async function sendUpdateEtapa(codigo, etapa, estado, avance) {
-            Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+            Swal.fire({ title: 'Actualizando registros...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
             try {
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
@@ -360,8 +486,8 @@
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    Swal.fire('¡Listo!', 'Etapa actualizada en Sheets.', 'success');
-                    loadData();
+                    Swal.fire('¡Validación Exitosa!', 'El estado de la etapa ha sido guardado.', 'success');
+                    openDetail(codigo);
                 } else throw new Error();
             } catch (error) {
                 Swal.fire('Error', 'Fallo al sincronizar con Google Sheets.', 'error');
@@ -405,12 +531,12 @@
                     });
                     const result = await res.json();
                     if (result.status === 'success') {
-                        Swal.fire('¡Guardado!', 'Evidencia almacenada en Drive.', 'success');
+                        Swal.fire('¡Evidencia Almacenada!', 'El archivo se encuentra resguardado en Google Drive.', 'success');
                     } else throw new Error();
                 } catch (error) {
-                    Swal.fire('Error', 'No se pudo subir a Drive.', 'error');
+                    Swal.fire('Error', 'No se pudo subir el archivo a Google Drive.', 'error');
                 } finally {
-                    btn.innerHTML = '<i class="fa-brands fa-google-drive"></i> Guardar en Google Drive';
+                    btn.innerHTML = '<i class="fa-brands fa-google-drive"></i> Subir a Drive';
                     btn.disabled = false;
                 }
             }
@@ -420,7 +546,7 @@
         async function triggerGeminiVision() {
             if (!selectedFile) return;
             const btn = document.getElementById('btn-ai');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analizando con IA...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Leyendo con Gemini...';
             btn.disabled = true;
 
             const reader = new FileReader();
@@ -440,7 +566,7 @@
                         const ingredientes = result.data.ingredientes || 'No especificado';
                         const alergenos = result.data.alergenos || 'Ninguno';
 
-                        // Guardar automáticamente en Google Sheets para persistencia
+                        // Guardar en Google Sheets de forma permanente
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
                             body: JSON.stringify({
@@ -451,15 +577,15 @@
                             })
                         });
 
-                        Swal.fire({icon: 'success', title: '¡Análisis guardado!', text: 'Los datos ya están vinculados permanentemente a este material.', timer: 2000, showConfirmButton: false});
-                        loadData(); // Recargar para refrescar la matriz
+                        Swal.fire({icon: 'success', title: '¡Análisis IA Completado!', text: 'Ingredientes y alérgenos detectados y guardados en la nube.', timer: 2500, showConfirmButton: false});
+                        openDetail(currentItemCode); 
                     } else {
                         throw new Error(result.message);
                     }
                 } catch (error) {
-                    Swal.fire('Error de Análisis', error.message || 'No se pudo procesar la etiqueta.', 'error');
+                    Swal.fire('Error de Visión IA', error.message || 'No se pudo procesar la etiqueta.', 'error');
                 } finally {
-                    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Analizar con Gemini AI';
+                    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Analizar con IA';
                     btn.disabled = false;
                 }
             }
