@@ -4,27 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QA Inspection Dashboard Pro</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <script>
-        tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }
-    </script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }</script>
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        #zoom-container { cursor: grab; }
-        #zoom-container:active { cursor: grabbing; }
+        #zoom-container { cursor: grab; } #zoom-container:active { cursor: grabbing; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Navbar -->
     <nav class="bg-primary text-white shadow-md h-14 flex-shrink-0 z-50 sticky top-0">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
@@ -32,43 +24,39 @@
                 <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2 transition-colors shadow-sm">
+                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2 transition-colors">
                     <i class="fa-solid fa-plus"></i> Nuevo Material
                 </button>
-                <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors shadow-sm" title="Sincronizar Datos">
+                <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors">
                     <i class="fa-solid fa-rotate-right" id="sync-icon"></i>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Container -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
         
-        <!-- Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
             <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
         </div>
 
-        <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avance Global</p><h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3></div>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase">Avance Global</p><h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3></div>
                     <i class="fa-solid fa-chart-line text-3xl text-secondary opacity-50"></i>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lotes Liberados</p><h3 class="text-3xl font-black text-accent" id="kpi-approved-count">0</h3></div>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase">Lotes Liberados</p><h3 class="text-3xl font-black text-accent" id="kpi-approved-count">0</h3></div>
                     <i class="fa-solid fa-check-double text-3xl text-accent opacity-50"></i>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">En Revisión / Alertas</p><h3 class="text-3xl font-black text-warning" id="kpi-pending-count">0</h3></div>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase">En Revisión / Alertas</p><h3 class="text-3xl font-black text-warning" id="kpi-pending-count">0</h3></div>
                     <i class="fa-solid fa-clock-rotate-left text-3xl text-warning opacity-50"></i>
                 </div>
             </div>
 
-            <!-- Tabla Principal -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                     <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
@@ -90,7 +78,6 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle -->
         <div id="detail-view" class="hidden flex-col gap-4">
             <div class="flex items-center justify-between">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm font-semibold flex items-center gap-2">
@@ -119,7 +106,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
-                <!-- VISOR -->
+                <!-- VISOR DE EVIDENCIA ACTUALIZADO (Thumbnail API) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col h-[350px] shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -129,8 +116,7 @@
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                         </div>
-                        <img id="scanned-image-view" src="" onerror="this.onerror=null; document.getElementById('image-error-link').classList.remove('hidden');" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
-                        <a id="image-error-link" href="#" target="_blank" class="hidden absolute bottom-4 text-xs bg-blue-600 text-white px-3 py-1 rounded shadow-lg z-10 hover:bg-blue-700">Ver imagen en Drive</a>
+                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
                         <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm">
                                 <i class="fa-solid fa-magnifying-glass-plus"></i> Abrir Visor
@@ -139,7 +125,6 @@
                     </div>
                 </div>
 
-                <!-- ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -164,7 +149,7 @@
     </main>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
+        const SCRIPT_URL = 'PON_AQUI_TU_NUEVA_URL_DE_APPS_SCRIPT';
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
@@ -206,23 +191,37 @@
                 }
             } catch (error) {
                 document.getElementById('loading-spinner').classList.add('hidden');
-                Swal.fire('Error de Conexión', 'No se pudo leer la base de datos.<br><br>Intente recargar la página.', 'error');
+                Swal.fire('Error de Conexión', 'No se pudo conectar a la base de datos.', 'error');
             } finally {
                 document.getElementById('sync-icon').classList.remove('fa-spin');
             }
+        }
+
+        // --- CÁLCULO DINÁMICO DE PORCENTAJES ---
+        function calculateDynamicProgress(codigo) {
+            const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
+            const etapasItem = appData.etapas.filter(e => e['Código'] == codigo);
+            let aprobados = 0;
+            
+            etapasFijas.forEach(nombreEtapa => {
+                let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase());
+                if (etapaObj && etapaObj.Estado === 'APROBADO') aprobados++;
+            });
+            return Math.round((aprobados / etapasFijas.length) * 100);
         }
 
         function renderKPIs() {
             const total = appData.registros.length;
             if (total === 0) return;
             let sumaAvance = 0, aprobados = 0, pendientes = 0;
+            
             appData.registros.forEach(reg => {
-                let av = parseInt(reg['Avance general (%)'] || reg['Avance general'] || reg['Avance (%)'] || reg['Avance']) || 0;
+                let av = calculateDynamicProgress(reg['Código']); // Forzamos cálculo preciso
                 sumaAvance += av;
                 if (av === 100) aprobados++; else pendientes++;
             });
-            let promedio = Math.round(sumaAvance / total);
-            document.getElementById('kpi-avg-progress').innerText = `${promedio}%`;
+            
+            document.getElementById('kpi-avg-progress').innerText = `${Math.round(sumaAvance / total)}%`;
             document.getElementById('kpi-approved-count').innerText = aprobados;
             document.getElementById('kpi-pending-count').innerText = pendientes;
         }
@@ -232,7 +231,7 @@
             tbody.innerHTML = '';
 
             appData.registros.forEach(reg => {
-                let av = parseInt(reg['Avance general (%)'] || reg['Avance general'] || reg['Avance (%)'] || reg['Avance']) || 0;
+                let av = calculateDynamicProgress(reg['Código']); // Forzamos cálculo preciso
                 let bgAvance = av === 100 ? 'bg-accent' : (av > 40 ? 'bg-secondary' : 'bg-warning');
 
                 const tr = document.createElement('tr');
@@ -259,11 +258,15 @@
             });
         }
 
+        // --- SISTEMA DE IMAGEN ROBUSTO (Usa Thumbnail API de Google Drive) ---
         function extractDirectImageUrl(url) {
             if (!url) return '';
-            if (url.includes('data:image') || url.includes('uc?export=view')) return url;
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            if (url.includes('data:image')) return url;
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                // Esta URL jamás será bloqueada por Chrome
+                return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+            }
             return url;
         }
 
@@ -276,32 +279,31 @@
             document.getElementById('detail-code').innerText = registro['Código'];
             document.getElementById('detail-material').innerText = registro['Material'];
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
-            document.getElementById('detail-progress').innerText = `${parseInt(registro['Avance general (%)'] || registro['Avance general'] || registro['Avance (%)'] || registro['Avance'] || 0)}%`;
+            document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
-            let ingText = registro['Ingredientes_IA'] || '';
-            let aleText = registro['Alergenos_IA'] || '';
+            let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
+            let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             let fullText = (ingText + " " + aleText).toUpperCase();
 
-            ['leche', 'soya', 'gluten', 'lactosa'].forEach(alg => {
-                document.getElementById(`chk-${alg}`).checked = fullText.includes(alg.toUpperCase());
-            });
+            // Marcado inteligente de alérgenos
+            document.getElementById('chk-leche').checked = fullText.includes('LECHE') || fullText.includes('LÁCTEO') || fullText.includes('LACTEO');
+            document.getElementById('chk-soya').checked = fullText.includes('SOYA') || fullText.includes('SOJA');
+            document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN') || fullText.includes('TRIGO');
+            document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const zoomOverlay = document.getElementById('zoom-overlay');
-            const errorLink = document.getElementById('image-error-link');
             
-            let urlOrigen = window.localImageCache[codigo] || registro['Evidencia_URL'] || registro['URL Evidencia'] || registro['Imagen'] || registro['Evidencia'] || '';
+            // Busca la URL en las diferentes columnas posibles de tu Excel
+            let urlOrigen = window.localImageCache[codigo] || registro['Evidencia'] || registro['Evidencia_URL'] || registro['Imagen'] || registro['URL Evidencia'] || '';
             let urlDirecta = extractDirectImageUrl(urlOrigen);
-
-            errorLink.classList.add('hidden'); // Reinicia el botón de error de imagen
 
             if (urlDirecta) {
                 imgView.src = urlDirecta; 
                 imgView.classList.remove('hidden');
                 zoomOverlay.classList.remove('hidden'); 
                 noImgMsg.classList.add('hidden');
-                errorLink.href = urlOrigen; // Enlace directo a Drive por si falla
             } else {
                 imgView.src = ''; 
                 imgView.classList.add('hidden');
@@ -314,7 +316,7 @@
             etapasContainer.innerHTML = '';
 
             etapasFijas.forEach(nombreEtapa => {
-                let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE', Responsable: 'Planta' };
+                let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE' };
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && ingText !== 'No analizado') etapaObj.Estado = 'APROBADO';
 
                 let isApproved = etapaObj.Estado === 'APROBADO';
@@ -345,13 +347,12 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- MANEJO DE IMAGEN CON SCROLL ZOOM ---
         function openImageZoom() {
             const imgView = document.getElementById('scanned-image-view');
             if (!imgView.src || imgView.classList.contains('hidden')) return;
 
             Swal.fire({
-                title: '<span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mouse"></i> Scroll para hacer zoom, Click para arrastrar</span>',
+                title: '<span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mouse"></i> Scroll para zoom, Click para arrastrar</span>',
                 html: `<div id="zoom-container" class="flex justify-center items-center bg-slate-900 rounded-lg h-[70vh] relative overflow-hidden shadow-inner"><img id="zoom-img" src="${imgView.src}" class="max-w-full max-h-full object-contain pointer-events-none" style="transform-origin: center; transform: scale(1) translate(0, 0);"></div>`,
                 width: '85%', showConfirmButton: false, showCloseButton: true, padding: '1em', background: '#f8fafc',
                 didOpen: () => {
@@ -372,11 +373,9 @@
             });
         }
 
-        // --- MANEJO Y SUBIDA DE IMÁGENES A LA IA ---
         function triggerFileMod() {
             Swal.close();
-            // Esto arregla el bug de que no dejaba probar una segunda vez
-            document.getElementById('fileInput').value = ""; 
+            document.getElementById('fileInput').value = ""; // Limpia la memoria del input para permitir resubidas
             document.getElementById('fileInput').click();
         }
 
@@ -392,12 +391,12 @@
                 }
                 reader.readAsDataURL(file);
             }
-            event.target.value = ""; // Limpia la caché del botón para futuros usos
+            event.target.value = "";
         }
 
         async function uploadImageAndAnalyze(base64Data) {
             const materialName = document.getElementById('detail-material').innerText;
-            Swal.fire({ title: 'IA Validando Etiqueta...', html: `Comprobando coincidencia con:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Analizando Etiqueta...', html: `Comprobando coincidencia con:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
                 const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: selectedFile.type, base64: base64Data, materialName: materialName });
@@ -407,7 +406,7 @@
                     let proceed = true;
 
                     if (data.coincide === false || data.coincide === "false") {
-                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta escaneada es de <b>${data.productoDetectado||"Otro producto"}</b>.<br>Este lote corresponde a <b>${materialName}</b>.<br><br>¿Seguro que deseas forzar la carga bajo tu responsabilidad?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
+                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta escaneada es de <b>${data.productoDetectado||"Otro producto"}</b>.<br>Este lote corresponde a <b>${materialName}</b>.<br><br>¿Seguro que deseas forzar la aprobación?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
                         proceed = confirm.isConfirmed;
                     }
 
@@ -417,15 +416,15 @@
                         await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
                         await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                         
-                        Swal.fire('¡Éxito!', 'Etiqueta validada y datos guardados.', 'success');
-                        loadData(); // Refresca automáticamente para recalcular el Avance Lote (%)
+                        Swal.fire('¡Éxito!', 'Etiqueta validada y guardada.', 'success');
+                        loadData(); // Refresca automáticamente para recalcular %
                     } else {
                         delete window.localImageCache[currentItemCode];
                         openDetail(currentItemCode);
                     }
                 } else throw new Error(resultAI.message || "Error en el análisis de IA.");
             } catch (error) {
-                Swal.fire('Atención', error.message, 'error');
+                Swal.fire('Atención', error.message, 'warning');
                 delete window.localImageCache[currentItemCode];
                 openDetail(currentItemCode);
             }
@@ -455,13 +454,9 @@
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({ title: 'Actualizando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    try {
-                        await fetchGAS({ action: 'editMaterial', codigo: codigo, material: result.value.material, proveedor: result.value.proveedor });
-                        Swal.fire('Actualizado', 'Los datos del material han sido modificados.', 'success');
-                        loadData();
-                    } catch (e) {
-                        Swal.fire('Error', 'No se pudo actualizar el registro en la nube.', 'error');
-                    }
+                    await fetchGAS({ action: 'editMaterial', codigo: codigo, material: result.value.material, proveedor: result.value.proveedor });
+                    Swal.fire('Actualizado', 'Los datos del material han sido modificados.', 'success');
+                    loadData();
                 }
             });
         }
@@ -469,7 +464,7 @@
         function deleteMaterial(codigo) {
             Swal.fire({
                 title: '¿Eliminar Material?',
-                text: `Se eliminará el código ${codigo} y todo su historial de auditoría permanentemente.`,
+                text: `Se eliminará el código ${codigo} permanentemente.`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
@@ -479,13 +474,9 @@
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({ title: 'Eliminando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    try {
-                        await fetchGAS({ action: 'deleteMaterial', codigo: codigo });
-                        Swal.fire('Eliminado', 'El material ha sido retirado de la base de datos.', 'success');
-                        loadData();
-                    } catch (e) {
-                        Swal.fire('Error', 'Ocurrió un problema al intentar eliminar.', 'error');
-                    }
+                    await fetchGAS({ action: 'deleteMaterial', codigo: codigo });
+                    Swal.fire('Eliminado', 'El material ha sido retirado.', 'success');
+                    loadData();
                 }
             });
         }
@@ -509,47 +500,28 @@
                 preConfirm: () => document.getElementById('swal-eval').value
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    let nuevoEstado = result.value;
                     Swal.fire({ title: 'Guardando etapa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    try {
-                        await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: nuevoEstado });
-                        Swal.close();
-                        loadData(); // Refresca automáticamente para recalcular %
-                    } catch (e) {
-                        Swal.fire('Error', 'No se pudo guardar la evaluación.', 'error');
-                    }
+                    await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: result.value });
+                    loadData(); // Refresca automáticamente para recalcular %
                 }
             });
         }
 
         function openNewMaterialModal() {
-            Swal.fire({ title: 'Información', text: 'Módulo de creación en construcción. Añada registros en Google Sheets por ahora.', icon: 'info' });
+            Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets por ahora.', icon: 'info' });
         }
 
-        // --- UTILIDADES DE INTERFAZ ---
-        function showDashboard() { 
-            currentItemCode = null; 
-            document.getElementById('detail-view').classList.add('hidden'); 
-            document.getElementById('dashboard-view').classList.remove('hidden'); 
-            loadData(); 
-        }
-
-        function handleSmartSearch(e) { 
-            const q = e.target.value.toUpperCase();
-            const tr = document.getElementById('registrosTable').getElementsByTagName('tr'); 
-            for(let i=1; i<tr.length; i++) {
-                tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; 
-            }
-        }
+        function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
+        function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
         function openIngredientsModal() { 
             const reg = appData.registros.find(r => r['Código'] == currentItemCode); 
+            let ingText = reg['Ingredientes_IA'] || reg['Ingredientes IA'] || reg['Ingredientes'] || 'N/A';
+            let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes:</strong><p class="text-slate-700 text-sm italic">${reg['Ingredientes_IA']||'N/A'}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos:</strong><p class="text-red-800 text-sm font-bold">${reg['Alergenos_IA']||'N/A'}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
-                showConfirmButton: false, 
-                showCloseButton: true,
-                width: '500px'
+                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes:</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
+                showConfirmButton: false, showCloseButton: true, width: '500px'
             }); 
         }
     </script>
