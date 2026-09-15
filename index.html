@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QA Inspection Industrial Pro</title>
-    <!-- Tailwind CSS y FontAwesome con HTTPS seguro -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -12,7 +11,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Navbar -->
     <nav class="bg-primary text-white shadow-md h-14 flex-shrink-0 z-50 sticky top-0">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
@@ -30,16 +28,13 @@
         </div>
     </nav>
 
-    <!-- Contenedor Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
         
-        <!-- Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
             <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
         </div>
 
-        <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
@@ -81,7 +76,6 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle y Auditoría -->
         <div id="detail-view" class="hidden flex-col gap-4">
             <div class="flex items-center justify-between">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm font-semibold flex items-center gap-2">
@@ -112,12 +106,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
                 <!-- VISOR DE EVIDENCIA + BOTÓN GOOGLE DRIVE PERMANENTE -->
-                <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col h-[400px] shadow-sm">
+                <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
-                    <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer" onclick="openImageZoom()">
+                    <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[260px] flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer mb-3" onclick="openImageZoom()">
                         <div id="no-evidence-msg" class="text-center p-4">
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
@@ -131,9 +125,9 @@
                         </div>
                     </div>
                     
-                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO -->
-                    <a id="drive-fallback-link" href="#" target="_blank" class="hidden mt-3 w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
-                        <i class="fa-brands fa-google-drive text-lg"></i> Ver Etiqueta Original en Drive
+                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO PARA AUDITORÍA -->
+                    <a id="drive-fallback-link" href="#" target="_blank" class="hidden w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
+                        <i class="fa-brands fa-google-drive text-lg"></i> Abrir Etiqueta Original en Google Drive
                     </a>
                 </div>
 
@@ -294,6 +288,8 @@
                 if (urlOrigen.includes('http')) {
                     driveLink.href = urlOrigen;
                     driveLink.classList.remove('hidden');
+                } else {
+                    driveLink.classList.add('hidden');
                 }
             } else {
                 imgView.src = ''; 
@@ -342,7 +338,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA ---
+        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA CON IA ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
@@ -391,13 +387,18 @@
                     const data = resultAI.data || {};
                     let proceed = true;
 
+                    // Validación estricta de coincidencia con SAP
                     if (data.coincide === false || data.coincide === "false") {
-                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta dice ser: <b>${data.productoDetectado||"Desconocido"}</b>.<br>Pero SAP espera: <b>${materialName}</b>.<br><br>¿Forzar la aprobación?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
+                        const confirm = await Swal.fire({ 
+                            title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', 
+                            html: `La etiqueta escaneada no corresponde al producto.<br>Detectado en imagen: <b>${data.productoDetectado || "Desconocido"}</b>.<br>Esperado en SAP: <b>${materialName}</b>.<br><br>¿Deseas forzar la aprobación bajo tu responsabilidad?`, 
+                            icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true 
+                        });
                         proceed = confirm.isConfirmed;
                     }
 
                     if (proceed) {
-                        Swal.fire({ title: 'Guardando auditoría...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                        Swal.fire({ title: 'Guardando auditoría en la nube...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                         
                         let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
                         await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
@@ -419,7 +420,6 @@
             }
         }
 
-        // --- BOTONES DE MODIFICAR Y ELIMINAR EN TABLA ---
         function editMaterialInfo(codigo) {
             const registro = appData.registros.find(r => r['Código'] == codigo);
             if(!registro) return;
@@ -479,7 +479,7 @@
             let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados:</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Reemplazar etiqueta (Modificar)</button></div></div>`, 
+                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados (Literal completo):</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Reemplazar etiqueta (Modificar)</button></div></div>`, 
                 showConfirmButton: false, showCloseButton: true, width: '500px'
             }); 
         }
