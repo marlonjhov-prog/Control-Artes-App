@@ -18,7 +18,7 @@
                 <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-2 transition-colors shadow-sm">
                     <i class="fa-solid fa-plus"></i> Nuevo Material
                 </button>
                 <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors text-xs font-bold" title="Sincronizar Datos">
@@ -32,7 +32,7 @@
         
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
-            <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
+            <p class="text-slate-500 text-sm font-medium">Sincronizando base de datos...</p>
         </div>
 
         <div id="dashboard-view" class="hidden flex-col gap-5">
@@ -105,7 +105,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA REDISEÑADO ELEGANTE -->
+                <!-- VISOR DE EVIDENCIA BLINDADO (SIN OPCIÓN DE SOBREESCRIBIR) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -113,8 +113,8 @@
                     
                     <div id="image-container-ui" class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[240px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300">
                         
-                        <!-- ESTADO 1: SIN IMAGEN (Dropzone invitadora) -->
-                        <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors" onclick="triggerFileMod()">
+                        <!-- ESTADO 1: SIN IMAGEN (Dropzone invitadora activa) -->
+                        <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
                             <div class="w-16 h-16 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-3 shadow-sm border border-blue-100">
                                 <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
                             </div>
@@ -122,12 +122,11 @@
                             <p class="text-xs text-slate-400 mt-1">Haz clic para analizar con IA</p>
                         </div>
 
-                        <!-- ESTADO 2: CON IMAGEN CARGADA -->
+                        <!-- ESTADO 2: CON IMAGEN CARGADA (Botón bloqueado) -->
                         <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-emerald-50 border-2 border-emerald-100">
                             <i class="fa-solid fa-circle-check text-4xl text-accent mb-3 shadow-sm rounded-full bg-white"></i>
-                            <p class="text-sm font-bold text-emerald-800">Evidencia Cargada y Validada</p>
+                            <p class="text-sm font-bold text-emerald-800">Evidencia Cargada Permanentemente</p>
                             
-                            <!-- ENLACE DIRECTO DE VISUALIZACIÓN A DRIVE -->
                             <a id="drive-file-link" href="#" target="_blank" class="mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-5 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-md">
                                 <i class="fa-solid fa-up-right-from-square text-secondary"></i> Ver Imagen Original
                             </a>
@@ -150,7 +149,7 @@
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
                         <i class="fa-solid fa-shield-halved mt-0.5"></i>
-                        <p><strong>Inspección Automática IA:</strong> Validación inteligente estricta (Verifica variantes como Descremada vs Deslactosada).</p>
+                        <p><strong>Inspección Automática IA:</strong> Validación inteligente estricta en SAP.</p>
                     </div>
                 </div>
             </div>
@@ -187,9 +186,13 @@
                     appData.etapas = result.etapas;
                     renderKPIs();
                     renderTable();
-                    document.getElementById('loading-spinner').classList.add('hidden');
-                    if(currentItemCode) openDetail(currentItemCode);
-                    else document.getElementById('dashboard-view').classList.remove('hidden');
+                    
+                    if(currentItemCode) {
+                        openDetail(currentItemCode); // Refresca la vista si el usuario está dentro
+                    } else {
+                        document.getElementById('loading-spinner').classList.add('hidden');
+                        document.getElementById('dashboard-view').classList.remove('hidden');
+                    }
                 } else { throw new Error(result.message); }
             } catch (error) {
                 document.getElementById('loading-spinner').classList.add('hidden');
@@ -206,16 +209,6 @@
                 if (etapaObj && etapaObj.Estado === 'APROBADO') aprobados++;
             });
             return Math.round((aprobados / etapasFijas.length) * 100);
-        }
-
-        // FUNCIÓN CLAVE PARA ACTUALIZAR VISTA EN VIVO SIN RECARGAR
-        function refreshUIAfterSave(codigo) {
-            let porcentajeNuevo = calculateDynamicProgress(codigo);
-            document.getElementById('detail-progress').innerText = `${porcentajeNuevo}%`;
-            
-            // Refresca la tabla en segundo plano
-            renderKPIs();
-            renderTable();
         }
 
         function renderKPIs() {
@@ -257,14 +250,10 @@
             });
         }
 
-        // Obtener el enlace CORRECTO para abrir el visor de imagen en Drive (NO la carpeta)
         function getDriveFileViewUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-                // Formato oficial de visualización directa del archivo en Google Drive
-                return `https://drive.google.com/file/d/${match[1]}/view`;
-            }
+            if (match && match[1]) { return `https://drive.google.com/file/d/${match[1]}/view`; }
             return url;
         }
 
@@ -282,7 +271,6 @@
             let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             
-            // Checkboxes de Alérgenos
             document.getElementById('chk-leche').checked = false;
             document.getElementById('chk-soya').checked = false;
             document.getElementById('chk-gluten').checked = false;
@@ -296,7 +284,6 @@
                 document.getElementById('chk-lactosa').checked = fullAleText.includes('LACTOSA') || fullAleText.includes('DESLACTOSADA');
             }
 
-            // Diseño UI de la imagen
             const stateNoImage = document.getElementById('state-no-image');
             const stateHasImage = document.getElementById('state-has-image');
             const driveFileLink = document.getElementById('drive-file-link');
@@ -305,19 +292,19 @@
             for (let key in registro) {
                 let k = key.toLowerCase();
                 let val = registro[key];
-                if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) {
-                    urlOrigen = val;
-                    break;
-                }
+                if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; break; }
             }
 
+            // BLINDAJE DE EVIDENCIA: Si existe URL, se bloquea la subida.
             if (urlOrigen) {
                 stateNoImage.classList.add('hidden');
                 stateHasImage.classList.remove('hidden');
                 driveFileLink.href = getDriveFileViewUrl(urlOrigen);
+                stateNoImage.onclick = null; // Desactiva clic
             } else {
                 stateNoImage.classList.remove('hidden');
                 stateHasImage.classList.add('hidden');
+                stateNoImage.onclick = () => document.getElementById('fileInput').click(); // Habilita clic solo si está vacío
             }
 
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
@@ -338,9 +325,12 @@
 
                 let botonHTML = '';
                 if (nombreEtapa.toLowerCase() === 'ingredientes') {
-                    botonHTML = isApproved ? 
-                        `<button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-eye"></i> Visualizar IA</button>` : 
-                        `<button onclick="triggerFileMod()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-upload"></i> Subir para IA</button>`;
+                    // Si ya hay evidencia o está aprobado, solo deja visualizar.
+                    if (urlOrigen || isApproved) {
+                        botonHTML = `<button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-eye"></i> Visualizar IA</button>`;
+                    } else {
+                        botonHTML = `<button onclick="document.getElementById('fileInput').click()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-upload"></i> Subir para IA</button>`;
+                    }
                 } else {
                     botonHTML = `<button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${etapaObj.Estado}')" class="mt-3 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-bold py-1.5 rounded transition-colors"><i class="fa-solid fa-pen-to-square"></i> Gestionar</button>`;
                 }
@@ -357,41 +347,6 @@
 
             document.getElementById('dashboard-view').classList.add('hidden');
             document.getElementById('detail-view').classList.remove('hidden');
-        }
-
-        function triggerFileMod() {
-            Swal.close();
-            const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-            let urlDB = '';
-            for (let key in reg) {
-                let k = key.toLowerCase();
-                let val = reg[key];
-                if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) {
-                    urlDB = val;
-                    break;
-                }
-            }
-            
-            if (urlDB) {
-                Swal.fire({
-                    title: '⚠️ Etiqueta ya registrada',
-                    text: '¿Deseas reemplazar la imagen y volver a ejecutar el análisis IA?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, reemplazar',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#94a3b8'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('fileInput').value = ""; 
-                        document.getElementById('fileInput').click();
-                    }
-                });
-            } else {
-                document.getElementById('fileInput').value = ""; 
-                document.getElementById('fileInput').click();
-            }
         }
 
         function handleFileSelect(event) {
@@ -422,27 +377,13 @@
                     if (!confirm.isConfirmed) { Swal.close(); return; }
                 }
 
-                Swal.fire({ title: 'Guardando en la nube...', text: 'Generando enlace oficial de Drive', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
-                
+                Swal.fire({ title: 'Guardando evidencia...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
                 await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
                 await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                 
-                // Actualización Inmediata Local para evitar recargas
-                const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-                if(reg) {
-                    reg['Ingredientes_IA'] = data.ingredientes;
-                    reg['Alergenos_IA'] = data.alergenos;
-                    if(uploadRes.url) reg['Evidencia'] = uploadRes.url;
-                }
-                const etapaReg = appData.etapas.find(e => e['Código'] == currentItemCode && e['Etapa'].toUpperCase() === 'INGREDIENTES');
-                if(etapaReg) etapaReg.Estado = 'APROBADO';
-                
-                Swal.fire('¡Éxito!', 'Etiqueta validada y guardada.', 'success');
-                
-                // Refresco visual automático en vivo
-                openDetail(currentItemCode); 
-                refreshUIAfterSave(currentItemCode);
+                Swal.fire('¡Éxito!', 'Evidencia validada y guardada permanentemente.', 'success');
+                loadData(); // Resincroniza para actualizar UI (KPIs e interfaz de bloqueo)
 
             } catch (error) {
                 Swal.fire('Error Técnico', error.message, 'error');
@@ -455,21 +396,69 @@
                 if (result.isConfirmed) {
                     Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: result.value });
-                    
-                    // Actualización Inmediata Local
-                    const etapaReg = appData.etapas.find(e => e['Código'] == codigo && e['Etapa'].toUpperCase() === etapaNombre.toUpperCase());
-                    if(etapaReg) etapaReg.Estado = result.value;
-                    
+                    loadData(); // Resincroniza UI y KPIs automáticamente
                     Swal.close();
-                    openDetail(codigo);
-                    refreshUIAfterSave(codigo);
                 }
             });
         }
 
-        function editMaterialInfo(codigo) { /* Lógica intacta */ }
-        function deleteMaterial(codigo) { /* Lógica intacta */ }
-        function openNewMaterialModal() { Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets.', icon: 'info' }); }
+        // --- FUNCIÓN DE NUEVO MATERIAL CON FORMULARIO REAL ---
+        function openNewMaterialModal() {
+            Swal.fire({
+                title: '<span class="text-lg font-black text-slate-800"><i class="fa-solid fa-plus-circle text-accent"></i> Nuevo Material</span>',
+                html: `<div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700">
+                    <div><label>Código SAP:</label><input id="swal-new-codigo" type="number" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div>
+                    <div><label>Material / Producto:</label><input id="swal-new-material" type="text" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary uppercase"></div>
+                    <div><label>Proveedor:</label><input id="swal-new-proveedor" type="text" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary uppercase"></div>
+                </div>`,
+                showCancelButton: true, confirmButtonText: 'Crear Material', cancelButtonText: 'Cancelar', confirmButtonColor: '#10b981',
+                preConfirm: () => {
+                    const c = document.getElementById('swal-new-codigo').value.trim();
+                    const m = document.getElementById('swal-new-material').value.trim().toUpperCase();
+                    const p = document.getElementById('swal-new-proveedor').value.trim().toUpperCase();
+                    if(!c || !m) { Swal.showValidationMessage('El Código y Material son obligatorios'); return false; }
+                    return { codigo: c, material: m, proveedor: p };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Creando registro...', text: 'Configurando etapas de auditoría', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    await fetchGAS({ action: 'addMaterial', codigo: result.value.codigo, material: result.value.material, proveedor: result.value.proveedor });
+                    Swal.fire('Creado', 'El nuevo material está listo para auditarse.', 'success');
+                    loadData(); // Refresca la tabla y los KPIs
+                }
+            });
+        }
+
+        function editMaterialInfo(codigo) {
+            const registro = appData.registros.find(r => r['Código'] == codigo);
+            if(!registro) return;
+            Swal.fire({
+                title: '<span class="text-lg font-black text-slate-800">Modificar Datos</span>',
+                html: `<div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700"><div><label>Código SAP (Fijo):</label><input value="${registro['Código']}" disabled class="w-full p-2 border border-slate-200 rounded mt-1 bg-slate-100 text-slate-500 font-mono"></div><div><label>Material / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div><div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div></div>`,
+                showCancelButton: true, confirmButtonText: 'Guardar Cambios', cancelButtonText: 'Cancelar', confirmButtonColor: '#3b82f6',
+                preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor').value } }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Actualizando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    await fetchGAS({ action: 'editMaterial', codigo: codigo, material: result.value.material, proveedor: result.value.proveedor });
+                    Swal.fire('Actualizado', 'Los datos del material han sido modificados.', 'success'); 
+                    loadData();
+                }
+            });
+        }
+
+        function deleteMaterial(codigo) {
+            Swal.fire({ title: '¿Eliminar Material?', text: `Se eliminará el código ${codigo} permanentemente de la base.`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Eliminando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    await fetchGAS({ action: 'deleteMaterial', codigo: codigo });
+                    Swal.fire('Eliminado', 'El material ha sido retirado.', 'success'); 
+                    loadData();
+                }
+            });
+        }
+
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
@@ -477,10 +466,12 @@
             const reg = appData.registros.find(r => r['Código'] == currentItemCode); 
             let ingText = reg['Ingredientes_IA'] || reg['Ingredientes IA'] || reg['Ingredientes'] || 'N/A';
             let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
+            
+            // Modal de solo lectura (Se removió el botón de reemplazar evidencia)
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados (Literal completo):</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Reemplazar etiqueta (Modificar)</button></div></div>`, 
-                showConfirmButton: false, showCloseButton: true, width: '500px'
+                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados (Literal completo):</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div></div>`, 
+                showConfirmButton: true, confirmButtonText: 'Cerrar', confirmButtonColor: '#0f172a', showCloseButton: true, width: '500px'
             }); 
         }
     </script>
