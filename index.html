@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QA Inspection Industrial Pro</title>
+    <!-- Tailwind CSS y FontAwesome con HTTPS seguro -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -11,27 +12,34 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
+    <!-- Navbar -->
     <nav class="bg-primary text-white shadow-md h-14 flex-shrink-0 z-50 sticky top-0">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-industry text-xl text-secondary"></i>
                 <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
-            <div>
-                <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors text-xs font-bold">
+            <div class="flex items-center gap-3">
+                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                    <i class="fa-solid fa-plus"></i> Nuevo Material
+                </button>
+                <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors text-xs font-bold" title="Sincronizar Datos">
                     <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Sincronizar
                 </button>
             </div>
         </div>
     </nav>
 
+    <!-- Contenedor Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
         
+        <!-- Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
-            <p class="text-slate-500 text-sm font-medium">Cargando flujos de calidad...</p>
+            <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
         </div>
 
+        <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
@@ -60,7 +68,11 @@
                     <table class="w-full text-left border-collapse" id="registrosTable">
                         <thead class="bg-slate-100">
                             <tr class="text-slate-600 text-[11px] uppercase border-b border-slate-200">
-                                <th class="p-4 font-bold">Código</th><th class="p-4 font-bold">Material</th><th class="p-4 font-bold">Proveedor</th><th class="p-4 font-bold">Avance</th><th class="p-4 font-bold text-center">Acciones</th>
+                                <th class="p-4 font-bold">Código</th>
+                                <th class="p-4 font-bold">Material</th>
+                                <th class="p-4 font-bold">Proveedor</th>
+                                <th class="p-4 font-bold">Avance</th>
+                                <th class="p-4 font-bold text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
@@ -69,6 +81,7 @@
             </div>
         </div>
 
+        <!-- VISTA 2: Detalle y Auditoría -->
         <div id="detail-view" class="hidden flex-col gap-4">
             <div class="flex items-center justify-between">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm font-semibold flex items-center gap-2">
@@ -98,6 +111,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
+                <!-- VISOR DE EVIDENCIA + BOTÓN GOOGLE DRIVE PERMANENTE -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col h-[400px] shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -117,12 +131,13 @@
                         </div>
                     </div>
                     
-                    <!-- ENLACE DIRECTO DE GOOGLE DRIVE SEGURO -->
+                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO -->
                     <a id="drive-fallback-link" href="#" target="_blank" class="hidden mt-3 w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
                         <i class="fa-brands fa-google-drive text-lg"></i> Ver Etiqueta Original en Drive
                     </a>
                 </div>
 
+                <!-- ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -147,7 +162,6 @@
     </main>
 
     <script>
-        // URL INCORRUPTIBLE Y FIJA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
         
         let appData = { registros: [], etapas: [] };
@@ -224,7 +238,11 @@
                     <td class="p-4 text-slate-600 text-xs font-medium">${reg['Proveedor']}</td>
                     <td class="p-4"><div class="flex items-center gap-3"><div class="w-20 bg-slate-200 rounded-full h-2 shadow-inner overflow-hidden"><div class="${bgAvance} h-full rounded-full transition-all" style="width: ${av}%"></div></div><span class="text-xs font-black text-slate-700 w-8">${av}%</span></div></td>
                     <td class="p-4 text-center">
-                        <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded text-[11px] font-bold shadow-sm"><i class="fa-solid fa-microscope"></i> Auditar</button>
+                        <div class="flex gap-1.5 justify-center">
+                            <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded text-[11px] font-bold shadow-sm" title="Auditar"><i class="fa-solid fa-microscope"></i> Auditar</button>
+                            <button onclick="editMaterialInfo('${reg['Código']}')" class="bg-amber-500 text-white hover:bg-amber-600 px-3 py-1.5 rounded text-[11px] font-bold shadow-sm" title="Modificar"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteMaterial('${reg['Código']}')" class="bg-danger text-white hover:bg-red-700 px-3 py-1.5 rounded text-[11px] font-bold shadow-sm" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -253,7 +271,7 @@
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             let fullText = (ingText + " " + aleText + " " + registro['Material']).toUpperCase();
 
-            // Marcado inteligente y automático de alérgenos
+            // Marcado automático de alérgenos
             document.getElementById('chk-leche').checked = fullText.includes('LECHE') || fullText.includes('LÁCTEO') || fullText.includes('LACTEO') || fullText.includes('SUERO');
             document.getElementById('chk-soya').checked = fullText.includes('SOYA') || fullText.includes('SOJA');
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN') || fullText.includes('TRIGO');
@@ -324,7 +342,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- VALIDACIÓN DE DUPLICIDAD ---
+        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
@@ -401,6 +419,35 @@
             }
         }
 
+        // --- BOTONES DE MODIFICAR Y ELIMINAR EN TABLA ---
+        function editMaterialInfo(codigo) {
+            const registro = appData.registros.find(r => r['Código'] == codigo);
+            if(!registro) return;
+            Swal.fire({
+                title: '<span class="text-lg font-black text-slate-800">Modificar Datos</span>',
+                html: `<div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700"><div><label>Código SAP (Fijo):</label><input value="${registro['Código']}" disabled class="w-full p-2 border border-slate-200 rounded mt-1 bg-slate-100 text-slate-500 font-mono"></div><div><label>Material / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div><div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div></div>`,
+                showCancelButton: true, confirmButtonText: 'Guardar Cambios', cancelButtonText: 'Cancelar', confirmButtonColor: '#3b82f6',
+                preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor').value } }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Actualizando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    await fetchGAS({ action: 'editMaterial', codigo: codigo, material: result.value.material, proveedor: result.value.proveedor });
+                    Swal.fire('Actualizado', 'Los datos del material han sido modificados.', 'success'); loadData();
+                }
+            });
+        }
+
+        function deleteMaterial(codigo) {
+            Swal.fire({ title: '¿Eliminar Material?', text: `Se eliminará el código ${codigo} permanentemente.`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Eliminando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    await fetchGAS({ action: 'deleteMaterial', codigo: codigo });
+                    Swal.fire('Eliminado', 'El material ha sido retirado.', 'success'); loadData();
+                }
+            });
+        }
+
         function openImageZoom() {
             const imgView = document.getElementById('scanned-image-view');
             if (!imgView.src || imgView.classList.contains('hidden')) return;
@@ -422,6 +469,7 @@
             });
         }
 
+        function openNewMaterialModal() { Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets.', icon: 'info' }); }
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
