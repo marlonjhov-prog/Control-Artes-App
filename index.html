@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Inspection Dashboard Pro</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    <script src="[https://cdn.jsdelivr.net/npm/sweetalert2@11](https://cdn.jsdelivr.net/npm/sweetalert2@11)"></script>
+    <title>QA Inspection Industrial Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }</script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
@@ -17,9 +17,9 @@
                 <i class="fa-solid fa-industry text-xl text-secondary"></i>
                 <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors">
-                    <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Actualizar
+            <div>
+                <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors text-xs font-bold">
+                    <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Sincronizar
                 </button>
             </div>
         </div>
@@ -29,7 +29,7 @@
         
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
-            <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
+            <p class="text-slate-500 text-sm font-medium">Cargando flujos de calidad...</p>
         </div>
 
         <div id="dashboard-view" class="hidden flex-col gap-5">
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                     
-                    <!-- ENLACE DIRECTO DE GOOGLE DRIVE -->
+                    <!-- ENLACE DIRECTO DE GOOGLE DRIVE SEGURO -->
                     <a id="drive-fallback-link" href="#" target="_blank" class="hidden mt-3 w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
                         <i class="fa-brands fa-google-drive text-lg"></i> Ver Etiqueta Original en Drive
                     </a>
@@ -147,7 +147,8 @@
     </main>
 
     <script>
-        const SCRIPT_URL = '[https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec](https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec)';
+        // URL INCORRUPTIBLE Y FIJA
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
@@ -233,7 +234,7 @@
         function extractDirectImageUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) return `[https://drive.google.com/thumbnail?id=$](https://drive.google.com/thumbnail?id=$){match[1]}&sz=w1000`;
+            if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
             return url;
         }
 
@@ -248,18 +249,16 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
-            // Búsqueda inteligente de datos IA en los campos del registro
             let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             let fullText = (ingText + " " + aleText + " " + registro['Material']).toUpperCase();
 
-            // Marcado dinámico y seguro de alérgenos
+            // Marcado inteligente y automático de alérgenos
             document.getElementById('chk-leche').checked = fullText.includes('LECHE') || fullText.includes('LÁCTEO') || fullText.includes('LACTEO') || fullText.includes('SUERO');
             document.getElementById('chk-soya').checked = fullText.includes('SOYA') || fullText.includes('SOJA');
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN') || fullText.includes('TRIGO');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA') || fullText.includes('DESLACTOSADA');
 
-            // Renderizado de Imagen y Botón Drive
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const zoomOverlay = document.getElementById('zoom-overlay');
@@ -325,7 +324,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- VALIDACIÓN ESTRICTA DE DUPLICIDAD ---
+        // --- VALIDACIÓN DE DUPLICIDAD ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
@@ -386,7 +385,6 @@
                         await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
                         await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                         
-                        // Actualización instantánea en pantalla
                         const reg = appData.registros.find(r => r['Código'] == currentItemCode);
                         if(reg) {
                             reg['Ingredientes_IA'] = data.ingredientes;
@@ -424,7 +422,6 @@
             });
         }
 
-        function openNewMaterialModal() { Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets.', icon: 'info' }); }
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
