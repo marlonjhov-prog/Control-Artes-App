@@ -105,7 +105,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA Y ENLACE DE DRIVE PARA AUDITORÍA MULTIPLES MÁQUINAS -->
+                <!-- VISOR DE EVIDENCIA Y ENLACE DE DRIVE PERMANENTE -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -125,7 +125,7 @@
                         </div>
                     </div>
                     
-                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO Y PERMANENTE PARA AUDITORES -->
+                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO PARA AUDITORÍA -->
                     <a id="drive-fallback-link" href="#" target="_blank" class="hidden w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
                         <i class="fa-brands fa-google-drive text-lg"></i> Abrir Etiqueta Original en Google Drive
                     </a>
@@ -247,7 +247,7 @@
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
-                return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+                return `https://drive.google.com/uc?export=view&id=${match[1]}`;
             }
             return url;
         }
@@ -278,7 +278,7 @@
             const zoomOverlay = document.getElementById('zoom-overlay');
             const driveLink = document.getElementById('drive-fallback-link');
             
-            // BUSCADOR INTELIGENTE DE URL (Independiente del nombre de la columna en Google Sheets/Supabase)
+            // Buscador flexible de URL en los datos del registro
             let urlOrigen = '';
             for (let key in registro) {
                 let k = key.toLowerCase();
@@ -349,7 +349,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA ---
+        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA CON IA REAL ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
@@ -397,39 +397,55 @@
 
         async function uploadImageAndAnalyze(base64Data, mimeType) {
             const materialName = document.getElementById('detail-material').innerText;
-            Swal.fire({ title: 'Analizando con IA...', html: `Extrayendo datos de la etiqueta para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Analizando con IA...', html: `Verificando correspondencia de etiqueta para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
+                // 1. Análisis estricto con IA
                 const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: mimeType, base64: base64Data, materialName: materialName });
-                const data = resultAI.status === 'success' ? resultAI.data : {};
+                if (resultAI.status !== 'success') throw new Error(resultAI.message || "Error al analizar imagen.");
+                
+                const data = resultAI.data || {};
 
-                let proceed = true;
+                // 2. Validación de coincidencia obligatoria
                 if (data.coincide === false || data.coincide === "false") {
                     const confirm = await Swal.fire({ 
                         title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', 
-                        html: `La etiqueta escaneada no corresponde al producto.<br>Detectado: <b>${data.productoDetectado || "Desconocido"}</b>.<br>Esperado en SAP: <b>${materialName}</b>.<br><br>¿Deseas forzar la aprobación?`, 
-                        icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true 
+                        html: `La etiqueta escaneada <b>no corresponde</b> al material.<br><br>Detectado en imagen: <b class="text-danger">${data.productoDetectado || "Desconocido"}</b><br>Esperado en SAP: <b class="text-secondary">${materialName}</b><br><br>¿Deseas forzar la aprobación bajo tu responsabilidad?`, 
+                        icon: 'warning', 
+                        showCancelButton: true, 
+                        confirmButtonText: 'Sí, forzar carga', 
+                        cancelButtonText: 'Cancelar y corregir', 
+                        confirmButtonColor: '#ef4444', 
+                        cancelButtonColor: '#3b82f6', 
+                        reverseButtons: true 
                     });
-                    proceed = confirm.isConfirmed;
+
+                    if (!confirm.isConfirmed) {
+                        Swal.close();
+                        return; // Detiene el proceso si el usuario cancela
+                    }
                 }
 
-                if (proceed) {
-                    await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
-                    await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
-                    
-                    const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-                    if(reg) {
-                        reg['Ingredientes_IA'] = data.ingredientes;
-                        reg['Alergenos_IA'] = data.alergenos;
-                        if(uploadRes.url) reg['Evidencia'] = uploadRes.url;
-                    }
-                    
-                    Swal.fire('¡Éxito!', 'Etiqueta validada, guardada y link de Drive generado correctamente.', 'success');
-                    loadData(); 
+                // 3. Subir a Google Drive una vez validado
+                Swal.fire({ title: 'Subiendo evidencia a Google Drive...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
+                
+                // 4. Guardar resultados en la base de datos
+                await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
+                await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
+                
+                const reg = appData.registros.find(r => r['Código'] == currentItemCode);
+                if(reg) {
+                    reg['Ingredientes_IA'] = data.ingredientes;
+                    reg['Alergenos_IA'] = data.alergenos;
+                    if(uploadRes.url) reg['Evidencia'] = uploadRes.url;
                 }
+                
+                Swal.fire('¡Éxito!', 'Etiqueta validada, guardada y enlace de Drive generado correctamente.', 'success');
+                loadData(); 
+
             } catch (error) {
-                Swal.fire('Atención', 'Ocurrió un error al procesar la imagen: ' + error.message, 'warning');
+                Swal.fire('Atención', error.message, 'warning');
             }
         }
 
