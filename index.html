@@ -90,13 +90,13 @@
                 </div>
             </div>
             
-            <!-- CABECERA REDISEÑADA CON IMAGEN DEL PRODUCTO -->
+            <!-- CABECERA CON IMAGEN ESTÁTICA ROBUSTA (VECTORIAL INCORPORADA) -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-secondary shadow-sm gap-4">
                 <div class="flex items-center gap-5 w-full">
-                    <!-- CONTENEDOR DE LA IMAGEN ESTÁTICA -->
-                    <div class="w-20 h-28 bg-slate-50 rounded-lg border border-slate-200 shadow-sm flex items-center justify-center p-1 overflow-hidden">
-                        <!-- NOTA: Reemplaza esta URL de abajo con la URL directa de la foto de tu producto -->
-                        <img id="static-product-image" src="https://drive.google.com/file/d/1nr1QN_Mfvts2AMCzvTqm_qr-5M4hUVIA/view?usp=sharing" onerror="this.src='https://via.placeholder.com/150x200.png?text=NUTRI'" alt="Producto" class="max-h-full max-w-full object-contain">
+                    <div class="w-20 h-28 bg-gradient-to-b from-sky-400 to-blue-600 rounded-lg border border-slate-300 shadow-md flex flex-col items-center justify-center p-2 text-white flex-shrink-0">
+                        <i class="fa-solid fa-cube text-2xl mb-1"></i>
+                        <span class="text-[10px] font-black tracking-widest uppercase">NUTRI</span>
+                        <span class="text-[8px] bg-white/20 px-1.5 rounded mt-1">1L UHT</span>
                     </div>
                     <div>
                         <h2 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight" id="detail-material"></h2>
@@ -118,7 +118,7 @@
             <!-- DASHBOARD INFERIOR: EVIDENCIA | INGREDIENTES | ALÉRGENOS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                 
-                <!-- 1. VISOR DE EVIDENCIA BLINDADA (COMPACTO Y OSCURO) -->
+                <!-- 1. VISOR DE EVIDENCIA BLINDADA -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -126,7 +126,6 @@
                     
                     <div id="image-container-ui" class="border rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 min-h-[160px]">
                         
-                        <!-- ESTADO 1: SIN IMAGEN (Botón de subida) -->
                         <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-4">
                             <div class="w-12 h-12 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-2 shadow-sm border border-blue-100">
                                 <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
@@ -134,7 +133,6 @@
                             <p class="text-xs font-bold text-slate-700 text-center">Subir Evidencia</p>
                         </div>
 
-                        <!-- ESTADO 2: EVIDENCIA BLINDADA (Estilo Tarjeta Oscura con Candado) -->
                         <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-600 rounded-xl p-4 shadow-inner">
                             <i class="fa-solid fa-lock text-3xl text-accent mb-2"></i>
                             <p class="text-white font-bold text-sm mb-4">Evidencia Blindada</p>
@@ -145,17 +143,15 @@
                     </div>
                 </div>
 
-                <!-- 2. VISOR DE INGREDIENTES IA (NUEVO) -->
+                <!-- 2. VISOR DE INGREDIENTES IA -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-list-check text-secondary"></i> Ingredientes IA
                     </h3>
-                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[160px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view">
-                        <!-- El texto con palabras resaltadas aparecerá aquí -->
-                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[160px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view"></div>
                 </div>
 
-                <!-- 3. ALÉRGENOS -->
+                <!-- 3. ALÉRGENOS SINCRONIZADOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -170,7 +166,7 @@
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-2 rounded text-[10px] text-blue-800 mt-3 flex items-start gap-1.5 leading-tight">
                         <i class="fa-solid fa-shield-halved mt-0.5"></i>
-                        <p><strong>Inspección IA Automática:</strong> Análisis rígido de etiquetado en SAP.</p>
+                        <p><strong>Inspección IA Automática:</strong> Sincronización perfecta de alérgenos en SAP.</p>
                     </div>
                 </div>
             </div>
@@ -277,12 +273,13 @@
             return url;
         }
 
-        // MOTOR DE RESALTADO INTELIGENTE (Pinta de rojo las palabras peligrosas)
+        // MOTOR DE RESALTADO INTELIGENTE (Sincronizado con todos los derivados de alérgenos)
         function formatIngredientsText(text) {
             if (!text || text.trim() === '') {
                 return '<span class="text-slate-400 italic text-center block mt-4">No hay datos de ingredientes. Sube la evidencia para escanear.</span>';
             }
-            const keywords = ['leche', 'soya', 'soja', 'gluten', 'trigo', 'lactosa', 'lácteo', 'lacteo', 'suero'];
+            // Diccionario completo de palabras clave para resaltado en rojo
+            const keywords = ['leche', 'soya', 'soja', 'gluten', 'trigo', 'lactosa', 'lácteo', 'lacteo', 'suero', 'lactasa'];
             let highlighted = text;
             keywords.forEach(kw => {
                 const regex = new RegExp(`(${kw})`, 'gi');
@@ -302,26 +299,19 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
-            // Procesado de Ingredientes y Alérgenos
             let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             
-            // Inyecta el texto de ingredientes en el panel central con formato
+            // Inyecta el texto con el resaltador mejorado
             document.getElementById('ingredientes-text-view').innerHTML = formatIngredientsText(ingText);
 
-            // Checks de Alérgenos
-            document.getElementById('chk-leche').checked = false;
-            document.getElementById('chk-soya').checked = false;
-            document.getElementById('chk-gluten').checked = false;
-            document.getElementById('chk-lactosa').checked = false;
-
-            if (aleText && aleText.trim().length > 0) {
-                let fullAleText = aleText.toUpperCase();
-                document.getElementById('chk-leche').checked = fullAleText.includes('LECHE') || fullAleText.includes('LÁCTEO') || fullAleText.includes('LACTEO') || fullAleText.includes('SUERO');
-                document.getElementById('chk-soya').checked = fullAleText.includes('SOYA') || fullAleText.includes('SOJA');
-                document.getElementById('chk-gluten').checked = fullAleText.includes('GLUTEN') || fullAleText.includes('TRIGO');
-                document.getElementById('chk-lactosa').checked = fullAleText.includes('LACTOSA') || fullAleText.includes('DESLACTOSADA');
-            }
+            // Sincronización robusta de checkboxes basada en el texto combinado
+            let combinedSource = (ingText + ' ' + aleText).toUpperCase();
+            
+            document.getElementById('chk-leche').checked = combinedSource.includes('LECHE') || combinedSource.includes('LÁCTEO') || combinedSource.includes('LACTEO') || combinedSource.includes('SUERO');
+            document.getElementById('chk-soya').checked = combinedSource.includes('SOYA') || combinedSource.includes('SOJA');
+            document.getElementById('chk-gluten').checked = combinedSource.includes('GLUTEN') || combinedSource.includes('TRIGO');
+            document.getElementById('chk-lactosa').checked = combinedSource.includes('LACTOSA') || combinedSource.includes('LACTASA') || combinedSource.includes('DESLACTOSADA');
 
             const stateNoImage = document.getElementById('state-no-image');
             const stateHasImage = document.getElementById('state-has-image');
@@ -334,11 +324,10 @@
                 if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; break; }
             }
 
-            // UI DE EVIDENCIA BLINDADA
             if (urlOrigen) {
                 stateNoImage.classList.add('hidden');
                 stateHasImage.classList.remove('hidden');
-                stateHasImage.classList.add('flex'); // Asegura que se centre
+                stateHasImage.classList.add('flex'); 
                 driveFileLink.href = getDriveFileViewUrl(urlOrigen);
                 stateNoImage.onclick = null; 
             } else {
@@ -363,7 +352,6 @@
                 let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
                 let iconColor = isApproved ? 'text-accent' : (isWarning ? 'text-warning' : 'text-slate-400');
 
-                // Si es la etapa de ingredientes, ya no ponemos botón porque ya se ve en el dashboard
                 let botonHTML = '';
                 if (nombreEtapa.toLowerCase() !== 'ingredientes') {
                     botonHTML = `<button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${etapaObj.Estado}')" class="mt-3 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-bold py-1 rounded transition-colors"><i class="fa-solid fa-pen-to-square"></i> Evaluar</button>`;
