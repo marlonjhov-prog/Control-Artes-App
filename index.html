@@ -12,13 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } 
-                } 
-            } 
-        }
+        tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }
     </script>
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -59,27 +53,17 @@
 
         <!-- VISTA 1: Dashboard y KPIs -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
-            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avance Global</p>
-                        <h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3>
-                    </div>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avance Global</p><h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3></div>
                     <i class="fa-solid fa-chart-line text-3xl text-secondary opacity-50"></i>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lotes Liberados</p>
-                        <h3 class="text-3xl font-black text-accent" id="kpi-approved-count">0</h3>
-                    </div>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lotes Liberados</p><h3 class="text-3xl font-black text-accent" id="kpi-approved-count">0</h3></div>
                     <i class="fa-solid fa-check-double text-3xl text-accent opacity-50"></i>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">En Revisión / Alertas</p>
-                        <h3 class="text-3xl font-black text-warning" id="kpi-pending-count">0</h3>
-                    </div>
+                    <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">En Revisión / Alertas</p><h3 class="text-3xl font-black text-warning" id="kpi-pending-count">0</h3></div>
                     <i class="fa-solid fa-clock-rotate-left text-3xl text-warning opacity-50"></i>
                 </div>
             </div>
@@ -97,11 +81,7 @@
                     <table class="w-full text-left border-collapse" id="registrosTable">
                         <thead class="bg-slate-100">
                             <tr class="text-slate-600 text-[11px] uppercase border-b border-slate-200">
-                                <th class="p-4 font-bold">Código</th>
-                                <th class="p-4 font-bold">Material</th>
-                                <th class="p-4 font-bold">Proveedor</th>
-                                <th class="p-4 font-bold">Avance</th>
-                                <th class="p-4 font-bold text-center">Acciones</th>
+                                <th class="p-4 font-bold">Código</th><th class="p-4 font-bold">Material</th><th class="p-4 font-bold">Proveedor</th><th class="p-4 font-bold">Avance</th><th class="p-4 font-bold text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="text-sm divide-y divide-slate-100"></tbody>
@@ -110,9 +90,8 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle (Flujo, Evidencia y Alérgenos) -->
+        <!-- VISTA 2: Detalle -->
         <div id="detail-view" class="hidden flex-col gap-4">
-            <!-- Botón Volver -->
             <div class="flex items-center justify-between">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm font-semibold flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Volver a Bandeja
@@ -123,7 +102,6 @@
                 </div>
             </div>
             
-            <!-- Título Lote -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center border-l-4 border-l-secondary shadow-sm">
                 <div>
                     <h2 class="text-lg font-black text-slate-800" id="detail-material"></h2>
@@ -135,13 +113,11 @@
                 </div>
             </div>
 
-            <!-- Flujo de Etapas -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                 <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Aprobación</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-2 md:grid-cols-6 gap-3"></div>
             </div>
 
-            <!-- Contenedor Inferior: Visor y Alérgenos -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 <!-- VISOR -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col h-[350px] shadow-sm">
@@ -153,7 +129,8 @@
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                         </div>
-                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
+                        <img id="scanned-image-view" src="" onerror="this.onerror=null; document.getElementById('image-error-link').classList.remove('hidden');" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
+                        <a id="image-error-link" href="#" target="_blank" class="hidden absolute bottom-4 text-xs bg-blue-600 text-white px-3 py-1 rounded shadow-lg z-10 hover:bg-blue-700">Ver imagen en Drive</a>
                         <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm">
                                 <i class="fa-solid fa-magnifying-glass-plus"></i> Abrir Visor
@@ -169,18 +146,10 @@
                             <i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos Detectados
                         </h3>
                         <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50">
-                                <input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Leche</span>
-                            </label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50">
-                                <input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Soya</span>
-                            </label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50">
-                                <input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Gluten</span>
-                            </label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50">
-                                <input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Lactosa</span>
-                            </label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Leche</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Soya</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Gluten</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Lactosa</span></label>
                         </div>
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
@@ -191,12 +160,10 @@
             </div>
         </div>
         
-        <!-- Input File Oculto -->
         <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     </main>
 
     <script>
-        // LA URL EXACTA PROPORCIONADA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
         
         let appData = { registros: [], etapas: [] };
@@ -204,7 +171,6 @@
         let selectedFile = null;
         window.localImageCache = {};
 
-        // PARCHE DE CORS: Enviar como text/plain
         async function fetchGAS(payload) {
             const res = await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -239,7 +205,6 @@
                     throw new Error(result.message);
                 }
             } catch (error) {
-                console.error(error);
                 document.getElementById('loading-spinner').classList.add('hidden');
                 Swal.fire('Error de Conexión', 'No se pudo leer la base de datos.<br><br>Intente recargar la página.', 'error');
             } finally {
@@ -252,7 +217,7 @@
             if (total === 0) return;
             let sumaAvance = 0, aprobados = 0, pendientes = 0;
             appData.registros.forEach(reg => {
-                let av = parseInt(reg['Avance general (%)'] || reg['Avance general'] || reg['Avance']) || 0;
+                let av = parseInt(reg['Avance general (%)'] || reg['Avance general'] || reg['Avance (%)'] || reg['Avance']) || 0;
                 sumaAvance += av;
                 if (av === 100) aprobados++; else pendientes++;
             });
@@ -267,7 +232,7 @@
             tbody.innerHTML = '';
 
             appData.registros.forEach(reg => {
-                let av = parseInt(reg['Avance general (%)'] || reg['Avance general'] || reg['Avance']) || 0;
+                let av = parseInt(reg['Avance general (%)'] || reg['Avance general'] || reg['Avance (%)'] || reg['Avance']) || 0;
                 let bgAvance = av === 100 ? 'bg-accent' : (av > 40 ? 'bg-secondary' : 'bg-warning');
 
                 const tr = document.createElement('tr');
@@ -297,7 +262,7 @@
         function extractDirectImageUrl(url) {
             if (!url) return '';
             if (url.includes('data:image') || url.includes('uc?export=view')) return url;
-            const match = url.match(/\/d\/(.+?)\//);
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
             return url;
         }
@@ -311,7 +276,7 @@
             document.getElementById('detail-code').innerText = registro['Código'];
             document.getElementById('detail-material').innerText = registro['Material'];
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
-            document.getElementById('detail-progress').innerText = `${parseInt(registro['Avance general (%)'] || registro['Avance general'] || 0)}%`;
+            document.getElementById('detail-progress').innerText = `${parseInt(registro['Avance general (%)'] || registro['Avance general'] || registro['Avance (%)'] || registro['Avance'] || 0)}%`;
 
             let ingText = registro['Ingredientes_IA'] || '';
             let aleText = registro['Alergenos_IA'] || '';
@@ -324,16 +289,24 @@
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const zoomOverlay = document.getElementById('zoom-overlay');
+            const errorLink = document.getElementById('image-error-link');
             
-            let urlOrigen = window.localImageCache[codigo] || registro['Evidencia_URL'] || registro['Imagen'] || registro['Evidencia'] || '';
+            let urlOrigen = window.localImageCache[codigo] || registro['Evidencia_URL'] || registro['URL Evidencia'] || registro['Imagen'] || registro['Evidencia'] || '';
             let urlDirecta = extractDirectImageUrl(urlOrigen);
 
+            errorLink.classList.add('hidden'); // Reinicia el botón de error de imagen
+
             if (urlDirecta) {
-                imgView.src = urlDirecta; imgView.classList.remove('hidden');
-                zoomOverlay.classList.remove('hidden'); noImgMsg.classList.add('hidden');
+                imgView.src = urlDirecta; 
+                imgView.classList.remove('hidden');
+                zoomOverlay.classList.remove('hidden'); 
+                noImgMsg.classList.add('hidden');
+                errorLink.href = urlOrigen; // Enlace directo a Drive por si falla
             } else {
-                imgView.src = ''; imgView.classList.add('hidden');
-                zoomOverlay.classList.add('hidden'); noImgMsg.classList.remove('hidden');
+                imgView.src = ''; 
+                imgView.classList.add('hidden');
+                zoomOverlay.classList.add('hidden'); 
+                noImgMsg.classList.remove('hidden');
             }
 
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
@@ -353,7 +326,7 @@
                 if (nombreEtapa.toLowerCase() === 'ingredientes') {
                     botonHTML = isApproved ? 
                         `<button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded transition-colors shadow-sm"><i class="fa-solid fa-eye"></i> Visualizar IA</button>` : 
-                        `<button onclick="document.getElementById('fileInput').click()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded transition-colors shadow-sm"><i class="fa-solid fa-upload"></i> Subir para IA</button>`;
+                        `<button onclick="triggerFileMod()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded transition-colors shadow-sm"><i class="fa-solid fa-upload"></i> Subir para IA</button>`;
                 } else {
                     botonHTML = `<button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${etapaObj.Estado}')" class="mt-3 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-bold py-1.5 rounded transition-colors"><i class="fa-solid fa-pen-to-square"></i> Gestionar</button>`;
                 }
@@ -400,6 +373,13 @@
         }
 
         // --- MANEJO Y SUBIDA DE IMÁGENES A LA IA ---
+        function triggerFileMod() {
+            Swal.close();
+            // Esto arregla el bug de que no dejaba probar una segunda vez
+            document.getElementById('fileInput').value = ""; 
+            document.getElementById('fileInput').click();
+        }
+
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
@@ -412,6 +392,7 @@
                 }
                 reader.readAsDataURL(file);
             }
+            event.target.value = ""; // Limpia la caché del botón para futuros usos
         }
 
         async function uploadImageAndAnalyze(base64Data) {
@@ -426,7 +407,7 @@
                     let proceed = true;
 
                     if (data.coincide === false || data.coincide === "false") {
-                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta escaneada es de <b>${data.productoDetectado||"Otro producto"}</b>.<br>Este lote corresponde a <b>${materialName}</b>.<br><br>¿Seguro que deseas forzar la carga?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
+                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta escaneada es de <b>${data.productoDetectado||"Otro producto"}</b>.<br>Este lote corresponde a <b>${materialName}</b>.<br><br>¿Seguro que deseas forzar la carga bajo tu responsabilidad?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
                         proceed = confirm.isConfirmed;
                     }
 
@@ -434,24 +415,23 @@
                         Swal.fire({ title: 'Aprobado. Guardando auditoría...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                         await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: selectedFile.type, base64: base64Data });
                         await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
-                        await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO', avance: 100 });
+                        await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                         
                         Swal.fire('¡Éxito!', 'Etiqueta validada y datos guardados.', 'success');
-                        document.getElementById('fileInput').value = "";
-                        loadData();
+                        loadData(); // Refresca automáticamente para recalcular el Avance Lote (%)
                     } else {
-                        document.getElementById('fileInput').value = "";
                         delete window.localImageCache[currentItemCode];
                         openDetail(currentItemCode);
                     }
                 } else throw new Error(resultAI.message || "Error en el análisis de IA.");
             } catch (error) {
                 Swal.fire('Atención', error.message, 'error');
-                document.getElementById('fileInput').value = "";
+                delete window.localImageCache[currentItemCode];
+                openDetail(currentItemCode);
             }
         }
 
-        // --- FUNCIONES COMPLETAS DE GESTIÓN (EDITAR, ELIMINAR, ETAPAS) ---
+        // --- FUNCIONES DE GESTIÓN (EDITAR, ELIMINAR, ETAPAS) ---
         function editMaterialInfo(codigo) {
             const registro = appData.registros.find(r => r['Código'] == codigo);
             if(!registro) return;
@@ -530,13 +510,11 @@
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     let nuevoEstado = result.value;
-                    let nuevoAvance = nuevoEstado === 'APROBADO' ? 100 : (nuevoEstado === 'CON ALERTA' ? 20 : 50);
-                    
                     Swal.fire({ title: 'Guardando etapa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     try {
-                        await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: nuevoEstado, avance: nuevoAvance });
+                        await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: nuevoEstado });
                         Swal.close();
-                        loadData();
+                        loadData(); // Refresca automáticamente para recalcular %
                     } catch (e) {
                         Swal.fire('Error', 'No se pudo guardar la evaluación.', 'error');
                     }
@@ -545,24 +523,7 @@
         }
 
         function openNewMaterialModal() {
-            Swal.fire({
-                title: '<span class="text-lg font-black">Nuevo Material</span>',
-                html: `
-                    <div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700">
-                        <div><label>Código SAP:</label><input id="swal-codigo" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div>
-                        <div><label>Descripción / Producto:</label><input id="swal-material" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div>
-                        <div><label>Proveedor:</label><input id="swal-proveedor" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Registrar',
-                confirmButtonColor: '#10b981',
-                preConfirm: () => { return { codigo: document.getElementById('swal-codigo').value, material: document.getElementById('swal-material').value } }
-            }).then((result) => {
-                if (result.isConfirmed && result.value.codigo) {
-                    Swal.fire('Información', 'Módulo de creación de material en construcción. Por favor, añada registros directamente en Google Sheets por ahora.', 'info');
-                }
-            });
+            Swal.fire({ title: 'Información', text: 'Módulo de creación en construcción. Añada registros en Google Sheets por ahora.', icon: 'info' });
         }
 
         // --- UTILIDADES DE INTERFAZ ---
@@ -585,7 +546,7 @@
             const reg = appData.registros.find(r => r['Código'] == currentItemCode); 
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes:</strong><p class="text-slate-700 text-sm italic">${reg['Ingredientes_IA']||'N/A'}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos:</strong><p class="text-red-800 text-sm font-bold">${reg['Alergenos_IA']||'N/A'}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="Swal.close(); document.getElementById('fileInput').click()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
+                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes:</strong><p class="text-slate-700 text-sm italic">${reg['Ingredientes_IA']||'N/A'}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos:</strong><p class="text-red-800 text-sm font-bold">${reg['Alergenos_IA']||'N/A'}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
                 showConfirmButton: false, 
                 showCloseButton: true,
                 width: '500px'
