@@ -105,14 +105,15 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA BLINDADO -->
+                <!-- VISUALIZADOR DE IMAGEN (RESTAURADO Y BLINDADO) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
-                    <div id="image-container-ui" class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[240px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300">
+                    <div id="image-container-ui" class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[240px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 p-2">
                         
+                        <!-- ESTADO 1: NO HAY IMAGEN, MOSTRAR BOTÓN DE SUBIDA -->
                         <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
                             <div class="w-16 h-16 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-3 shadow-sm border border-blue-100">
                                 <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
@@ -121,13 +122,21 @@
                             <p class="text-xs text-slate-400 mt-1">Haz clic para analizar con IA</p>
                         </div>
 
-                        <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-emerald-50 border-2 border-emerald-100">
-                            <i class="fa-solid fa-circle-check text-4xl text-accent mb-3 shadow-sm rounded-full bg-white"></i>
-                            <p class="text-sm font-bold text-emerald-800">Evidencia Cargada Permanentemente</p>
-                            <a id="drive-file-link" href="#" target="_blank" class="mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-5 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-md">
-                                <i class="fa-solid fa-up-right-from-square text-secondary"></i> Ver Imagen Original
-                            </a>
+                        <!-- ESTADO 2: SÍ HAY IMAGEN (BLOQUEADO + PREVISUALIZACIÓN EN VIVO) -->
+                        <div id="state-has-image" class="hidden w-full h-full relative group rounded-lg overflow-hidden bg-white">
+                            <!-- Aquí se muestra la imagen real -->
+                            <img id="scanned-image-view" src="" class="w-full h-full object-contain">
+                            
+                            <!-- Overlay que aparece al poner el mouse encima con el link a Drive -->
+                            <div class="absolute inset-0 bg-slate-900/70 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <i class="fa-solid fa-lock text-3xl text-accent mb-2"></i>
+                                <p class="text-white font-bold text-sm mb-4">Evidencia Blindada</p>
+                                <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-2 px-5 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-md">
+                                    <i class="fa-solid fa-up-right-from-square"></i> Abrir Original en Drive
+                                </a>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -247,10 +256,19 @@
             });
         }
 
+        // Obtiene el enlace para ver SOLAMENTE LA IMAGEN (no la carpeta)
         function getDriveFileViewUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) { return `https://drive.google.com/file/d/${match[1]}/view`; }
+            return url;
+        }
+
+        // Obtiene un enlace renderizable para la etiqueta <img src="..."> en pantalla
+        function getDriveImageUrl(url) {
+            if (!url) return '';
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) { return `https://drive.google.com/uc?export=view&id=${match[1]}`; }
             return url;
         }
 
@@ -284,6 +302,7 @@
             const stateNoImage = document.getElementById('state-no-image');
             const stateHasImage = document.getElementById('state-has-image');
             const driveFileLink = document.getElementById('drive-file-link');
+            const scannedImageView = document.getElementById('scanned-image-view');
             
             let urlOrigen = '';
             for (let key in registro) {
@@ -292,14 +311,20 @@
                 if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; break; }
             }
 
+            // BLINDAJE DE EVIDENCIA + VISUALIZACIÓN DIRECTA EN PANTALLA
             if (urlOrigen) {
                 stateNoImage.classList.add('hidden');
                 stateHasImage.classList.remove('hidden');
+                
+                // Muestra la imagen en pantalla y configura el botón del drive
+                scannedImageView.src = getDriveImageUrl(urlOrigen);
                 driveFileLink.href = getDriveFileViewUrl(urlOrigen);
-                stateNoImage.onclick = null; 
+                
+                stateNoImage.onclick = null; // Bloquea totalmente que se pueda subir algo de nuevo
             } else {
                 stateNoImage.classList.remove('hidden');
                 stateHasImage.classList.add('hidden');
+                scannedImageView.src = '';
                 stateNoImage.onclick = () => document.getElementById('fileInput').click(); 
             }
 
@@ -343,10 +368,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // =========================================================================
-        // MOTOR DE COMPRESIÓN DE IMÁGENES (FRONTEND)
-        // Reduce imágenes de 5MB a ~150KB al instante. Evita el colapso de la API (503).
-        // =========================================================================
+        // COMPRESIÓN DE IMÁGENES AL VUELO
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -358,7 +380,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1000; // Limita a 1000px de ancho/alto (ideal para IA)
+                    const MAX_WIDTH = 1000; 
                     const MAX_HEIGHT = 1000;
                     let width = img.width;
                     let height = img.height;
@@ -374,12 +396,11 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Convierte y comprime la imagen a JPEG de calidad 0.7 (Reduce drásticamente el peso)
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                     const base64 = dataUrl.split(',')[1];
 
                     Swal.close();
-                    uploadImageAndAnalyze(base64, 'image/jpeg'); // Envía la imagen ligera
+                    uploadImageAndAnalyze(base64, 'image/jpeg'); 
                 }
                 img.src = e.target.result;
             }
@@ -493,6 +514,8 @@
             const reg = appData.registros.find(r => r['Código'] == currentItemCode); 
             let ingText = reg['Ingredientes_IA'] || reg['Ingredientes IA'] || reg['Ingredientes'] || 'N/A';
             let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
+            
+            // SIN BOTÓN DE SUBIDA (Blindado)
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
                 html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados (Literal completo):</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div></div>`, 
