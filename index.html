@@ -4,23 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QA Inspection Dashboard Pro</title>
-    <!-- Librerías con HTTPS asegurado -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <script>
-        tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }
-    </script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }</script>
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        #zoom-container { cursor: grab; } #zoom-container:active { cursor: grabbing; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- Barra de Navegación -->
     <nav class="bg-primary text-white shadow-md h-14 flex-shrink-0 z-50 sticky top-0">
         <div class="max-w-7xl mx-auto px-4 h-full flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
@@ -28,6 +24,9 @@
                 <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
             <div class="flex items-center gap-3">
+                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Nuevo Material
+                </button>
                 <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors">
                     <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Actualizar
                 </button>
@@ -35,18 +34,14 @@
         </div>
     </nav>
 
-    <!-- Contenedor Principal -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
         
-        <!-- Spinner de Carga -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center py-20 w-full">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-secondary mb-3"></div>
-            <p class="text-slate-500 text-sm font-medium">Conectando con la base de datos...</p>
+            <p class="text-slate-500 text-sm font-medium">Sincronizando flujos desde la nube...</p>
         </div>
 
-        <!-- VISTA 1: Dashboard y Bandeja -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
-            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div><p class="text-xs font-bold text-slate-400 uppercase">Avance Global</p><h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3></div>
@@ -62,7 +57,6 @@
                 </div>
             </div>
 
-            <!-- Tabla -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                     <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
@@ -84,24 +78,21 @@
             </div>
         </div>
 
-        <!-- VISTA 2: Detalle de Auditoría -->
         <div id="detail-view" class="hidden flex-col gap-4">
-            
-            <!-- Botón de regreso -->
             <div class="flex items-center justify-between">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm font-semibold flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Volver a Bandeja
                 </button>
                 <div class="flex items-center gap-3">
                     <span class="bg-slate-800 text-white px-3 py-1 rounded text-xs font-mono font-bold" id="detail-code"></span>
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider" id="detail-provider"></span>
                 </div>
             </div>
             
-            <!-- Cabecera de Producto -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center border-l-4 border-l-secondary shadow-sm">
                 <div>
                     <h2 class="text-lg font-black text-slate-800" id="detail-material"></h2>
-                    <p class="text-xs text-slate-500 font-medium font-bold uppercase" id="detail-provider"></p>
+                    <p class="text-xs text-slate-500 font-medium">Auditoría y Liberación de Calidad</p>
                 </div>
                 <div class="text-right bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
                     <span class="text-[10px] text-slate-500 uppercase font-extrabold block mb-0.5">Avance Lote</span>
@@ -109,40 +100,39 @@
                 </div>
             </div>
 
-            <!-- Flujo de Etapas -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                 <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Aprobación</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-2 md:grid-cols-6 gap-3"></div>
             </div>
 
-            <!-- Evidencia Visual y Alérgenos -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE IMAGEN ROBUSTO -->
-                <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
-                    <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
+                <!-- VISOR DE EVIDENCIA CON ENLACE DE DRIVE PERMANENTE -->
+                <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col h-[400px] shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
-                    <div class="flex-grow flex flex-col items-center justify-center p-2 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl relative">
-                        
-                        <!-- Si no hay imagen -->
+                    <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer" onclick="openImageZoom()">
                         <div id="no-evidence-msg" class="text-center p-4">
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                         </div>
+                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
                         
-                        <!-- BOTÓN MAESTRO DE GOOGLE DRIVE (A prueba de fallos) -->
-                        <a id="drive-fallback-link" href="#" target="_blank" class="hidden w-full max-w-sm mx-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md flex items-center justify-center gap-3 transition-colors mb-3">
-                            <i class="fa-brands fa-google-drive text-xl"></i> Abrir Etiqueta Original en Drive
-                        </a>
-
-                        <!-- Miniatura de respaldo -->
-                        <img id="scanned-image-view" src="" class="hidden max-h-[250px] object-contain rounded-lg border border-slate-200 shadow-sm p-1 bg-white">
+                        <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> Abrir Visor
+                            </div>
+                        </div>
                     </div>
+                    
+                    <!-- ENLACE DE DRIVE (Visible si existe la imagen en BD) -->
+                    <a id="drive-fallback-link" href="#" target="_blank" class="hidden mt-3 w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
+                        <i class="fa-brands fa-google-drive text-lg"></i> Ver Etiqueta Original en Drive
+                    </a>
                 </div>
 
-                <!-- SECCIÓN ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -163,20 +153,16 @@
             </div>
         </div>
         
-        <!-- Input oculto para subir imagen -->
         <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     </main>
 
     <script>
-        // === URL EXACTA INSERTADA ===
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
         let selectedFile = null;
-        window.localImageCache = {};
 
-        // --- SISTEMA DE CONEXIÓN ---
         async function fetchGAS(payload) {
             const res = await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -207,23 +193,17 @@
                     document.getElementById('loading-spinner').classList.add('hidden');
                     if(currentItemCode) openDetail(currentItemCode);
                     else document.getElementById('dashboard-view').classList.remove('hidden');
-                } else {
-                    throw new Error(result.message);
-                }
+                } else { throw new Error(result.message); }
             } catch (error) {
                 document.getElementById('loading-spinner').classList.add('hidden');
-                Swal.fire('Error de Conexión', 'No se pudo conectar a Google Sheets. Verifica tu conexión a internet.', 'error');
-            } finally {
-                document.getElementById('sync-icon').classList.remove('fa-spin');
-            }
+                Swal.fire('Error de Conexión', 'No se pudo conectar a la base de datos.', 'error');
+            } finally { document.getElementById('sync-icon').classList.remove('fa-spin'); }
         }
 
-        // --- FUNCIONES MATEMÁTICAS ---
         function calculateDynamicProgress(codigo) {
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
             const etapasItem = appData.etapas.filter(e => e['Código'] == codigo);
             let aprobados = 0;
-            
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase());
                 if (etapaObj && etapaObj.Estado === 'APROBADO') aprobados++;
@@ -258,19 +238,17 @@
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
                     <td class="p-4 text-slate-600 text-xs font-medium">${reg['Proveedor']}</td>
                     <td class="p-4"><div class="flex items-center gap-3"><div class="w-20 bg-slate-200 rounded-full h-2 shadow-inner overflow-hidden"><div class="${bgAvance} h-full rounded-full transition-all" style="width: ${av}%"></div></div><span class="text-xs font-black text-slate-700 w-8">${av}%</span></div></td>
-                    <td class="p-4"><div class="flex gap-1.5 justify-center">
+                    <td class="p-4 text-center">
                         <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded text-[11px] font-bold shadow-sm"><i class="fa-solid fa-microscope"></i> Auditar</button>
-                    </div></td>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- VISTA DETALLE Y EVIDENCIA ---
         function extractDirectImageUrl(url) {
             if (!url) return '';
-            if (url.includes('data:image')) return url;
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
             return url;
         }
@@ -286,38 +264,41 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
+            // Lógica de reglas de negocio para alérgenos
             let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             let fullText = (ingText + " " + aleText).toUpperCase();
 
-            // Lógica de marcado estricto de Alérgenos
-            document.getElementById('chk-leche').checked = fullText.includes('LECHE') || fullText.includes('LÁCTEO') || fullText.includes('LACTEO');
+            // Marcado dinámico instantáneo
+            document.getElementById('chk-leche').checked = fullText.includes('LECHE') || fullText.includes('LÁCTEO') || fullText.includes('LACTEO') || fullText.includes('SUERO');
             document.getElementById('chk-soya').checked = fullText.includes('SOYA') || fullText.includes('SOJA');
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN') || fullText.includes('TRIGO');
             document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
 
-            // INTERFAZ DE IMAGEN (El Botón y la miniatura)
+            // Renderizado de Imagen y Drive Link
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
+            const zoomOverlay = document.getElementById('zoom-overlay');
             const driveLink = document.getElementById('drive-fallback-link');
             
-            let urlOrigen = window.localImageCache[codigo] || registro['Evidencia'] || registro['Evidencia_URL'] || registro['Imagen'] || registro['URL Evidencia'] || '';
+            let urlOrigen = registro['Evidencia'] || registro['Evidencia_URL'] || registro['Imagen'] || registro['URL Evidencia'] || '';
             let urlDirecta = extractDirectImageUrl(urlOrigen);
 
             if (urlDirecta) {
-                // Siempre mostrar el botón de Drive si hay URL
-                if(urlOrigen.includes('http')) {
+                imgView.src = urlDirecta; 
+                imgView.classList.remove('hidden');
+                zoomOverlay.classList.remove('hidden');
+                noImgMsg.classList.add('hidden');
+                
+                // Mostrar siempre el botón de Google Drive si hay enlace
+                if (urlOrigen.includes('http')) {
                     driveLink.href = urlOrigen;
                     driveLink.classList.remove('hidden');
                 }
-                
-                // Mostrar miniatura
-                imgView.src = urlDirecta; 
-                imgView.classList.remove('hidden');
-                noImgMsg.classList.add('hidden');
             } else {
                 imgView.src = ''; 
                 imgView.classList.add('hidden');
+                zoomOverlay.classList.add('hidden');
                 noImgMsg.classList.remove('hidden');
                 driveLink.classList.add('hidden');
             }
@@ -329,11 +310,6 @@
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE' };
                 
-                // Forzar aprobación si la IA leyó correctamente (Evita el "Error de IA")
-                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && ingText !== 'No analizado' && !ingText.includes('Error')) {
-                    etapaObj.Estado = 'APROBADO';
-                }
-
                 let isApproved = etapaObj.Estado === 'APROBADO';
                 let isWarning = etapaObj.Estado === 'CON ALERTA';
                 let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
@@ -362,16 +338,16 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- SISTEMA DE ALERTA DE DUPLICIDAD Y SUBIDA ---
+        // --- PREVENCIÓN DE DUPLICIDAD OFICIAL ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-            let urlOrigen = window.localImageCache[currentItemCode] || reg['Evidencia'] || reg['Evidencia_URL'] || reg['Imagen'] || reg['URL Evidencia'];
+            let urlDB = reg['Evidencia'] || reg['Evidencia_URL'] || reg['Imagen'] || reg['URL Evidencia'] || '';
             
-            if (urlOrigen && urlOrigen.trim() !== '') {
+            if (urlDB.includes('http')) {
                 Swal.fire({
-                    title: '⚠️ Imagen ya registrada',
-                    text: 'Este lote ya tiene una etiqueta analizada en el sistema. ¿Deseas reemplazarla y volver a evaluarla con IA?',
+                    title: '⚠️ Etiqueta ya cargada',
+                    text: 'Este lote ya cuenta con una etiqueta registrada en la base de datos. ¿Deseas reemplazarla y volver a correr el análisis IA?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Sí, reemplazar',
@@ -395,11 +371,7 @@
             if (file) {
                 selectedFile = file;
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    window.localImageCache[currentItemCode] = e.target.result; 
-                    openDetail(currentItemCode); 
-                    uploadImageAndAnalyze(e.target.result.split(',')[1]);
-                }
+                reader.onload = function(e) { uploadImageAndAnalyze(e.target.result.split(',')[1]); }
                 reader.readAsDataURL(file);
             }
             event.target.value = "";
@@ -407,7 +379,7 @@
 
         async function uploadImageAndAnalyze(base64Data) {
             const materialName = document.getElementById('detail-material').innerText;
-            Swal.fire({ title: 'Analizando Etiqueta con IA...', html: `Extrayendo datos de:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Analizando Etiqueta con IA...', html: `Extrayendo ingredientes para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
                 const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: selectedFile.type, base64: base64Data, materialName: materialName });
@@ -416,34 +388,55 @@
                     const data = resultAI.data || {};
                     let proceed = true;
 
-                    // Validación de coincidencia de la IA
                     if (data.coincide === false || data.coincide === "false") {
-                        const confirm = await Swal.fire({ 
-                            title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', 
-                            html: `La etiqueta escaneada dice ser: <b>${data.productoDetectado||"Desconocido"}</b>.<br>Pero SAP espera: <b>${materialName}</b>.<br><br>¿Forzar la aprobación bajo tu responsabilidad?`, 
-                            icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true 
-                        });
+                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta escaneada dice ser: <b>${data.productoDetectado||"Desconocido"}</b>.<br>Pero SAP espera: <b>${materialName}</b>.<br><br>¿Forzar la aprobación bajo tu responsabilidad?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
                         proceed = confirm.isConfirmed;
                     }
 
                     if (proceed) {
-                        Swal.fire({ title: 'Guardando auditoría...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                        await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: selectedFile.type, base64: base64Data });
+                        Swal.fire({ title: 'Guardando auditoría en la nube...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                        
+                        // Enviamos los datos al backend
+                        let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: selectedFile.type, base64: base64Data });
                         await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
                         await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                         
-                        Swal.fire('¡Éxito!', 'Etiqueta validada y guardada correctamente en el sistema.', 'success');
-                        loadData(); 
-                    } else {
-                        delete window.localImageCache[currentItemCode];
-                        openDetail(currentItemCode);
+                        // ACTUALIZACIÓN OPTIMISTA (La interfaz se actualiza instantáneamente para ti, sin esperar que Sheets recargue)
+                        const reg = appData.registros.find(r => r['Código'] == currentItemCode);
+                        reg['Ingredientes_IA'] = data.ingredientes;
+                        reg['Alergenos_IA'] = data.alergenos;
+                        if(uploadRes.url) reg['Evidencia'] = uploadRes.url; 
+                        
+                        const etapa = appData.etapas.find(e => e['Código'] == currentItemCode && e['Etapa'].toUpperCase() === 'INGREDIENTES');
+                        if (etapa) etapa['Estado'] = 'APROBADO';
+                        
+                        Swal.fire('¡Éxito!', 'Etiqueta validada y guardada correctamente.', 'success');
+                        
+                        // Refresca la vista inmediatamente con los datos recién inyectados
+                        openDetail(currentItemCode); 
                     }
                 } else throw new Error(resultAI.message || "Error al procesar la IA.");
             } catch (error) {
                 Swal.fire('Atención', error.message, 'warning');
-                delete window.localImageCache[currentItemCode];
-                openDetail(currentItemCode);
             }
+        }
+
+        function openImageZoom() {
+            const imgView = document.getElementById('scanned-image-view');
+            if (!imgView.src || imgView.classList.contains('hidden')) return;
+            Swal.fire({
+                title: '<span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mouse"></i> Scroll para zoom, Click para arrastrar</span>',
+                html: `<div id="zoom-container" class="flex justify-center items-center bg-slate-900 rounded-lg h-[70vh] relative overflow-hidden shadow-inner"><img id="zoom-img" src="${imgView.src}" class="max-w-full max-h-full object-contain pointer-events-none" style="transform-origin: center; transform: scale(1) translate(0, 0);"></div>`,
+                width: '85%', showConfirmButton: false, showCloseButton: true, padding: '1em', background: '#f8fafc',
+                didOpen: () => {
+                    const container = document.getElementById('zoom-container'), img = document.getElementById('zoom-img');
+                    let scale = 1, panning = false, pointX = 0, pointY = 0, startX = 0, startY = 0;
+                    container.addEventListener('wheel', (e) => { e.preventDefault(); scale += e.deltaY > 0 ? -0.15 : 0.15; scale = Math.min(Math.max(1, scale), 5); if(scale === 1) { pointX = 0; pointY = 0; } img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; });
+                    container.addEventListener('mousedown', (e) => { if(scale > 1) { panning = true; startX = e.clientX - pointX; startY = e.clientY - pointY; }});
+                    container.addEventListener('mousemove', (e) => { if (panning) { e.preventDefault(); pointX = e.clientX - startX; pointY = e.clientY - startY; img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; }});
+                    container.addEventListener('mouseup', () => panning = false); container.addEventListener('mouseleave', () => panning = false);
+                }
+            });
         }
 
         function gestionarEtapa(codigo, etapaNombre, estadoActual) {
@@ -452,11 +445,18 @@
                 if (result.isConfirmed) {
                     Swal.fire({ title: 'Guardando etapa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: result.value });
-                    loadData(); 
+                    
+                    // Actualización optimista
+                    const etapa = appData.etapas.find(e => e['Código'] == codigo && e['Etapa'].toUpperCase() === etapaNombre.toUpperCase());
+                    if (etapa) etapa['Estado'] = result.value;
+                    
+                    Swal.close();
+                    openDetail(codigo);
                 }
             });
         }
 
+        function openNewMaterialModal() { Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets por ahora.', icon: 'info' }); }
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
@@ -466,7 +466,7 @@
             let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes extraídos:</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos normativos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
+                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes detectados:</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
                 showConfirmButton: false, showCloseButton: true, width: '500px'
             }); 
         }
