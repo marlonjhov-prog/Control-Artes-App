@@ -4,16 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QA Inspection Dashboard Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <script src="[https://cdn.jsdelivr.net/npm/sweetalert2@11](https://cdn.jsdelivr.net/npm/sweetalert2@11)"></script>
     <script>tailwind.config = { theme: { extend: { colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#10b981', warning: '#f59e0b', danger: '#ef4444' } } } }</script>
-    <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        #zoom-container { cursor: grab; } #zoom-container:active { cursor: grabbing; }
-    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
@@ -24,9 +18,6 @@
                 <span class="font-bold text-base tracking-wide">QA Inspection <span class="text-secondary font-light">Industrial Pro</span></span>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="openNewMaterialModal()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> Nuevo Material
-                </button>
                 <button onclick="loadData()" class="text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700 transition-colors">
                     <i class="fa-solid fa-rotate-right" id="sync-icon"></i> Actualizar
                 </button>
@@ -107,7 +98,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA CON ENLACE DE DRIVE PERMANENTE -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col h-[400px] shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -118,16 +108,16 @@
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
                         </div>
-                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105">
+                        <img id="scanned-image-view" src="" class="hidden w-full h-full object-contain p-2">
                         
                         <div id="zoom-overlay" class="hidden absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm">
-                                <i class="fa-solid fa-magnifying-glass-plus"></i> Abrir Visor
+                            <div class="bg-white/90 text-slate-800 p-3 rounded-full shadow-lg font-bold text-sm">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> Ampliar Imagen
                             </div>
                         </div>
                     </div>
                     
-                    <!-- ENLACE DE DRIVE (Visible si existe la imagen en BD) -->
+                    <!-- ENLACE DIRECTO DE GOOGLE DRIVE -->
                     <a id="drive-fallback-link" href="#" target="_blank" class="hidden mt-3 w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
                         <i class="fa-brands fa-google-drive text-lg"></i> Ver Etiqueta Original en Drive
                     </a>
@@ -139,10 +129,10 @@
                             <i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos Detectados
                         </h3>
                         <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Leche</span></label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Soya</span></label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Gluten</span></label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50"><input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded" disabled><span class="ml-2 font-bold text-slate-700 text-sm">Lactosa</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Leche</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Soya</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Gluten</span></label>
+                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Lactosa</span></label>
                         </div>
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
@@ -157,11 +147,10 @@
     </main>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
+        const SCRIPT_URL = '[https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec](https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec)';
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
-        let selectedFile = null;
 
         async function fetchGAS(payload) {
             const res = await fetch(SCRIPT_URL, {
@@ -176,11 +165,6 @@
 
         async function loadData() {
             document.getElementById('sync-icon').classList.add('fa-spin');
-            if(!document.getElementById('dashboard-view').classList.contains('hidden') && !currentItemCode){
-                document.getElementById('dashboard-view').classList.add('hidden');
-                document.getElementById('loading-spinner').classList.remove('hidden');
-            }
-
             try {
                 const response = await fetch(`${SCRIPT_URL}?action=getData`, { method: 'GET' });
                 const result = await response.json();
@@ -196,7 +180,7 @@
                 } else { throw new Error(result.message); }
             } catch (error) {
                 document.getElementById('loading-spinner').classList.add('hidden');
-                Swal.fire('Error de Conexión', 'No se pudo conectar a la base de datos.', 'error');
+                Swal.fire('Error', 'No se pudo conectar con la base de datos.', 'error');
             } finally { document.getElementById('sync-icon').classList.remove('fa-spin'); }
         }
 
@@ -234,7 +218,7 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
                 tr.innerHTML = `
-                    <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2 py-1 rounded text-xs font-bold border border-slate-300 shadow-sm">${reg['Código']}</span></td>
+                    <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2 py-1 rounded text-xs font-bold border">${reg['Código']}</span></td>
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
                     <td class="p-4 text-slate-600 text-xs font-medium">${reg['Proveedor']}</td>
                     <td class="p-4"><div class="flex items-center gap-3"><div class="w-20 bg-slate-200 rounded-full h-2 shadow-inner overflow-hidden"><div class="${bgAvance} h-full rounded-full transition-all" style="width: ${av}%"></div></div><span class="text-xs font-black text-slate-700 w-8">${av}%</span></div></td>
@@ -249,7 +233,7 @@
         function extractDirectImageUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+            if (match && match[1]) return `[https://drive.google.com/thumbnail?id=$](https://drive.google.com/thumbnail?id=$){match[1]}&sz=w1000`;
             return url;
         }
 
@@ -264,18 +248,18 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
-            // Lógica de reglas de negocio para alérgenos
+            // Búsqueda inteligente de datos IA en los campos del registro
             let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
-            let fullText = (ingText + " " + aleText).toUpperCase();
+            let fullText = (ingText + " " + aleText + " " + registro['Material']).toUpperCase();
 
-            // Marcado dinámico instantáneo
+            // Marcado dinámico y seguro de alérgenos
             document.getElementById('chk-leche').checked = fullText.includes('LECHE') || fullText.includes('LÁCTEO') || fullText.includes('LACTEO') || fullText.includes('SUERO');
             document.getElementById('chk-soya').checked = fullText.includes('SOYA') || fullText.includes('SOJA');
             document.getElementById('chk-gluten').checked = fullText.includes('GLUTEN') || fullText.includes('TRIGO');
-            document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA');
+            document.getElementById('chk-lactosa').checked = fullText.includes('LACTOSA') || fullText.includes('DESLACTOSADA');
 
-            // Renderizado de Imagen y Drive Link
+            // Renderizado de Imagen y Botón Drive
             const imgView = document.getElementById('scanned-image-view');
             const noImgMsg = document.getElementById('no-evidence-msg');
             const zoomOverlay = document.getElementById('zoom-overlay');
@@ -290,7 +274,6 @@
                 zoomOverlay.classList.remove('hidden');
                 noImgMsg.classList.add('hidden');
                 
-                // Mostrar siempre el botón de Google Drive si hay enlace
                 if (urlOrigen.includes('http')) {
                     driveLink.href = urlOrigen;
                     driveLink.classList.remove('hidden');
@@ -310,6 +293,10 @@
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE' };
                 
+                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && !ingText.includes('Error')) {
+                    etapaObj.Estado = 'APROBADO';
+                }
+
                 let isApproved = etapaObj.Estado === 'APROBADO';
                 let isWarning = etapaObj.Estado === 'CON ALERTA';
                 let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
@@ -327,7 +314,7 @@
                 etapasContainer.innerHTML += `
                     <div class="p-3 rounded-xl border ${badgeBg} flex flex-col justify-between shadow-sm">
                         <div>
-                            <div class="flex justify-between items-center mb-2"><i class="fa-solid fa-circle-check ${iconColor} text-sm"></i><span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white border border-slate-200 shadow-sm">${etapaObj.Estado}</span></div>
+                            <div class="flex justify-between items-center mb-2"><i class="fa-solid fa-circle-check ${iconColor} text-sm"></i><span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white border shadow-sm">${etapaObj.Estado}</span></div>
                             <h4 class="font-bold text-xs uppercase text-slate-800 mb-0.5">${nombreEtapa}</h4>
                         </div>
                         ${botonHTML}
@@ -338,7 +325,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- PREVENCIÓN DE DUPLICIDAD OFICIAL ---
+        // --- VALIDACIÓN ESTRICTA DE DUPLICIDAD ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
@@ -346,8 +333,8 @@
             
             if (urlDB.includes('http')) {
                 Swal.fire({
-                    title: '⚠️ Etiqueta ya cargada',
-                    text: 'Este lote ya cuenta con una etiqueta registrada en la base de datos. ¿Deseas reemplazarla y volver a correr el análisis IA?',
+                    title: '⚠️ Etiqueta ya registrada',
+                    text: 'Este lote ya cuenta con una etiqueta analizada. ¿Deseas reemplazarla y volver a ejecutar el análisis IA?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Sí, reemplazar',
@@ -369,53 +356,48 @@
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
-                selectedFile = file;
                 const reader = new FileReader();
-                reader.onload = function(e) { uploadImageAndAnalyze(e.target.result.split(',')[1]); }
+                reader.onload = function(e) { uploadImageAndAnalyze(e.target.result.split(',')[1], file.type); }
                 reader.readAsDataURL(file);
             }
             event.target.value = "";
         }
 
-        async function uploadImageAndAnalyze(base64Data) {
+        async function uploadImageAndAnalyze(base64Data, mimeType) {
             const materialName = document.getElementById('detail-material').innerText;
-            Swal.fire({ title: 'Analizando Etiqueta con IA...', html: `Extrayendo ingredientes para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Analizando con IA...', html: `Extrayendo datos de la etiqueta para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: selectedFile.type, base64: base64Data, materialName: materialName });
+                const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: mimeType, base64: base64Data, materialName: materialName });
                 
                 if (resultAI.status === 'success') {
                     const data = resultAI.data || {};
                     let proceed = true;
 
                     if (data.coincide === false || data.coincide === "false") {
-                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta escaneada dice ser: <b>${data.productoDetectado||"Desconocido"}</b>.<br>Pero SAP espera: <b>${materialName}</b>.<br><br>¿Forzar la aprobación bajo tu responsabilidad?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
+                        const confirm = await Swal.fire({ title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', html: `La etiqueta dice ser: <b>${data.productoDetectado||"Desconocido"}</b>.<br>Pero SAP espera: <b>${materialName}</b>.<br><br>¿Forzar la aprobación?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true });
                         proceed = confirm.isConfirmed;
                     }
 
                     if (proceed) {
-                        Swal.fire({ title: 'Guardando auditoría en la nube...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                        Swal.fire({ title: 'Guardando auditoría...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                         
-                        // Enviamos los datos al backend
-                        let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: selectedFile.type, base64: base64Data });
+                        let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
                         await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
                         await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                         
-                        // ACTUALIZACIÓN OPTIMISTA (La interfaz se actualiza instantáneamente para ti, sin esperar que Sheets recargue)
+                        // Actualización instantánea en pantalla
                         const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-                        reg['Ingredientes_IA'] = data.ingredientes;
-                        reg['Alergenos_IA'] = data.alergenos;
-                        if(uploadRes.url) reg['Evidencia'] = uploadRes.url; 
-                        
-                        const etapa = appData.etapas.find(e => e['Código'] == currentItemCode && e['Etapa'].toUpperCase() === 'INGREDIENTES');
-                        if (etapa) etapa['Estado'] = 'APROBADO';
+                        if(reg) {
+                            reg['Ingredientes_IA'] = data.ingredientes;
+                            reg['Alergenos_IA'] = data.alergenos;
+                            if(uploadRes.url) reg['Evidencia'] = uploadRes.url;
+                        }
                         
                         Swal.fire('¡Éxito!', 'Etiqueta validada y guardada correctamente.', 'success');
-                        
-                        // Refresca la vista inmediatamente con los datos recién inyectados
-                        openDetail(currentItemCode); 
+                        loadData(); 
                     }
-                } else throw new Error(resultAI.message || "Error al procesar la IA.");
+                } else throw new Error(resultAI.message || "Error en la IA.");
             } catch (error) {
                 Swal.fire('Atención', error.message, 'warning');
             }
@@ -425,38 +407,24 @@
             const imgView = document.getElementById('scanned-image-view');
             if (!imgView.src || imgView.classList.contains('hidden')) return;
             Swal.fire({
-                title: '<span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-mouse"></i> Scroll para zoom, Click para arrastrar</span>',
-                html: `<div id="zoom-container" class="flex justify-center items-center bg-slate-900 rounded-lg h-[70vh] relative overflow-hidden shadow-inner"><img id="zoom-img" src="${imgView.src}" class="max-w-full max-h-full object-contain pointer-events-none" style="transform-origin: center; transform: scale(1) translate(0, 0);"></div>`,
-                width: '85%', showConfirmButton: false, showCloseButton: true, padding: '1em', background: '#f8fafc',
-                didOpen: () => {
-                    const container = document.getElementById('zoom-container'), img = document.getElementById('zoom-img');
-                    let scale = 1, panning = false, pointX = 0, pointY = 0, startX = 0, startY = 0;
-                    container.addEventListener('wheel', (e) => { e.preventDefault(); scale += e.deltaY > 0 ? -0.15 : 0.15; scale = Math.min(Math.max(1, scale), 5); if(scale === 1) { pointX = 0; pointY = 0; } img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; });
-                    container.addEventListener('mousedown', (e) => { if(scale > 1) { panning = true; startX = e.clientX - pointX; startY = e.clientY - pointY; }});
-                    container.addEventListener('mousemove', (e) => { if (panning) { e.preventDefault(); pointX = e.clientX - startX; pointY = e.clientY - startY; img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; }});
-                    container.addEventListener('mouseup', () => panning = false); container.addEventListener('mouseleave', () => panning = false);
-                }
+                title: '<span class="text-sm font-bold text-slate-600">Visor de Etiqueta</span>',
+                html: `<div class="flex justify-center items-center bg-slate-900 rounded-lg h-[70vh]"><img src="${imgView.src}" class="max-w-full max-h-full object-contain"></div>`,
+                width: '85%', showConfirmButton: false, showCloseButton: true, background: '#f8fafc'
             });
         }
 
         function gestionarEtapa(codigo, etapaNombre, estadoActual) {
-            Swal.fire({ title: `<span class="text-base font-black">Evaluación: ${etapaNombre}</span>`, html: `<div class="mt-4"><select id="swal-eval" class="w-full p-3 border border-slate-300 rounded-lg text-sm font-bold text-slate-700 bg-slate-50 outline-none focus:border-secondary"><option value="APROBADO" ${estadoActual==='APROBADO'?'selected':''}>✅ CUMPLE (Aprobado)</option><option value="CON ALERTA" ${estadoActual==='CON ALERTA'?'selected':''}>⚠️ NO CUMPLE (Alerta)</option><option value="PENDIENTE" ${estadoActual==='PENDIENTE'?'selected':''}>⏳ PENDIENTE</option></select></div>`, showCancelButton: true, confirmButtonText: 'Guardar Estado', cancelButtonText: 'Cancelar', confirmButtonColor: '#3b82f6', preConfirm: () => document.getElementById('swal-eval').value
+            Swal.fire({ title: `<span class="text-base font-black">Evaluación: ${etapaNombre}</span>`, html: `<div class="mt-4"><select id="swal-eval" class="w-full p-3 border border-slate-300 rounded-lg text-sm font-bold text-slate-700 bg-slate-50 outline-none"><option value="APROBADO" ${estadoActual==='APROBADO'?'selected':''}>✅ CUMPLE</option><option value="CON ALERTA" ${estadoActual==='CON ALERTA'?'selected':''}>⚠️ NO CUMPLE</option><option value="PENDIENTE" ${estadoActual==='PENDIENTE'?'selected':''}>⏳ PENDIENTE</option></select></div>`, showCancelButton: true, confirmButtonText: 'Guardar', cancelButtonText: 'Cancelar', confirmButtonColor: '#3b82f6', preConfirm: () => document.getElementById('swal-eval').value
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({ title: 'Guardando etapa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: result.value });
-                    
-                    // Actualización optimista
-                    const etapa = appData.etapas.find(e => e['Código'] == codigo && e['Etapa'].toUpperCase() === etapaNombre.toUpperCase());
-                    if (etapa) etapa['Estado'] = result.value;
-                    
-                    Swal.close();
-                    openDetail(codigo);
+                    loadData();
                 }
             });
         }
 
-        function openNewMaterialModal() { Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets por ahora.', icon: 'info' }); }
+        function openNewMaterialModal() { Swal.fire({ title: 'Información', text: 'Añada nuevos registros directamente en Google Sheets.', icon: 'info' }); }
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
@@ -466,7 +434,7 @@
             let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl shadow-inner"><strong class="text-yellow-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-seedling mr-1"></i> Ingredientes detectados:</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl shadow-inner"><strong class="text-red-900 block mb-1 text-xs font-black tracking-wider uppercase"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Subir imagen diferente (Modificar)</button></div></div>`, 
+                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados:</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div><div class="pt-4 border-t border-slate-200"><button onclick="triggerFileMod()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg flex justify-center items-center gap-2 text-sm"><i class="fa-solid fa-upload"></i> Reemplazar etiqueta (Modificar)</button></div></div>`, 
                 showConfirmButton: false, showCloseButton: true, width: '500px'
             }); 
         }
