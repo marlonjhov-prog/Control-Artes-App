@@ -338,7 +338,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA CON IA ---
+        // --- VALIDACIÓN DE DUPLICIDAD Y SUBIDA ---
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
@@ -381,42 +381,39 @@
             Swal.fire({ title: 'Analizando con IA...', html: `Extrayendo datos de la etiqueta para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: mimeType, base64: base64Data, materialName: materialName });
+                // 1. Subir primero la imagen a Google Drive y guardar la URL para asegurar que el enlace esté disponible
+                let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
                 
-                if (resultAI.status === 'success') {
-                    const data = resultAI.data || {};
-                    let proceed = true;
+                // 2. Analizar con IA
+                const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: mimeType, base64: base64Data, materialName: materialName });
+                const data = resultAI.status === 'success' ? resultAI.data : {};
 
-                    // Validación estricta de coincidencia con SAP
-                    if (data.coincide === false || data.coincide === "false") {
-                        const confirm = await Swal.fire({ 
-                            title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', 
-                            html: `La etiqueta escaneada no corresponde al producto.<br>Detectado en imagen: <b>${data.productoDetectado || "Desconocido"}</b>.<br>Esperado en SAP: <b>${materialName}</b>.<br><br>¿Deseas forzar la aprobación bajo tu responsabilidad?`, 
-                            icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true 
-                        });
-                        proceed = confirm.isConfirmed;
-                    }
+                let proceed = true;
+                if (data.coincide === false || data.coincide === "false") {
+                    const confirm = await Swal.fire({ 
+                        title: '<span class="text-xl font-black text-danger">⚠️ ALERTA DE CALIDAD</span>', 
+                        html: `La etiqueta escaneada no corresponde al producto.<br>Detectado: <b>${data.productoDetectado || "Desconocido"}</b>.<br>Esperado en SAP: <b>${materialName}</b>.<br><br>¿Deseas forzar la aprobación?`, 
+                        icon: 'warning', showCancelButton: true, confirmButtonText: 'Forzar carga', cancelButtonText: 'Cancelar', confirmButtonColor: '#ef4444', cancelButtonColor: '#3b82f6', reverseButtons: true 
+                    });
+                    proceed = confirm.isConfirmed;
+                }
 
-                    if (proceed) {
-                        Swal.fire({ title: 'Guardando auditoría en la nube...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                        
-                        let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
-                        await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
-                        await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
-                        
-                        const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-                        if(reg) {
-                            reg['Ingredientes_IA'] = data.ingredientes;
-                            reg['Alergenos_IA'] = data.alergenos;
-                            if(uploadRes.url) reg['Evidencia'] = uploadRes.url;
-                        }
-                        
-                        Swal.fire('¡Éxito!', 'Etiqueta validada y guardada correctamente.', 'success');
-                        loadData(); 
+                if (proceed) {
+                    await fetchGAS({ action: 'saveAIResult', codigo: currentItemCode, ingredientes: data.ingredientes, alergenos: data.alergenos });
+                    await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
+                    
+                    const reg = appData.registros.find(r => r['Código'] == currentItemCode);
+                    if(reg) {
+                        reg['Ingredientes_IA'] = data.ingredientes;
+                        reg['Alergenos_IA'] = data.alergenos;
+                        if(uploadRes.url) reg['Evidencia'] = uploadRes.url;
                     }
-                } else throw new Error(resultAI.message || "Error en la IA.");
+                    
+                    Swal.fire('¡Éxito!', 'Etiqueta validada, guardada y link de Drive generado correctamente.', 'success');
+                    loadData(); 
+                }
             } catch (error) {
-                Swal.fire('Atención', error.message, 'warning');
+                Swal.fire('Atención', 'Ocurrió un error al procesar la imagen: ' + error.message, 'warning');
             }
         }
 
