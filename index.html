@@ -105,13 +105,13 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA + BOTÓN GOOGLE DRIVE PERMANENTE -->
+                <!-- VISOR DE EVIDENCIA Y ENLACE DE DRIVE PARA AUDITORÍA MULTIPLES MÁQUINAS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
-                    <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[260px] flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer mb-3" onclick="openImageZoom()">
+                    <div class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[240px] flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer mb-3" onclick="openImageZoom()">
                         <div id="no-evidence-msg" class="text-center p-4">
                             <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
                             <p class="text-sm font-medium text-slate-500">Sin evidencia visual</p>
@@ -125,7 +125,7 @@
                         </div>
                     </div>
                     
-                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO PARA AUDITORÍA -->
+                    <!-- ENLACE DE GOOGLE DRIVE DIRECTO Y PERMANENTE PARA AUDITORES -->
                     <a id="drive-fallback-link" href="#" target="_blank" class="hidden w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-2.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-sm">
                         <i class="fa-brands fa-google-drive text-lg"></i> Abrir Etiqueta Original en Google Drive
                     </a>
@@ -246,7 +246,9 @@
         function extractDirectImageUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+            if (match && match[1]) {
+                return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+            }
             return url;
         }
 
@@ -276,7 +278,17 @@
             const zoomOverlay = document.getElementById('zoom-overlay');
             const driveLink = document.getElementById('drive-fallback-link');
             
-            let urlOrigen = registro['Evidencia'] || registro['Evidencia_URL'] || registro['Imagen'] || registro['URL Evidencia'] || '';
+            // BUSCADOR INTELIGENTE DE URL (Independiente del nombre de la columna en Google Sheets/Supabase)
+            let urlOrigen = '';
+            for (let key in registro) {
+                let k = key.toLowerCase();
+                let val = registro[key];
+                if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) {
+                    urlOrigen = val;
+                    break;
+                }
+            }
+
             let urlDirecta = extractDirectImageUrl(urlOrigen);
 
             if (urlDirecta) {
@@ -284,18 +296,17 @@
                 imgView.classList.remove('hidden');
                 zoomOverlay.classList.remove('hidden');
                 noImgMsg.classList.add('hidden');
-                
-                if (urlOrigen.includes('http')) {
-                    driveLink.href = urlOrigen;
-                    driveLink.classList.remove('hidden');
-                } else {
-                    driveLink.classList.add('hidden');
-                }
             } else {
                 imgView.src = ''; 
                 imgView.classList.add('hidden');
                 zoomOverlay.classList.add('hidden');
                 noImgMsg.classList.remove('hidden');
+            }
+
+            if (urlOrigen && urlOrigen.startsWith('http')) {
+                driveLink.href = urlOrigen;
+                driveLink.classList.remove('hidden');
+            } else {
                 driveLink.classList.add('hidden');
             }
 
@@ -342,9 +353,17 @@
         function triggerFileMod() {
             Swal.close();
             const reg = appData.registros.find(r => r['Código'] == currentItemCode);
-            let urlDB = reg['Evidencia'] || reg['Evidencia_URL'] || reg['Imagen'] || reg['URL Evidencia'] || '';
+            let urlDB = '';
+            for (let key in reg) {
+                let k = key.toLowerCase();
+                let val = reg[key];
+                if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) {
+                    urlDB = val;
+                    break;
+                }
+            }
             
-            if (urlDB.includes('http')) {
+            if (urlDB) {
                 Swal.fire({
                     title: '⚠️ Etiqueta ya registrada',
                     text: 'Este lote ya cuenta con una etiqueta analizada. ¿Deseas reemplazarla y volver a ejecutar el análisis IA?',
@@ -381,10 +400,7 @@
             Swal.fire({ title: 'Analizando con IA...', html: `Extrayendo datos de la etiqueta para:<br><b class="text-secondary">${materialName}</b>`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
-                // 1. Subir primero la imagen a Google Drive y guardar la URL para asegurar que el enlace esté disponible
                 let uploadRes = await fetchGAS({ action: 'uploadImage', codigo: currentItemCode, fileName: `${currentItemCode}_IMG.jpg`, mimeType: mimeType, base64: base64Data });
-                
-                // 2. Analizar con IA
                 const resultAI = await fetchGAS({ action: 'analyzeImage', mimeType: mimeType, base64: base64Data, materialName: materialName });
                 const data = resultAI.status === 'success' ? resultAI.data : {};
 
