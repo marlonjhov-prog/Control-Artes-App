@@ -105,7 +105,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                 
-                <!-- VISOR DE EVIDENCIA BLINDADO (SIN OPCIÓN DE SOBREESCRIBIR) -->
+                <!-- VISOR DE EVIDENCIA BLINDADO -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -113,7 +113,6 @@
                     
                     <div id="image-container-ui" class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[240px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300">
                         
-                        <!-- ESTADO 1: SIN IMAGEN (Dropzone invitadora activa) -->
                         <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
                             <div class="w-16 h-16 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-3 shadow-sm border border-blue-100">
                                 <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
@@ -122,11 +121,9 @@
                             <p class="text-xs text-slate-400 mt-1">Haz clic para analizar con IA</p>
                         </div>
 
-                        <!-- ESTADO 2: CON IMAGEN CARGADA (Botón bloqueado) -->
                         <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-emerald-50 border-2 border-emerald-100">
                             <i class="fa-solid fa-circle-check text-4xl text-accent mb-3 shadow-sm rounded-full bg-white"></i>
                             <p class="text-sm font-bold text-emerald-800">Evidencia Cargada Permanentemente</p>
-                            
                             <a id="drive-file-link" href="#" target="_blank" class="mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-5 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-md">
                                 <i class="fa-solid fa-up-right-from-square text-secondary"></i> Ver Imagen Original
                             </a>
@@ -149,7 +146,7 @@
                     </div>
                     <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
                         <i class="fa-solid fa-shield-halved mt-0.5"></i>
-                        <p><strong>Inspección Automática IA:</strong> Validación inteligente estricta en SAP.</p>
+                        <p><strong>Inspección Automática IA:</strong> Optimizado con Compresión Front-End para Alta Velocidad.</p>
                     </div>
                 </div>
             </div>
@@ -188,7 +185,7 @@
                     renderTable();
                     
                     if(currentItemCode) {
-                        openDetail(currentItemCode); // Refresca la vista si el usuario está dentro
+                        openDetail(currentItemCode); 
                     } else {
                         document.getElementById('loading-spinner').classList.add('hidden');
                         document.getElementById('dashboard-view').classList.remove('hidden');
@@ -295,16 +292,15 @@
                 if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; break; }
             }
 
-            // BLINDAJE DE EVIDENCIA: Si existe URL, se bloquea la subida.
             if (urlOrigen) {
                 stateNoImage.classList.add('hidden');
                 stateHasImage.classList.remove('hidden');
                 driveFileLink.href = getDriveFileViewUrl(urlOrigen);
-                stateNoImage.onclick = null; // Desactiva clic
+                stateNoImage.onclick = null; 
             } else {
                 stateNoImage.classList.remove('hidden');
                 stateHasImage.classList.add('hidden');
-                stateNoImage.onclick = () => document.getElementById('fileInput').click(); // Habilita clic solo si está vacío
+                stateNoImage.onclick = () => document.getElementById('fileInput').click(); 
             }
 
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
@@ -313,7 +309,6 @@
 
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase()) || { Estado: 'PENDIENTE' };
-                
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && !ingText.includes('Error') && ingText.length > 5) {
                     etapaObj.Estado = 'APROBADO';
                 }
@@ -325,7 +320,6 @@
 
                 let botonHTML = '';
                 if (nombreEtapa.toLowerCase() === 'ingredientes') {
-                    // Si ya hay evidencia o está aprobado, solo deja visualizar.
                     if (urlOrigen || isApproved) {
                         botonHTML = `<button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-eye"></i> Visualizar IA</button>`;
                     } else {
@@ -349,13 +343,47 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
+        // =========================================================================
+        // MOTOR DE COMPRESIÓN DE IMÁGENES (FRONTEND)
+        // Reduce imágenes de 5MB a ~150KB al instante. Evita el colapso de la API (503).
+        // =========================================================================
         function handleFileSelect(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) { uploadImageAndAnalyze(e.target.result.split(',')[1], file.type); }
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            Swal.fire({ title: 'Optimizando imagen...', html: 'Preparando alta velocidad', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1000; // Limita a 1000px de ancho/alto (ideal para IA)
+                    const MAX_HEIGHT = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convierte y comprime la imagen a JPEG de calidad 0.7 (Reduce drásticamente el peso)
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    const base64 = dataUrl.split(',')[1];
+
+                    Swal.close();
+                    uploadImageAndAnalyze(base64, 'image/jpeg'); // Envía la imagen ligera
+                }
+                img.src = e.target.result;
             }
+            reader.readAsDataURL(file);
             event.target.value = "";
         }
 
@@ -383,7 +411,7 @@
                 await fetchGAS({ action: 'updateEtapa', codigo: currentItemCode, etapa: 'Ingredientes', estado: 'APROBADO' });
                 
                 Swal.fire('¡Éxito!', 'Evidencia validada y guardada permanentemente.', 'success');
-                loadData(); // Resincroniza para actualizar UI (KPIs e interfaz de bloqueo)
+                loadData(); 
 
             } catch (error) {
                 Swal.fire('Error Técnico', error.message, 'error');
@@ -396,13 +424,12 @@
                 if (result.isConfirmed) {
                     Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     await fetchGAS({ action: 'updateEtapa', codigo: codigo, etapa: etapaNombre, estado: result.value });
-                    loadData(); // Resincroniza UI y KPIs automáticamente
+                    loadData(); 
                     Swal.close();
                 }
             });
         }
 
-        // --- FUNCIÓN DE NUEVO MATERIAL CON FORMULARIO REAL ---
         function openNewMaterialModal() {
             Swal.fire({
                 title: '<span class="text-lg font-black text-slate-800"><i class="fa-solid fa-plus-circle text-accent"></i> Nuevo Material</span>',
@@ -424,7 +451,7 @@
                     Swal.fire({ title: 'Creando registro...', text: 'Configurando etapas de auditoría', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     await fetchGAS({ action: 'addMaterial', codigo: result.value.codigo, material: result.value.material, proveedor: result.value.proveedor });
                     Swal.fire('Creado', 'El nuevo material está listo para auditarse.', 'success');
-                    loadData(); // Refresca la tabla y los KPIs
+                    loadData(); 
                 }
             });
         }
@@ -466,8 +493,6 @@
             const reg = appData.registros.find(r => r['Código'] == currentItemCode); 
             let ingText = reg['Ingredientes_IA'] || reg['Ingredientes IA'] || reg['Ingredientes'] || 'N/A';
             let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
-            
-            // Modal de solo lectura (Se removió el botón de reemplazar evidencia)
             Swal.fire({ 
                 title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
                 html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados (Literal completo):</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div></div>`, 
