@@ -35,6 +35,7 @@
             <p class="text-slate-500 text-sm font-medium">Sincronizando base de datos...</p>
         </div>
 
+        <!-- VISTA DASHBOARD (BANDEJA) -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
@@ -76,7 +77,9 @@
             </div>
         </div>
 
+        <!-- VISTA DE DETALLE -->
         <div id="detail-view" class="hidden flex-col gap-4">
+            
             <div class="flex items-center justify-between">
                 <button onclick="showDashboard()" class="text-slate-600 hover:text-primary text-sm border border-slate-300 px-4 py-1.5 rounded-lg bg-white shadow-sm font-semibold flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Volver a Bandeja
@@ -87,75 +90,87 @@
                 </div>
             </div>
             
-            <div class="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center border-l-4 border-l-secondary shadow-sm">
-                <div>
-                    <h2 class="text-lg font-black text-slate-800" id="detail-material"></h2>
-                    <p class="text-xs text-slate-500 font-medium">Auditoría y Liberación de Calidad</p>
+            <!-- CABECERA REDISEÑADA CON IMAGEN DEL PRODUCTO -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-secondary shadow-sm gap-4">
+                <div class="flex items-center gap-5 w-full">
+                    <!-- CONTENEDOR DE LA IMAGEN ESTÁTICA -->
+                    <div class="w-20 h-28 bg-slate-50 rounded-lg border border-slate-200 shadow-sm flex items-center justify-center p-1 overflow-hidden">
+                        <!-- NOTA: Reemplaza esta URL de abajo con la URL directa de la foto de tu producto -->
+                        <img id="static-product-image" src="https://drive.google.com/file/d/1nr1QN_Mfvts2AMCzvTqm_qr-5M4hUVIA/view?usp=sharing" onerror="this.src='https://via.placeholder.com/150x200.png?text=NUTRI'" alt="Producto" class="max-h-full max-w-full object-contain">
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight" id="detail-material"></h2>
+                        <p class="text-xs text-slate-500 font-medium mt-1 uppercase">Auditoría y Liberación de Calidad</p>
+                    </div>
                 </div>
-                <div class="text-right bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
-                    <span class="text-[10px] text-slate-500 uppercase font-extrabold block mb-0.5">Avance Lote</span>
-                    <span class="text-xl font-black text-secondary leading-none transition-all duration-500" id="detail-progress">0%</span>
+                <div class="text-right bg-slate-50 px-5 py-3 rounded-lg border border-slate-200 flex-shrink-0">
+                    <span class="text-[10px] text-slate-500 uppercase font-extrabold block mb-1">Avance Lote</span>
+                    <span class="text-3xl font-black text-secondary leading-none transition-all duration-500" id="detail-progress">0%</span>
                 </div>
             </div>
 
+            <!-- FLUJO DE APROBACIÓN -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                 <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Aprobación</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-2 md:grid-cols-6 gap-3"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+            <!-- DASHBOARD INFERIOR: EVIDENCIA | INGREDIENTES | ALÉRGENOS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                 
-                <!-- VISUALIZADOR DE IMAGEN (RESTAURADO Y BLINDADO) -->
+                <!-- 1. VISOR DE EVIDENCIA BLINDADA (COMPACTO Y OSCURO) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
-                    <div id="image-container-ui" class="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 h-[240px] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 p-2">
+                    <div id="image-container-ui" class="border rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 min-h-[160px]">
                         
-                        <!-- ESTADO 1: NO HAY IMAGEN, MOSTRAR BOTÓN DE SUBIDA -->
-                        <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
-                            <div class="w-16 h-16 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-3 shadow-sm border border-blue-100">
-                                <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                        <!-- ESTADO 1: SIN IMAGEN (Botón de subida) -->
+                        <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-4">
+                            <div class="w-12 h-12 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-2 shadow-sm border border-blue-100">
+                                <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
                             </div>
-                            <p class="text-sm font-bold text-slate-700">Subir Evidencia de Etiqueta</p>
-                            <p class="text-xs text-slate-400 mt-1">Haz clic para analizar con IA</p>
+                            <p class="text-xs font-bold text-slate-700 text-center">Subir Evidencia</p>
                         </div>
 
-                        <!-- ESTADO 2: SÍ HAY IMAGEN (BLOQUEADO + PREVISUALIZACIÓN EN VIVO) -->
-                        <div id="state-has-image" class="hidden w-full h-full relative group rounded-lg overflow-hidden bg-white">
-                            <!-- Aquí se muestra la imagen real -->
-                            <img id="scanned-image-view" src="" class="w-full h-full object-contain">
-                            
-                            <!-- Overlay que aparece al poner el mouse encima con el link a Drive -->
-                            <div class="absolute inset-0 bg-slate-900/70 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <i class="fa-solid fa-lock text-3xl text-accent mb-2"></i>
-                                <p class="text-white font-bold text-sm mb-4">Evidencia Blindada</p>
-                                <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-2 px-5 rounded-lg flex justify-center items-center gap-2 transition-colors text-sm shadow-md">
-                                    <i class="fa-solid fa-up-right-from-square"></i> Abrir Original en Drive
-                                </a>
-                            </div>
+                        <!-- ESTADO 2: EVIDENCIA BLINDADA (Estilo Tarjeta Oscura con Candado) -->
+                        <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-600 rounded-xl p-4 shadow-inner">
+                            <i class="fa-solid fa-lock text-3xl text-accent mb-2"></i>
+                            <p class="text-white font-bold text-sm mb-4">Evidencia Blindada</p>
+                            <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-xs shadow-md w-full max-w-[180px]">
+                                <i class="fa-solid fa-up-right-from-square"></i> Abrir Original
+                            </a>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- ALÉRGENOS -->
+                <!-- 2. VISOR DE INGREDIENTES IA (NUEVO) -->
+                <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
+                        <i class="fa-solid fa-list-check text-secondary"></i> Ingredientes IA
+                    </h3>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[160px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view">
+                        <!-- El texto con palabras resaltadas aparecerá aquí -->
+                    </div>
+                </div>
+
+                <!-- 3. ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos Detectados
+                            <i class="fa-solid fa-triangle-exclamation text-warning"></i> Alérgenos
                         </h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-leche" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Leche</span></label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-soya" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Soya</span></label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-gluten" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Gluten</span></label>
-                            <label class="flex items-center p-3 border rounded-lg bg-slate-50 cursor-pointer"><input type="checkbox" id="chk-lactosa" class="w-4 h-4 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-sm">Lactosa</span></label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center p-2 border rounded bg-slate-50"><input type="checkbox" id="chk-leche" class="w-3.5 h-3.5 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-xs">Leche</span></label>
+                            <label class="flex items-center p-2 border rounded bg-slate-50"><input type="checkbox" id="chk-soya" class="w-3.5 h-3.5 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-xs">Soya</span></label>
+                            <label class="flex items-center p-2 border rounded bg-slate-50"><input type="checkbox" id="chk-gluten" class="w-3.5 h-3.5 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-xs">Gluten</span></label>
+                            <label class="flex items-center p-2 border rounded bg-slate-50"><input type="checkbox" id="chk-lactosa" class="w-3.5 h-3.5 text-secondary rounded pointer-events-none"><span class="ml-2 font-bold text-slate-700 text-xs">Lactosa</span></label>
                         </div>
                     </div>
-                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 mt-4 flex items-start gap-2">
+                    <div class="bg-blue-50 border border-blue-200 p-2 rounded text-[10px] text-blue-800 mt-3 flex items-start gap-1.5 leading-tight">
                         <i class="fa-solid fa-shield-halved mt-0.5"></i>
-                        <p><strong>Inspección Automática IA:</strong> Optimizado con Compresión Front-End para Alta Velocidad.</p>
+                        <p><strong>Inspección IA Automática:</strong> Análisis rígido de etiquetado en SAP.</p>
                     </div>
                 </div>
             </div>
@@ -193,9 +208,8 @@
                     renderKPIs();
                     renderTable();
                     
-                    if(currentItemCode) {
-                        openDetail(currentItemCode); 
-                    } else {
+                    if(currentItemCode) { openDetail(currentItemCode); } 
+                    else {
                         document.getElementById('loading-spinner').classList.add('hidden');
                         document.getElementById('dashboard-view').classList.remove('hidden');
                     }
@@ -256,7 +270,6 @@
             });
         }
 
-        // Obtiene el enlace para ver SOLAMENTE LA IMAGEN (no la carpeta)
         function getDriveFileViewUrl(url) {
             if (!url) return '';
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
@@ -264,12 +277,18 @@
             return url;
         }
 
-        // Obtiene un enlace renderizable para la etiqueta <img src="..."> en pantalla
-        function getDriveImageUrl(url) {
-            if (!url) return '';
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) { return `https://drive.google.com/uc?export=view&id=${match[1]}`; }
-            return url;
+        // MOTOR DE RESALTADO INTELIGENTE (Pinta de rojo las palabras peligrosas)
+        function formatIngredientsText(text) {
+            if (!text || text.trim() === '') {
+                return '<span class="text-slate-400 italic text-center block mt-4">No hay datos de ingredientes. Sube la evidencia para escanear.</span>';
+            }
+            const keywords = ['leche', 'soya', 'soja', 'gluten', 'trigo', 'lactosa', 'lácteo', 'lacteo', 'suero'];
+            let highlighted = text;
+            keywords.forEach(kw => {
+                const regex = new RegExp(`(${kw})`, 'gi');
+                highlighted = highlighted.replace(regex, '<strong class="text-danger font-black uppercase bg-red-100 px-1 rounded">$1</strong>');
+            });
+            return highlighted;
         }
 
         function openDetail(codigo) {
@@ -283,9 +302,14 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
+            // Procesado de Ingredientes y Alérgenos
             let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
             
+            // Inyecta el texto de ingredientes en el panel central con formato
+            document.getElementById('ingredientes-text-view').innerHTML = formatIngredientsText(ingText);
+
+            // Checks de Alérgenos
             document.getElementById('chk-leche').checked = false;
             document.getElementById('chk-soya').checked = false;
             document.getElementById('chk-gluten').checked = false;
@@ -302,7 +326,6 @@
             const stateNoImage = document.getElementById('state-no-image');
             const stateHasImage = document.getElementById('state-has-image');
             const driveFileLink = document.getElementById('drive-file-link');
-            const scannedImageView = document.getElementById('scanned-image-view');
             
             let urlOrigen = '';
             for (let key in registro) {
@@ -311,20 +334,17 @@
                 if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; break; }
             }
 
-            // BLINDAJE DE EVIDENCIA + VISUALIZACIÓN DIRECTA EN PANTALLA
+            // UI DE EVIDENCIA BLINDADA
             if (urlOrigen) {
                 stateNoImage.classList.add('hidden');
                 stateHasImage.classList.remove('hidden');
-                
-                // Muestra la imagen en pantalla y configura el botón del drive
-                scannedImageView.src = getDriveImageUrl(urlOrigen);
+                stateHasImage.classList.add('flex'); // Asegura que se centre
                 driveFileLink.href = getDriveFileViewUrl(urlOrigen);
-                
-                stateNoImage.onclick = null; // Bloquea totalmente que se pueda subir algo de nuevo
+                stateNoImage.onclick = null; 
             } else {
                 stateNoImage.classList.remove('hidden');
                 stateHasImage.classList.add('hidden');
-                scannedImageView.src = '';
+                stateHasImage.classList.remove('flex');
                 stateNoImage.onclick = () => document.getElementById('fileInput').click(); 
             }
 
@@ -343,22 +363,17 @@
                 let badgeBg = isApproved ? 'bg-emerald-50 border-emerald-300' : (isWarning ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200');
                 let iconColor = isApproved ? 'text-accent' : (isWarning ? 'text-warning' : 'text-slate-400');
 
+                // Si es la etapa de ingredientes, ya no ponemos botón porque ya se ve en el dashboard
                 let botonHTML = '';
-                if (nombreEtapa.toLowerCase() === 'ingredientes') {
-                    if (urlOrigen || isApproved) {
-                        botonHTML = `<button onclick="openIngredientsModal()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-eye"></i> Visualizar IA</button>`;
-                    } else {
-                        botonHTML = `<button onclick="document.getElementById('fileInput').click()" class="mt-3 w-full bg-secondary hover:bg-blue-600 text-white text-[11px] font-bold py-1.5 rounded shadow-sm transition-colors"><i class="fa-solid fa-upload"></i> Subir para IA</button>`;
-                    }
-                } else {
-                    botonHTML = `<button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${etapaObj.Estado}')" class="mt-3 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-bold py-1.5 rounded transition-colors"><i class="fa-solid fa-pen-to-square"></i> Gestionar</button>`;
+                if (nombreEtapa.toLowerCase() !== 'ingredientes') {
+                    botonHTML = `<button onclick="gestionarEtapa('${codigo}', '${nombreEtapa}', '${etapaObj.Estado}')" class="mt-3 w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-bold py-1 rounded transition-colors"><i class="fa-solid fa-pen-to-square"></i> Evaluar</button>`;
                 }
 
                 etapasContainer.innerHTML += `
-                    <div class="p-3 rounded-xl border ${badgeBg} flex flex-col justify-between shadow-sm transition-all duration-300 hover:shadow-md">
+                    <div class="p-2 rounded-lg border ${badgeBg} flex flex-col justify-between shadow-sm transition-all duration-300">
                         <div>
-                            <div class="flex justify-between items-center mb-2"><i class="fa-solid fa-circle-check ${iconColor} text-sm"></i><span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-white border shadow-sm">${etapaObj.Estado}</span></div>
-                            <h4 class="font-bold text-xs uppercase text-slate-800 mb-0.5">${nombreEtapa}</h4>
+                            <div class="flex justify-between items-center mb-1"><i class="fa-solid fa-circle-check ${iconColor} text-xs"></i><span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-white border shadow-sm">${etapaObj.Estado}</span></div>
+                            <h4 class="font-bold text-[10px] uppercase text-slate-800 leading-tight">${nombreEtapa}</h4>
                         </div>
                         ${botonHTML}
                     </div>`;
@@ -368,7 +383,7 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // COMPRESIÓN DE IMÁGENES AL VUELO
+        // MOTOR DE COMPRESIÓN FRONTEND
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -510,18 +525,6 @@
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
 
-        function openIngredientsModal() { 
-            const reg = appData.registros.find(r => r['Código'] == currentItemCode); 
-            let ingText = reg['Ingredientes_IA'] || reg['Ingredientes IA'] || reg['Ingredientes'] || 'N/A';
-            let aleText = reg['Alergenos_IA'] || reg['Alérgenos_IA'] || reg['Alergenos'] || 'N/A';
-            
-            // SIN BOTÓN DE SUBIDA (Blindado)
-            Swal.fire({ 
-                title: '<div class="text-lg font-black text-slate-800 flex items-center justify-center gap-2"><i class="fa-solid fa-microscope text-secondary"></i> Reporte de Análisis IA</div>', 
-                html: `<div class="text-left mt-4 space-y-4"><div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl"><strong class="text-yellow-900 block mb-1 text-xs font-black uppercase">Ingredientes detectados (Literal completo):</strong><p class="text-slate-700 text-sm italic">${ingText}</p></div><div class="p-4 bg-red-50 border border-red-200 rounded-xl"><strong class="text-red-900 block mb-1 text-xs font-black uppercase">Alérgenos extraídos:</strong><p class="text-red-800 text-sm font-bold">${aleText}</p></div></div>`, 
-                showConfirmButton: true, confirmButtonText: 'Cerrar', confirmButtonColor: '#0f172a', showCloseButton: true, width: '500px'
-            }); 
-        }
     </script>
 </body>
 </html>
