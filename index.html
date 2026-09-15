@@ -90,10 +90,10 @@
                 </div>
             </div>
             
-            <!-- CABECERA CON IMAGEN VINCLULADA DESDE GOOGLE SHEETS (ARTE_ID) -->
+            <!-- CABECERA CON IMAGEN Y ZOOM INTERACTIVO -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-secondary shadow-sm gap-4">
                 <div class="flex items-center gap-5 w-full">
-                    <!-- CONTENEDOR DINÁMICO DE LA IMAGEN DESDE DRIVE -->
+                    <!-- CONTENEDOR DE MINIATURA CON EFECTO ZOOM HOVER -->
                     <div id="product-image-box" class="w-20 h-28 rounded-lg border border-slate-300 shadow-sm flex items-center justify-center p-1 overflow-hidden bg-slate-50 flex-shrink-0">
                         <!-- Se llena dinámicamente -->
                     </div>
@@ -171,6 +171,21 @@
             </div>
         </div>
         
+        <!-- MODAL FLOTANTE DE ZOOM CON SCROLL Y ARRASTRE -->
+        <div id="zoomModal" class="fixed inset-0 bg-slate-950/85 z-[9999] hidden flex-col items-center justify-center p-4">
+            <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
+                <span id="zoomModalTitle" class="text-white font-bold text-xs bg-slate-900/85 px-3 py-2 rounded-lg border border-slate-700 shadow-lg"></span>
+                <button onclick="resetZoom()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-xs font-bold border border-slate-700 transition-colors shadow-lg"><i class="fa-solid fa-rotate-left mr-1"></i> Restablecer</button>
+                <button onclick="closeZoomModal()" class="bg-danger hover:bg-red-600 text-white w-9 h-9 rounded-lg flex items-center justify-center text-sm transition-colors shadow-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="relative w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing" id="zoomContainer" onwheel="handleZoom(event)" onmousedown="startPan(event)" onmousemove="doPan(event)" onmouseup="endPan()" onmouseleave="endPan()">
+                <img id="zoomImage" src="" class="max-h-[90vh] max-w-[90vw] object-contain transition-transform duration-75 select-none pointer-events-none" style="transform: scale(1) translate(0px, 0px);">
+            </div>
+            <div class="absolute bottom-4 text-slate-300 text-xs bg-slate-900/90 px-4 py-2 rounded-full border border-slate-800 pointer-events-none shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-secondary"></i> Gira la rueda del mouse para hacer zoom y arrastra la imagen para moverte.
+            </div>
+        </div>
+
         <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
     </main>
 
@@ -179,6 +194,14 @@
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
+
+        // Variables de control para Zoom y Paneo
+        let currentScale = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
 
         async function fetchGAS(payload) {
             const res = await fetch(SCRIPT_URL, {
@@ -272,15 +295,78 @@
             return url;
         }
 
-        // =========================================================================
-        // PARSER INTELIGENTE DE DRIVE (Extrae ID si pegas URL completa o ID directo)
-        // =========================================================================
         function getDriveDirectImageUrl(inputVal) {
             if (!inputVal) return '';
             let val = inputVal.toString().trim();
             const match = val.match(/\/d\/([a-zA-Z0-9_-]+)/) || val.match(/id=([a-zA-Z0-9_-]+)/);
             let fileId = (match && match[1]) ? match[1] : val;
             return `https://lh3.googleusercontent.com/d/${fileId}`;
+        }
+
+        // =========================================================================
+        // FUNCIONES DE CONTROL DEL VISOR DE ZOOM INTERACTIVO
+        // =========================================================================
+        function openProductZoomModal(imgUrl, materialName) {
+            if (!imgUrl) return;
+            const modal = document.getElementById('zoomModal');
+            const img = document.getElementById('zoomImage');
+            const titleEl = document.getElementById('zoomModalTitle');
+            
+            img.src = imgUrl;
+            titleEl.innerText = materialName;
+            currentScale = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeZoomModal() {
+            const modal = document.getElementById('zoomModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function resetZoom() {
+            currentScale = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        }
+
+        function handleZoom(event) {
+            event.preventDefault();
+            const zoomIntensity = 0.15;
+            if (event.deltaY < 0) {
+                currentScale = Math.min(currentScale + zoomIntensity, 6); // Zoom máx 6x
+            } else {
+                currentScale = Math.max(currentScale - zoomIntensity, 0.5); // Zoom mín 0.5x
+            }
+            updateTransform();
+        }
+
+        function startPan(event) {
+            isDragging = true;
+            startX = event.clientX - panX;
+            startY = event.clientY - panY;
+        }
+
+        function doPan(event) {
+            if (!isDragging) return;
+            panX = event.clientX - startX;
+            panY = event.clientY - startY;
+            updateTransform();
+        }
+
+        function endPan() {
+            isDragging = false;
+        }
+
+        function updateTransform() {
+            const img = document.getElementById('zoomImage');
+            img.style.transform = `scale(${currentScale}) translate(${panX / currentScale}px, ${panY / currentScale}px)`;
         }
 
         // MOTOR DE RESALTADO INTELIGENTE
@@ -308,13 +394,19 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
-            // LECTURA DINÁMICA DE LA IMAGEN DESDE GOOGLE SHEETS (Columna Arte_ID o Arte ID)
+            // RENDERIZADO DE MINIATURA CON ACCESO A ZOOM INTERACTIVO
             const imageBox = document.getElementById('product-image-box');
             let arteVal = registro['Arte_ID'] || registro['Arte ID'] || registro['Arte'] || '';
             let directImgUrl = getDriveDirectImageUrl(arteVal);
 
             if (directImgUrl && arteVal.length > 3) {
-                imageBox.innerHTML = `<img src="${directImgUrl}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-b from-sky-400 to-blue-600 rounded-lg flex flex-col items-center justify-center p-2 text-white\\'><i class=\\'fa-solid fa-cube text-2xl mb-1\\'></i><span class=\\'text-[10px] font-black tracking-widest uppercase\\'>NUTRI</span><span class=\\'text-[8px] bg-white/20 px-1.5 rounded mt-1\\'>1L UHT</span></div>';" alt="Producto" class="max-h-full max-w-full object-contain">`;
+                imageBox.innerHTML = `
+                    <div onclick="openProductZoomModal('${directImgUrl}', '${registro['Material']}')" class="w-full h-full relative group cursor-pointer flex items-center justify-center">
+                        <img src="${directImgUrl}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-b from-sky-400 to-blue-600 rounded-lg flex flex-col items-center justify-center p-2 text-white\\'><i class=\\'fa-solid fa-cube text-2xl mb-1\\'></i><span class=\\'text-[10px] font-black tracking-widest uppercase\\'>NUTRI</span><span class=\\'text-[8px] bg-white/20 px-1.5 rounded mt-1\\'>1L UHT</span></div>';" alt="Producto" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                            <i class="fa-solid fa-magnifying-glass-plus text-white text-lg drop-shadow-md"></i>
+                        </div>
+                    </div>`;
             } else {
                 imageBox.innerHTML = `
                     <div class="w-full h-full bg-gradient-to-b from-sky-400 to-blue-600 rounded-lg flex flex-col items-center justify-center p-2 text-white">
