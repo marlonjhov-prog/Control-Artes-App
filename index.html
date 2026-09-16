@@ -189,7 +189,8 @@
     </main>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxh1u2VVyf9e1pz_DCB-mAmTZeREniQqR_uhqM0mS4CYoToI5TYMogr5Oz6ob5WHZXi/exec';
+        // AQUÍ ESTÁ EL NUEVO ENLACE DE TU APLICACIÓN
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq-8W88Zxg4f05Uvt47byXthFVPmdgHZSX_8Z1SrF_yDXfDbEQKPYhWYbK36XcqYVQ/exec';
         
         let appData = { registros: [], etapas: [] };
         let currentItemCode = null;
@@ -301,7 +302,6 @@
             return `https://lh3.googleusercontent.com/d/${fileId}`;
         }
 
-        // MANEJADOR DE ERROR DE IMAGEN (Evita pantalla en blanco si Drive bloquea el acceso)
         function handleImageLoadError(imgElement) {
             imgElement.style.display = 'none';
             if(!document.getElementById('drive-error-msg')) {
@@ -314,16 +314,12 @@
             }
         }
 
-        // =========================================================================
-        // ZOOM INTERACTIVO BLINDADO
-        // =========================================================================
         function openProductZoomModal(imgUrl, materialName) {
             if (!imgUrl) return;
             const modal = document.getElementById('zoomModal');
             const img = document.getElementById('zoomImage');
             const titleEl = document.getElementById('zoomModalTitle');
             
-            // Limpia errores previos si los hubo
             const oldErr = document.getElementById('drive-error-msg');
             if(oldErr) oldErr.remove();
             img.style.display = 'block';
