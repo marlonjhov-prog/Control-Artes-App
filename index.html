@@ -47,11 +47,8 @@
                     </div>
                     <div class="relative flex flex-col items-center justify-center mt-3 mr-2">
                         <svg viewBox="0 0 100 50" class="w-24 h-12 drop-shadow-sm overflow-visible">
-                            <!-- Arco fondo gris -->
                             <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"></path>
-                            <!-- Arco de progreso dinámico -->
                             <path id="kpi-gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6" class="transition-all duration-1000 ease-out"></path>
-                            <!-- Aguja/Pluma interactiva -->
                             <g id="kpi-gauge-needle" class="transition-transform duration-1000 ease-out" style="transform-origin: 50px 50px; transform: rotate(-90deg);">
                                 <polygon points="48,50 52,50 50,12" fill="#475569"></polygon>
                                 <circle cx="50" cy="50" r="5" fill="#1e293b"></circle>
@@ -99,7 +96,7 @@
             </div>
         </div>
 
-        <!-- VISTA DE DETALLE (Se mantiene intacta) -->
+        <!-- VISTA DE DETALLE -->
         <div id="detail-view" class="hidden flex-col gap-4">
             
             <div class="flex items-center justify-between">
@@ -247,13 +244,26 @@
             } finally { document.getElementById('sync-icon').classList.remove('fa-spin'); }
         }
 
+        // --- CÁLCULO UNIFICADO DE AVANCE (CORRECCIÓN APLICADA) ---
         function calculateDynamicProgress(codigo) {
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
             const etapasItem = appData.etapas.filter(e => e['Código'] == codigo);
+            const registro = appData.registros.find(r => r['Código'] == codigo) || {};
+            
+            // Verificamos si la IA ya extrajo ingredientes
+            let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
             let aprobados = 0;
+            
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase());
-                if (etapaObj && etapaObj.Estado === 'APROBADO') aprobados++;
+                let estado = etapaObj ? etapaObj.Estado : 'PENDIENTE';
+                
+                // REGLA DINÁMICA: Si hay ingredientes detectados por la IA, se aprueba automáticamente.
+                if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && !ingText.includes('Error') && ingText.length > 5) {
+                    estado = 'APROBADO';
+                }
+
+                if (estado === 'APROBADO') aprobados++;
             });
             return Math.round((aprobados / etapasFijas.length) * 100);
         }
@@ -273,27 +283,23 @@
             document.getElementById('kpi-approved-count').innerText = aprobados;
             document.getElementById('kpi-pending-count').innerText = pendientes;
 
-            // LÓGICA DE ANIMACIÓN DEL VELOCÍMETRO
             const gaugeFill = document.getElementById('kpi-gauge-fill');
             const gaugeNeedle = document.getElementById('kpi-gauge-needle');
             
             if (gaugeFill && gaugeNeedle) {
-                // Colores del velocímetro
-                let gaugeColor = '#ef4444'; // Peligro (Rojo)
-                if (avgProgress === 100) gaugeColor = '#10b981'; // Éxito (Verde)
-                else if (avgProgress >= 50) gaugeColor = '#f59e0b'; // Alerta (Amarillo)
-                else if (avgProgress > 0) gaugeColor = '#3b82f6'; // Proceso (Azul)
+                let gaugeColor = '#ef4444'; 
+                if (avgProgress === 100) gaugeColor = '#10b981'; 
+                else if (avgProgress >= 50) gaugeColor = '#f59e0b'; 
+                else if (avgProgress > 0) gaugeColor = '#3b82f6'; 
                 
                 gaugeFill.setAttribute('stroke', gaugeColor);
                 
-                // Animación del arco (125.6 es la longitud matemática del semicírculo r=40)
                 let dashOffset = 125.6 - (125.6 * avgProgress / 100);
                 setTimeout(() => {
                     gaugeFill.style.strokeDashoffset = dashOffset;
-                    // Animación de la aguja: de -90 grados (0%) a +90 grados (100%)
                     let needleRotation = -90 + (avgProgress * 1.8);
                     gaugeNeedle.style.transform = `rotate(${needleRotation}deg)`;
-                }, 100); // Pequeño retraso para garantizar que la transición CSS dispare
+                }, 100); 
             }
         }
 
@@ -303,13 +309,11 @@
             appData.registros.forEach(reg => {
                 let av = calculateDynamicProgress(reg['Código']); 
                 
-                // LÓGICA DE BARRAS SEGMENTADAS + SEMÁFORO
-                // Como son 6 etapas, calculamos cuántos "bloques" deben pintarse
                 let numBlocks = Math.round((av / 100) * 6);
                 
-                let colorClass = 'bg-danger'; // Menos de 34% (Rojo)
-                if (av === 100) { colorClass = 'bg-accent'; } // 100% Liberado (Verde)
-                else if (av >= 34) { colorClass = 'bg-warning'; } // En proceso (Amarillo)
+                let colorClass = 'bg-danger'; 
+                if (av === 100) { colorClass = 'bg-accent'; } 
+                else if (av >= 34) { colorClass = 'bg-warning'; } 
                 
                 let segmentsHtml = '';
                 for (let i = 0; i < 6; i++) {
