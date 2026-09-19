@@ -127,31 +127,32 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                 
-                <!-- 1. EVIDENCIA BLINDADA (AHORA CON BOTÓN DE REEMPLAZO) -->
+                <!-- 1. EVIDENCIA Y ARTE (DISEÑO VISUAL REESTILIZADO Y MODERNO) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
-                    <div id="image-container-ui" class="border rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 min-h-[160px]">
+                    <div id="image-container-ui" class="border border-slate-200 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 flex-grow flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 min-h-[170px] p-4 shadow-inner">
                         
-                        <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-4">
-                            <div class="w-12 h-12 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-2 shadow-sm border border-blue-100">
+                        <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/50 rounded-xl transition-colors p-4">
+                            <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mb-2 shadow-sm border border-blue-400/30">
                                 <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
                             </div>
-                            <p class="text-xs font-bold text-slate-700 text-center">Subir Evidencia</p>
+                            <p class="text-xs font-bold text-slate-200 text-center">Subir Evidencia</p>
                         </div>
                         
-                        <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-600 rounded-xl p-4 shadow-inner">
-                            <i class="fa-solid fa-lock text-2xl text-accent mb-1"></i>
-                            <p class="text-white font-bold text-sm mb-3">Evidencia Blindada</p>
-                            <div class="flex flex-col gap-2 w-full max-w-[180px]">
-                                <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-1.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-xs shadow-md w-full">
+                        <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center rounded-xl p-2">
+                            <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-1.5 border border-emerald-500/30 shadow-sm">
+                                <i class="fa-solid fa-shield-halved text-lg"></i>
+                            </div>
+                            <p class="text-white font-black text-xs uppercase tracking-wider mb-3">Evidencia Blindada</p>
+                            <div class="flex flex-col gap-2 w-full max-w-[190px]">
+                                <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg flex justify-center items-center gap-2 transition-all text-xs shadow-md w-full">
                                     <i class="fa-solid fa-up-right-from-square"></i> Abrir Original
                                 </a>
-                                <!-- NUEVO BOTÓN PARA FORZAR RE-ESCANEO -->
-                                <button onclick="document.getElementById('fileInput').click()" class="bg-slate-700 hover:bg-slate-500 text-white font-bold py-1.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-xs shadow-md w-full border border-slate-500">
-                                    <i class="fa-solid fa-rotate"></i> Reemplazar
+                                <button onclick="document.getElementById('fileInput').click()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold py-1.5 px-3 rounded-lg flex justify-center items-center gap-2 transition-all text-xs shadow-sm w-full border border-slate-600">
+                                    <i class="fa-solid fa-rotate"></i> Reemplazar Archivo
                                 </button>
                             </div>
                         </div>
@@ -163,7 +164,7 @@
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-list-check text-secondary"></i> Ingredientes IA
                     </h3>
-                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[160px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view"></div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[170px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view"></div>
                 </div>
 
                 <!-- 3. ALÉRGENOS -->
@@ -258,7 +259,6 @@
             const etapasItem = appData.etapas.filter(e => e['Código'] == codigo);
             const registro = appData.registros.find(r => r['Código'] == codigo) || {};
             
-            // Búsqueda inteligente de columnas en Excel
             let ingText = '';
             for (let k in registro) {
                 let upperK = k.toUpperCase();
@@ -388,19 +388,14 @@
             }
         }
 
-        // =========================================================
-        // MOTOR DE RESALTADO EN ROJO
-        // =========================================================
         function formatIngredientsText(text) {
             if (!text || text.trim() === '') {
                 return '<span class="text-slate-400 italic text-center block mt-4">No hay datos de ingredientes. Sube la evidencia para escanear.</span>';
             }
             const keywords = ['leche', 'soya', 'soja', 'gluten', 'trigo', 'lactosa', 'lácteo', 'lacteo', 'suero', 'lactasa'];
             let highlighted = text;
-            
             keywords.forEach(kw => {
                 const regex = new RegExp(`(${kw})`, 'gi');
-                // Aplica el color ROJO (text-danger) con fondo resaltado
                 highlighted = highlighted.replace(regex, '<strong class="text-danger font-black uppercase bg-red-100 px-1 rounded">$1</strong>');
             });
             return highlighted;
@@ -417,7 +412,6 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
-            // Búsqueda inteligente de columnas sin importar variaciones de nombre
             let ingText = '';
             let aleText = '';
             let urlOrigen = '';
@@ -453,14 +447,12 @@
                     </div>`;
             }
 
-            // Unificar ingredientes y alérgenos para el resaltado visual
             let fullTextToFormat = ingText;
             if (aleText && aleText.trim() !== '') {
                 fullTextToFormat += `<br><br><span class="text-[10px] text-slate-400 uppercase font-bold">Alérgenos Detectados:</span><br>${aleText}`;
             }
             document.getElementById('ingredientes-text-view').innerHTML = formatIngredientsText(fullTextToFormat);
 
-            // Validar Checks lógicos
             let combinedSource = (ingText + ' ' + aleText).toUpperCase();
             document.getElementById('chk-leche').checked = combinedSource.includes('LECHE') || combinedSource.includes('LÁCTEO') || combinedSource.includes('LACTEO') || combinedSource.includes('SUERO');
             document.getElementById('chk-soya').checked = combinedSource.includes('SOYA') || combinedSource.includes('SOJA');
@@ -518,7 +510,6 @@
             document.getElementById('detail-view').classList.remove('hidden');
         }
 
-        // CONTROLADORES DE MODAL ZOOM (Se mantienen igual)
         function openProductZoomModal(imgUrl, materialName) {
             if (!imgUrl) return;
             const modal = document.getElementById('zoomModal');
