@@ -71,12 +71,12 @@
                 <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
                     
-                    <!-- BUSCADOR REESTRUCTURADO SIN INTERFERENCIAS -->
+                    <!-- BUSCADOR FINO Y LIMPIO -->
                     <div class="relative w-full sm:w-72">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                             <i class="fa-solid fa-magnifying-glass text-xs"></i>
                         </span>
-                        <input type="text" id="smartSearchInput" placeholder="Buscar código o material..." oninput="handleSmartSearch(event)" class="w-full pl-10 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg outline-none focus:border-secondary shadow-sm transition-colors">
+                        <input type="text" id="smartSearchInput" placeholder="Filtrar por código, material o proveedor..." oninput="handleSmartSearch(event)" class="w-full pl-10 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg outline-none focus:border-secondary shadow-sm transition-colors">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -339,6 +339,11 @@
 
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
+                // Añadimos atributos data para búsqueda ultra fina y rápida
+                tr.setAttribute('data-codigo', reg['Código'] || '');
+                tr.setAttribute('data-material', (reg['Material'] || '').toUpperCase());
+                tr.setAttribute('data-proveedor', (reg['Proveedor'] || '').toUpperCase());
+
                 tr.innerHTML = `
                     <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2 py-1 rounded text-xs font-bold border">${reg['Código']}</span></td>
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
@@ -360,7 +365,6 @@
                 tbody.appendChild(tr);
             });
             
-            // Mantener el filtro de búsqueda activo si el usuario ya había escrito algo
             const searchInput = document.getElementById('smartSearchInput');
             if(searchInput && searchInput.value) {
                 handleSmartSearch({ target: searchInput });
@@ -660,7 +664,7 @@
                 title: '<span class="text-lg font-black text-slate-800">Modificar Datos</span>',
                 html: `<div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700"><div><label>Código SAP (Fijo):</label><input value="${registro['Código']}" disabled class="w-full p-2 border border-slate-200 rounded mt-1 bg-slate-100 text-slate-500 font-mono"></div><div><label>Material / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div><div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div></div>`,
                 showCancelButton: true, confirmButtonText: 'Guardar Cambios', cancelButtonText: 'Cancelar', confirmButtonColor: '#3b82f6',
-                preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor').value } }
+                preConfirm: () => { return { material: document.getElementById('swal-edit-material').value, proveedor: document.getElementById('swal-edit-proveedor'].value } }
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({ title: 'Actualizando registro...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -685,12 +689,24 @@
 
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         
-        // FUNCIÓN DE FILTRADO INSTANTÁNEO EN TIEMPO REAL
+        // --- BÚSQUEDA FINA Y PRECISA ---
         function handleSmartSearch(e) { 
-            const q = e.target.value.toUpperCase().trim(); 
+            const query = e.target.value.toUpperCase().trim();
+            const terms = query.split(/\s+/); // Separa las palabras escritas para buscar coincidencias exactas por término
             const tr = document.getElementById('registrosTable').getElementsByTagName('tr'); 
+            
             for(let i = 1; i < tr.length; i++) { 
-                tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; 
+                const codigo = tr[i].getAttribute('data-codigo') || '';
+                const material = tr[i].getAttribute('data-material') || '';
+                const proveedor = tr[i].getAttribute('data-proveedor') || '';
+                
+                // Combina exclusivamente los campos clave del producto
+                const combinedText = `${codigo} ${material} ${proveedor}`;
+                
+                // Verifica que todos los términos escritos estén presentes en el registro
+                const matches = terms.every(term => combinedText.includes(term));
+                
+                tr[i].style.display = matches ? "" : "none"; 
             } 
         }
 
