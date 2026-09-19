@@ -38,14 +38,36 @@
         <!-- VISTA DASHBOARD (BANDEJA) -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div><p class="text-xs font-bold text-slate-400 uppercase">Avance Global</p><h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3></div>
-                    <i class="fa-solid fa-chart-line text-3xl text-secondary opacity-50"></i>
+                
+                <!-- 1. KPI VELOCÍMETRO (AVANCE GLOBAL) -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between overflow-hidden">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-1">Avance Global</p>
+                        <h3 class="text-3xl font-black text-slate-800" id="kpi-avg-progress">0%</h3>
+                    </div>
+                    <div class="relative flex flex-col items-center justify-center mt-3 mr-2">
+                        <svg viewBox="0 0 100 50" class="w-24 h-12 drop-shadow-sm overflow-visible">
+                            <!-- Arco fondo gris -->
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"></path>
+                            <!-- Arco de progreso dinámico -->
+                            <path id="kpi-gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6" class="transition-all duration-1000 ease-out"></path>
+                            <!-- Aguja/Pluma interactiva -->
+                            <g id="kpi-gauge-needle" class="transition-transform duration-1000 ease-out" style="transform-origin: 50px 50px; transform: rotate(-90deg);">
+                                <polygon points="48,50 52,50 50,12" fill="#475569"></polygon>
+                                <circle cx="50" cy="50" r="5" fill="#1e293b"></circle>
+                                <circle cx="50" cy="50" r="2" fill="#ffffff"></circle>
+                            </g>
+                        </svg>
+                    </div>
                 </div>
+
+                <!-- 2. KPI LOTES LIBERADOS -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div><p class="text-xs font-bold text-slate-400 uppercase">Lotes Liberados</p><h3 class="text-3xl font-black text-accent" id="kpi-approved-count">0</h3></div>
                     <i class="fa-solid fa-check-double text-3xl text-accent opacity-50"></i>
                 </div>
+
+                <!-- 3. KPI EN REVISIÓN -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div><p class="text-xs font-bold text-slate-400 uppercase">En Revisión / Alertas</p><h3 class="text-3xl font-black text-warning" id="kpi-pending-count">0</h3></div>
                     <i class="fa-solid fa-clock-rotate-left text-3xl text-warning opacity-50"></i>
@@ -67,7 +89,7 @@
                                 <th class="p-4 font-bold">Código</th>
                                 <th class="p-4 font-bold">Material</th>
                                 <th class="p-4 font-bold">Proveedor</th>
-                                <th class="p-4 font-bold">Avance</th>
+                                <th class="p-4 font-bold">Avance Etapas</th>
                                 <th class="p-4 font-bold text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -77,7 +99,7 @@
             </div>
         </div>
 
-        <!-- VISTA DE DETALLE -->
+        <!-- VISTA DE DETALLE (Se mantiene intacta) -->
         <div id="detail-view" class="hidden flex-col gap-4">
             
             <div class="flex items-center justify-between">
@@ -90,11 +112,9 @@
                 </div>
             </div>
             
-            <!-- CABECERA CON IMAGEN Y ZOOM BLINDADO -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row justify-between items-center border-l-4 border-l-secondary shadow-sm gap-4">
                 <div class="flex items-center gap-5 w-full">
                     <div id="product-image-box" class="w-20 h-28 rounded-lg border border-slate-300 shadow-sm flex items-center justify-center p-1 overflow-hidden bg-slate-50 flex-shrink-0">
-                        <!-- Se llena dinámicamente -->
                     </div>
                     <div>
                         <h2 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight" id="detail-material"></h2>
@@ -107,30 +127,24 @@
                 </div>
             </div>
 
-            <!-- FLUJO DE APROBACIÓN -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                 <h3 class="text-xs font-bold text-slate-800 mb-3 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-secondary"></i> Flujo de Aprobación</h3>
                 <div id="etapas-horizontal-container" class="grid grid-cols-2 md:grid-cols-6 gap-3"></div>
             </div>
 
-            <!-- DASHBOARD INFERIOR -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
-                
-                <!-- 1. EVIDENCIA BLINDADA -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
                     <div id="image-container-ui" class="border rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 min-h-[160px]">
-                        
                         <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-4">
                             <div class="w-12 h-12 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-2 shadow-sm border border-blue-100">
                                 <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
                             </div>
                             <p class="text-xs font-bold text-slate-700 text-center">Subir Evidencia</p>
                         </div>
-
                         <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-600 rounded-xl p-4 shadow-inner">
                             <i class="fa-solid fa-lock text-3xl text-accent mb-2"></i>
                             <p class="text-white font-bold text-sm mb-4">Evidencia Blindada</p>
@@ -141,7 +155,6 @@
                     </div>
                 </div>
 
-                <!-- 2. INGREDIENTES IA -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-list-check text-secondary"></i> Ingredientes IA
@@ -149,7 +162,6 @@
                     <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[160px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view"></div>
                 </div>
 
-                <!-- 3. ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -170,7 +182,6 @@
             </div>
         </div>
         
-        <!-- MODAL FLOTANTE DE ZOOM BLINDADO CONTRA ERRORES -->
         <div id="zoomModal" class="fixed inset-0 bg-slate-950/85 z-[9999] hidden flex-col items-center justify-center p-4">
             <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
                 <span id="zoomModalTitle" class="text-white font-bold text-xs bg-slate-900/85 px-3 py-2 rounded-lg border border-slate-700 shadow-lg"></span>
@@ -189,7 +200,6 @@
     </main>
 
     <script>
-        // AQUÍ ESTÁ EL NUEVO ENLACE DE TU APLICACIÓN
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq-8W88Zxg4f05Uvt47byXthFVPmdgHZSX_8Z1SrF_yDXfDbEQKPYhWYbK36XcqYVQ/exec';
         
         let appData = { registros: [], etapas: [] };
@@ -257,9 +267,34 @@
                 sumaAvance += av;
                 if (av === 100) aprobados++; else pendientes++;
             });
-            document.getElementById('kpi-avg-progress').innerText = `${Math.round(sumaAvance / total)}%`;
+            
+            let avgProgress = Math.round(sumaAvance / total);
+            document.getElementById('kpi-avg-progress').innerText = `${avgProgress}%`;
             document.getElementById('kpi-approved-count').innerText = aprobados;
             document.getElementById('kpi-pending-count').innerText = pendientes;
+
+            // LÓGICA DE ANIMACIÓN DEL VELOCÍMETRO
+            const gaugeFill = document.getElementById('kpi-gauge-fill');
+            const gaugeNeedle = document.getElementById('kpi-gauge-needle');
+            
+            if (gaugeFill && gaugeNeedle) {
+                // Colores del velocímetro
+                let gaugeColor = '#ef4444'; // Peligro (Rojo)
+                if (avgProgress === 100) gaugeColor = '#10b981'; // Éxito (Verde)
+                else if (avgProgress >= 50) gaugeColor = '#f59e0b'; // Alerta (Amarillo)
+                else if (avgProgress > 0) gaugeColor = '#3b82f6'; // Proceso (Azul)
+                
+                gaugeFill.setAttribute('stroke', gaugeColor);
+                
+                // Animación del arco (125.6 es la longitud matemática del semicírculo r=40)
+                let dashOffset = 125.6 - (125.6 * avgProgress / 100);
+                setTimeout(() => {
+                    gaugeFill.style.strokeDashoffset = dashOffset;
+                    // Animación de la aguja: de -90 grados (0%) a +90 grados (100%)
+                    let needleRotation = -90 + (avgProgress * 1.8);
+                    gaugeNeedle.style.transform = `rotate(${needleRotation}deg)`;
+                }, 100); // Pequeño retraso para garantizar que la transición CSS dispare
+            }
         }
 
         function renderTable() {
@@ -267,14 +302,36 @@
             tbody.innerHTML = '';
             appData.registros.forEach(reg => {
                 let av = calculateDynamicProgress(reg['Código']); 
-                let bgAvance = av === 100 ? 'bg-accent' : (av > 40 ? 'bg-secondary' : 'bg-warning');
+                
+                // LÓGICA DE BARRAS SEGMENTADAS + SEMÁFORO
+                // Como son 6 etapas, calculamos cuántos "bloques" deben pintarse
+                let numBlocks = Math.round((av / 100) * 6);
+                
+                let colorClass = 'bg-danger'; // Menos de 34% (Rojo)
+                if (av === 100) { colorClass = 'bg-accent'; } // 100% Liberado (Verde)
+                else if (av >= 34) { colorClass = 'bg-warning'; } // En proceso (Amarillo)
+                
+                let segmentsHtml = '';
+                for (let i = 0; i < 6; i++) {
+                    if (i < numBlocks) {
+                        segmentsHtml += `<div class="h-2.5 flex-1 rounded-sm ${colorClass} transition-colors"></div>`;
+                    } else {
+                        segmentsHtml += `<div class="h-2.5 flex-1 rounded-sm bg-slate-200"></div>`;
+                    }
+                }
+
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
                 tr.innerHTML = `
                     <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2 py-1 rounded text-xs font-bold border">${reg['Código']}</span></td>
                     <td class="p-4 font-black text-slate-800 text-sm">${reg['Material']}</td>
                     <td class="p-4 text-slate-600 text-xs font-medium">${reg['Proveedor']}</td>
-                    <td class="p-4"><div class="flex items-center gap-3"><div class="w-20 bg-slate-200 rounded-full h-2 shadow-inner overflow-hidden"><div class="${bgAvance} h-full rounded-full transition-all" style="width: ${av}%"></div></div><span class="text-xs font-black text-slate-700 w-8">${av}%</span></div></td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-24 flex gap-0.5">${segmentsHtml}</div>
+                            <span class="text-xs font-black text-slate-700 w-8">${av}%</span>
+                        </div>
+                    </td>
                     <td class="p-4 text-center">
                         <div class="flex gap-1.5 justify-center">
                             <button onclick="openDetail('${reg['Código']}')" class="bg-secondary text-white hover:bg-blue-700 px-3 py-1.5 rounded text-[11px] font-bold shadow-sm" title="Auditar"><i class="fa-solid fa-microscope"></i> Auditar</button>
