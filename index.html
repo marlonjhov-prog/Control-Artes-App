@@ -35,11 +35,9 @@
             <p class="text-slate-500 text-sm font-medium">Sincronizando base de datos...</p>
         </div>
 
-        <!-- VISTA DASHBOARD (BANDEJA) -->
+        <!-- VISTA DASHBOARD -->
         <div id="dashboard-view" class="hidden flex-col gap-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                <!-- 1. KPI VELOCÍMETRO (AVANCE GLOBAL) -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between overflow-hidden">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase mb-1">Avance Global</p>
@@ -58,13 +56,11 @@
                     </div>
                 </div>
 
-                <!-- 2. KPI LOTES LIBERADOS -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div><p class="text-xs font-bold text-slate-400 uppercase">Lotes Liberados</p><h3 class="text-3xl font-black text-accent" id="kpi-approved-count">0</h3></div>
                     <i class="fa-solid fa-check-double text-3xl text-accent opacity-50"></i>
                 </div>
 
-                <!-- 3. KPI EN REVISIÓN -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div><p class="text-xs font-bold text-slate-400 uppercase">En Revisión / Alertas</p><h3 class="text-3xl font-black text-warning" id="kpi-pending-count">0</h3></div>
                     <i class="fa-solid fa-clock-rotate-left text-3xl text-warning opacity-50"></i>
@@ -130,28 +126,39 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
+                
+                <!-- 1. EVIDENCIA BLINDADA (AHORA CON BOTÓN DE REEMPLAZO) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
                     </h3>
                     
                     <div id="image-container-ui" class="border rounded-xl bg-slate-50 flex-grow flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 min-h-[160px]">
+                        
                         <div id="state-no-image" class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors p-4">
                             <div class="w-12 h-12 bg-blue-50 text-secondary rounded-full flex items-center justify-center mb-2 shadow-sm border border-blue-100">
                                 <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
                             </div>
                             <p class="text-xs font-bold text-slate-700 text-center">Subir Evidencia</p>
                         </div>
+                        
                         <div id="state-has-image" class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-600 rounded-xl p-4 shadow-inner">
-                            <i class="fa-solid fa-lock text-3xl text-accent mb-2"></i>
-                            <p class="text-white font-bold text-sm mb-4">Evidencia Blindada</p>
-                            <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-xs shadow-md w-full max-w-[180px]">
-                                <i class="fa-solid fa-up-right-from-square"></i> Abrir Original
-                            </a>
+                            <i class="fa-solid fa-lock text-2xl text-accent mb-1"></i>
+                            <p class="text-white font-bold text-sm mb-3">Evidencia Blindada</p>
+                            <div class="flex flex-col gap-2 w-full max-w-[180px]">
+                                <a id="drive-file-link" href="#" target="_blank" class="bg-secondary hover:bg-blue-600 text-white font-bold py-1.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-xs shadow-md w-full">
+                                    <i class="fa-solid fa-up-right-from-square"></i> Abrir Original
+                                </a>
+                                <!-- NUEVO BOTÓN PARA FORZAR RE-ESCANEO -->
+                                <button onclick="document.getElementById('fileInput').click()" class="bg-slate-700 hover:bg-slate-500 text-white font-bold py-1.5 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors text-xs shadow-md w-full border border-slate-500">
+                                    <i class="fa-solid fa-rotate"></i> Reemplazar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- 2. INGREDIENTES IA -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-list-check text-secondary"></i> Ingredientes IA
@@ -159,6 +166,7 @@
                     <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[160px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view"></div>
                 </div>
 
+                <!-- 3. ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -179,6 +187,7 @@
             </div>
         </div>
         
+        <!-- MODAL DE ZOOM -->
         <div id="zoomModal" class="fixed inset-0 bg-slate-950/85 z-[9999] hidden flex-col items-center justify-center p-4">
             <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
                 <span id="zoomModalTitle" class="text-white font-bold text-xs bg-slate-900/85 px-3 py-2 rounded-lg border border-slate-700 shadow-lg"></span>
@@ -244,21 +253,26 @@
             } finally { document.getElementById('sync-icon').classList.remove('fa-spin'); }
         }
 
-        // --- CÁLCULO UNIFICADO DE AVANCE (CORRECCIÓN APLICADA) ---
         function calculateDynamicProgress(codigo) {
             const etapasFijas = ["Recepción", "Toma de muestras", "Ingredientes", "Ficha técnica", "Certificado de inscripción (CIA)", "Diagrama de flujo"];
             const etapasItem = appData.etapas.filter(e => e['Código'] == codigo);
             const registro = appData.registros.find(r => r['Código'] == codigo) || {};
             
-            // Verificamos si la IA ya extrajo ingredientes
-            let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
-            let aprobados = 0;
+            // Búsqueda inteligente de columnas en Excel
+            let ingText = '';
+            for (let k in registro) {
+                let upperK = k.toUpperCase();
+                if (upperK.includes('INGREDIENTES IA') || upperK.includes('INGREDIENTES_IA') || upperK === 'INGREDIENTES') {
+                    ingText = registro[k] || '';
+                    if(ingText) break;
+                }
+            }
             
+            let aprobados = 0;
             etapasFijas.forEach(nombreEtapa => {
                 let etapaObj = etapasItem.find(e => e['Etapa'].toUpperCase() === nombreEtapa.toUpperCase());
                 let estado = etapaObj ? etapaObj.Estado : 'PENDIENTE';
                 
-                // REGLA DINÁMICA: Si hay ingredientes detectados por la IA, se aprueba automáticamente.
                 if (nombreEtapa.toLowerCase() === 'ingredientes' && ingText && !ingText.includes('Error') && ingText.length > 5) {
                     estado = 'APROBADO';
                 }
@@ -310,7 +324,6 @@
                 let av = calculateDynamicProgress(reg['Código']); 
                 
                 let numBlocks = Math.round((av / 100) * 6);
-                
                 let colorClass = 'bg-danger'; 
                 if (av === 100) { colorClass = 'bg-accent'; } 
                 else if (av >= 34) { colorClass = 'bg-warning'; } 
@@ -375,81 +388,19 @@
             }
         }
 
-        function openProductZoomModal(imgUrl, materialName) {
-            if (!imgUrl) return;
-            const modal = document.getElementById('zoomModal');
-            const img = document.getElementById('zoomImage');
-            const titleEl = document.getElementById('zoomModalTitle');
-            
-            const oldErr = document.getElementById('drive-error-msg');
-            if(oldErr) oldErr.remove();
-            img.style.display = 'block';
-
-            img.src = imgUrl;
-            titleEl.innerText = materialName;
-            currentScale = 1;
-            panX = 0;
-            panY = 0;
-            updateTransform();
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeZoomModal() {
-            const modal = document.getElementById('zoomModal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-        }
-
-        function resetZoom() {
-            currentScale = 1;
-            panX = 0;
-            panY = 0;
-            updateTransform();
-        }
-
-        function handleZoom(event) {
-            event.preventDefault();
-            const zoomIntensity = 0.15;
-            if (event.deltaY < 0) {
-                currentScale = Math.min(currentScale + zoomIntensity, 6);
-            } else {
-                currentScale = Math.max(currentScale - zoomIntensity, 0.5);
-            }
-            updateTransform();
-        }
-
-        function startPan(event) {
-            isDragging = true;
-            startX = event.clientX - panX;
-            startY = event.clientY - panY;
-        }
-
-        function doPan(event) {
-            if (!isDragging) return;
-            panX = event.clientX - startX;
-            panY = event.clientY - startY;
-            updateTransform();
-        }
-
-        function endPan() {
-            isDragging = false;
-        }
-
-        function updateTransform() {
-            const img = document.getElementById('zoomImage');
-            img.style.transform = `scale(${currentScale}) translate(${panX / currentScale}px, ${panY / currentScale}px)`;
-        }
-
+        // =========================================================
+        // MOTOR DE RESALTADO EN ROJO
+        // =========================================================
         function formatIngredientsText(text) {
             if (!text || text.trim() === '') {
                 return '<span class="text-slate-400 italic text-center block mt-4">No hay datos de ingredientes. Sube la evidencia para escanear.</span>';
             }
             const keywords = ['leche', 'soya', 'soja', 'gluten', 'trigo', 'lactosa', 'lácteo', 'lacteo', 'suero', 'lactasa'];
             let highlighted = text;
+            
             keywords.forEach(kw => {
                 const regex = new RegExp(`(${kw})`, 'gi');
+                // Aplica el color ROJO (text-danger) con fondo resaltado
                 highlighted = highlighted.replace(regex, '<strong class="text-danger font-black uppercase bg-red-100 px-1 rounded">$1</strong>');
             });
             return highlighted;
@@ -466,8 +417,23 @@
             document.getElementById('detail-provider').innerText = registro['Proveedor'];
             document.getElementById('detail-progress').innerText = `${calculateDynamicProgress(codigo)}%`;
 
+            // Búsqueda inteligente de columnas sin importar variaciones de nombre
+            let ingText = '';
+            let aleText = '';
+            let urlOrigen = '';
+            let arteVal = '';
+
+            for (let key in registro) {
+                let k = key.toUpperCase();
+                let val = registro[key] || '';
+                
+                if (!ingText && (k.includes('INGREDIENTES IA') || k.includes('INGREDIENTES_IA') || k === 'INGREDIENTES')) { ingText = val; }
+                if (!aleText && (k.includes('ALERGENOS IA') || k.includes('ALÉRGENOS IA') || k.includes('ALERGENOS_IA') || k.includes('ALÉRGENOS_IA') || k === 'ALERGENOS' || k === 'ALÉRGENOS')) { aleText = val; }
+                if (!urlOrigen && (k.includes('EVIDENCIA') || k.includes('IMAGEN') || k.includes('URL')) && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; }
+                if (!arteVal && (k === 'ARTE_ID' || k === 'ARTE ID' || k === 'ARTE')) { arteVal = val; }
+            }
+
             const imageBox = document.getElementById('product-image-box');
-            let arteVal = registro['Arte_ID'] || registro['Arte ID'] || registro['Arte'] || '';
             let directImgUrl = getDriveDirectImageUrl(arteVal);
 
             if (directImgUrl && arteVal.length > 3) {
@@ -487,13 +453,15 @@
                     </div>`;
             }
 
-            let ingText = registro['Ingredientes_IA'] || registro['Ingredientes IA'] || registro['Ingredientes'] || '';
-            let aleText = registro['Alergenos_IA'] || registro['Alérgenos_IA'] || registro['Alergenos'] || '';
-            
-            document.getElementById('ingredientes-text-view').innerHTML = formatIngredientsText(ingText);
+            // Unificar ingredientes y alérgenos para el resaltado visual
+            let fullTextToFormat = ingText;
+            if (aleText && aleText.trim() !== '') {
+                fullTextToFormat += `<br><br><span class="text-[10px] text-slate-400 uppercase font-bold">Alérgenos Detectados:</span><br>${aleText}`;
+            }
+            document.getElementById('ingredientes-text-view').innerHTML = formatIngredientsText(fullTextToFormat);
 
+            // Validar Checks lógicos
             let combinedSource = (ingText + ' ' + aleText).toUpperCase();
-            
             document.getElementById('chk-leche').checked = combinedSource.includes('LECHE') || combinedSource.includes('LÁCTEO') || combinedSource.includes('LACTEO') || combinedSource.includes('SUERO');
             document.getElementById('chk-soya').checked = combinedSource.includes('SOYA') || combinedSource.includes('SOJA');
             document.getElementById('chk-gluten').checked = combinedSource.includes('GLUTEN') || combinedSource.includes('TRIGO');
@@ -502,13 +470,6 @@
             const stateNoImage = document.getElementById('state-no-image');
             const stateHasImage = document.getElementById('state-has-image');
             const driveFileLink = document.getElementById('drive-file-link');
-            
-            let urlOrigen = '';
-            for (let key in registro) {
-                let k = key.toLowerCase();
-                let val = registro[key];
-                if ((k.includes('evidencia') || k.includes('imagen') || k.includes('url')) && val && typeof val === 'string' && val.startsWith('http')) { urlOrigen = val; break; }
-            }
 
             if (urlOrigen) {
                 stateNoImage.classList.add('hidden');
@@ -556,6 +517,36 @@
             document.getElementById('dashboard-view').classList.add('hidden');
             document.getElementById('detail-view').classList.remove('hidden');
         }
+
+        // CONTROLADORES DE MODAL ZOOM (Se mantienen igual)
+        function openProductZoomModal(imgUrl, materialName) {
+            if (!imgUrl) return;
+            const modal = document.getElementById('zoomModal');
+            const img = document.getElementById('zoomImage');
+            const titleEl = document.getElementById('zoomModalTitle');
+            
+            const oldErr = document.getElementById('drive-error-msg');
+            if(oldErr) oldErr.remove();
+            img.style.display = 'block';
+
+            img.src = imgUrl;
+            titleEl.innerText = materialName;
+            currentScale = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeZoomModal() { const modal = document.getElementById('zoomModal'); modal.classList.remove('flex'); modal.classList.add('hidden'); }
+        function resetZoom() { currentScale = 1; panX = 0; panY = 0; updateTransform(); }
+        function handleZoom(event) { event.preventDefault(); const zoomIntensity = 0.15; if (event.deltaY < 0) { currentScale = Math.min(currentScale + zoomIntensity, 6); } else { currentScale = Math.max(currentScale - zoomIntensity, 0.5); } updateTransform(); }
+        function startPan(event) { isDragging = true; startX = event.clientX - panX; startY = event.clientY - panY; }
+        function doPan(event) { if (!isDragging) return; panX = event.clientX - startX; panY = event.clientY - startY; updateTransform(); }
+        function endPan() { isDragging = false; }
+        function updateTransform() { const img = document.getElementById('zoomImage'); img.style.transform = `scale(${currentScale}) translate(${panX / currentScale}px, ${panY / currentScale}px)`; }
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
