@@ -71,12 +71,12 @@
                 <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
                     
-                    <!-- BUSCADOR FINO Y LIMPIO -->
-                    <div class="relative w-full sm:w-72">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    <!-- BUSCADOR CON LUPA INTERACTIVA Y FOCO -->
+                    <div class="relative w-full sm:w-80 group">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 cursor-pointer text-slate-400 group-focus-within:text-secondary transition-colors" onclick="document.getElementById('smartSearchInput').focus()">
+                            <i class="fa-solid fa-magnifying-glass"></i>
                         </span>
-                        <input type="text" id="smartSearchInput" placeholder="Filtrar por código, material o proveedor..." oninput="handleSmartSearch(event)" class="w-full pl-10 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg outline-none focus:border-secondary shadow-sm transition-colors">
+                        <input type="text" id="smartSearchInput" placeholder="Buscar material, proveedor o código..." oninput="handleSmartSearch(event)" class="w-full pl-10 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg outline-none focus:border-secondary focus:ring-2 focus:ring-blue-100 shadow-sm transition-all">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -196,7 +196,8 @@
                 <button onclick="closeZoomModal()" class="bg-danger hover:bg-red-600 text-white w-9 h-9 rounded-lg flex items-center justify-center text-sm transition-colors shadow-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="relative w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing" id="zoomContainer" onwheel="handleZoom(event)" onmousedown="startPan(event)" onmousemove="doPan(event)" onmouseup="endPan()" onmouseleave="endPan()">
-                <img id="zoomImage" src="" onerror="handleImageLoadError(this)" class="max-h-[90vh] max-w-[90vw] object-contain transition-transform duration-75 select-none pointer-events-none" style="transform: scale(1) translate(0px, 0px);">
+                <!-- IMAGEN CON ATRIBUTO data-retries PARA AUTO-RECUPERACIÓN -->
+                <img id="zoomImage" src="" data-retries="0" onerror="handleImageLoadError(this)" class="max-h-[90vh] max-w-[90vw] object-contain transition-transform duration-75 select-none pointer-events-none" style="transform: scale(1) translate(0px, 0px);">
             </div>
             <div class="absolute bottom-4 text-slate-300 text-xs bg-slate-900/90 px-4 py-2 rounded-full border border-slate-800 pointer-events-none shadow-lg flex items-center gap-2">
                 <i class="fa-solid fa-circle-info text-secondary"></i> Gira la rueda del mouse para hacer zoom y arrastra la imagen para moverte.
@@ -339,9 +340,11 @@
 
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition-colors';
+                
+                // Atributos de búsqueda limpios
                 tr.setAttribute('data-codigo', reg['Código'] || '');
-                tr.setAttribute('data-material', (reg['Material'] || '').toUpperCase());
-                tr.setAttribute('data-proveedor', (reg['Proveedor'] || '').toUpperCase());
+                tr.setAttribute('data-material', (reg['Material'] || '').toLowerCase());
+                tr.setAttribute('data-proveedor', (reg['Proveedor'] || '').toLowerCase());
 
                 tr.innerHTML = `
                     <td class="p-4"><span class="font-mono text-slate-700 bg-slate-200 px-2 py-1 rounded text-xs font-bold border">${reg['Código']}</span></td>
@@ -385,15 +388,30 @@
             return `https://lh3.googleusercontent.com/d/${fileId}`;
         }
 
+        // ==========================================
+        // CORRECCIÓN 1: SISTEMA DE AUTO-RECUPERACIÓN DE IMÁGENES
+        // ==========================================
         function handleImageLoadError(imgElement) {
-            imgElement.style.display = 'none';
-            if(!document.getElementById('drive-error-msg')) {
-                const parent = imgElement.parentElement;
-                const errDiv = document.createElement('div');
-                errDiv.id = 'drive-error-msg';
-                errDiv.className = 'text-center p-4 text-white text-xs';
-                errDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-warning text-2xl mb-2"></i><br><strong>Acceso Denegado por Google Drive</strong><br>Verifica que el archivo tenga el permiso configurado como: <em>"Cualquier usuario con el enlace"</em>.';
-                parent.appendChild(errDiv);
+            let retries = parseInt(imgElement.getAttribute('data-retries') || '0');
+            
+            // Si la imagen falla porque Drive aún la está procesando, reintenta hasta 3 veces.
+            if (retries < 3) {
+                setTimeout(() => {
+                    imgElement.setAttribute('data-retries', retries + 1);
+                    // Agrega un parámetro aleatorio para burlar el caché del navegador
+                    let baseSrc = imgElement.src.split('?')[0];
+                    imgElement.src = baseSrc + '?t=' + new Date().getTime();
+                }, 2000); // Espera 2 segundos entre intentos
+            } else {
+                // Si definitivamente no carga después de 3 intentos, muestra caja bonita de error
+                imgElement.style.display = 'none';
+                let parent = imgElement.parentElement;
+                parent.innerHTML = `
+                    <div class="w-full h-full bg-slate-800 rounded-lg flex flex-col items-center justify-center p-3 text-white text-center shadow-inner border border-slate-700">
+                        <i class="fa-solid fa-cloud-arrow-down text-2xl mb-2 text-warning"></i>
+                        <span class="text-[10px] font-black uppercase">Procesando en Drive</span>
+                        <span class="text-[9px] text-slate-400 mt-1">La imagen se subió. Usa "Abrir Original" para verla mientras Google la renderiza.</span>
+                    </div>`;
             }
         }
 
@@ -442,7 +460,7 @@
             if (directImgUrl && arteVal.length > 3) {
                 imageBox.innerHTML = `
                     <div onclick="openProductZoomModal('${directImgUrl}', '${registro['Material']}')" class="w-full h-full relative group cursor-pointer flex items-center justify-center">
-                        <img src="${directImgUrl}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-b from-sky-400 to-blue-600 rounded-lg flex flex-col items-center justify-center p-2 text-white\\'><i class=\\'fa-solid fa-cube text-xl\\'></i></div>';" alt="Producto" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105">
+                        <img src="${directImgUrl}" data-retries="0" onerror="handleImageLoadError(this)" alt="Producto" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105">
                         <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                             <i class="fa-solid fa-magnifying-glass-plus text-white text-lg drop-shadow-md"></i>
                         </div>
@@ -525,10 +543,7 @@
             const img = document.getElementById('zoomImage');
             const titleEl = document.getElementById('zoomModalTitle');
             
-            const oldErr = document.getElementById('drive-error-msg');
-            if(oldErr) oldErr.remove();
             img.style.display = 'block';
-
             img.src = imgUrl;
             titleEl.innerText = materialName;
             currentScale = 1;
@@ -661,13 +676,17 @@
             if(!registro) return;
             Swal.fire({
                 title: '<span class="text-lg font-black text-slate-800">Modificar Datos</span>',
-                html: `<div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700"><div><label>Código SAP (Fijo):</label><input value="${registro['Código']}" disabled class="w-full p-2 border border-slate-200 rounded mt-1 bg-slate-100 text-slate-500 font-mono"></div><div><label>Material / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div><div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div></div>`,
+                html: `<div class="text-left space-y-3 mt-4 text-sm font-medium text-slate-700">
+                    <div><label>Código SAP (Fijo):</label><input value="${registro['Código']}" disabled class="w-full p-2 border border-slate-200 rounded mt-1 bg-slate-100 text-slate-500 font-mono"></div>
+                    <div><label>Material / Producto:</label><input id="swal-edit-material" value="${registro['Material']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div>
+                    <div><label>Proveedor:</label><input id="swal-edit-proveedor" value="${registro['Proveedor']}" class="w-full p-2 border border-slate-300 rounded mt-1 outline-none focus:border-secondary"></div>
+                </div>`,
                 showCancelButton: true, confirmButtonText: 'Guardar Cambios', cancelButtonText: 'Cancelar', confirmButtonColor: '#3b82f6',
-                preConfirm: () => { 
-                    return { 
-                        material: document.getElementById('swal-edit-material').value, 
-                        proveedor: document.getElementById('swal-edit-proveedor').value 
-                    } 
+                preConfirm: () => {
+                    return {
+                        material: document.getElementById('swal-edit-material').value,
+                        proveedor: document.getElementById('swal-edit-proveedor').value
+                    }
                 }
             }).then(async (result) => {
                 if (result.isConfirmed) {
@@ -693,17 +712,26 @@
 
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         
-        // --- BÚSQUEDA FINA Y PRECISA ---
+        // ==========================================
+        // CORRECCIÓN 2: FILTRO INTELIGENTE CON LUPA
+        // ==========================================
         function handleSmartSearch(e) { 
-            const query = e.target.value.toUpperCase().trim();
-            const terms = query.split(/\s+/);
+            const query = e.target.value.toLowerCase().trim();
+            const terms = query.split(/\s+/); // Separa para buscar palabras sueltas inteligentemente
             const tr = document.getElementById('registrosTable').getElementsByTagName('tr'); 
             
             for(let i = 1; i < tr.length; i++) { 
-                const codigo = tr[i].getAttribute('data-codigo') || '';
-                const material = tr[i].getAttribute('data-material') || '';
-                const proveedor = tr[i].getAttribute('data-proveedor') || '';
+                const codigo = (tr[i].getAttribute('data-codigo') || '').toLowerCase();
+                const material = (tr[i].getAttribute('data-material') || '').toLowerCase();
+                const proveedor = (tr[i].getAttribute('data-proveedor') || '').toLowerCase();
                 
+                // Si el buscador está vacío, mostramos todo
+                if(!query) {
+                    tr[i].style.display = "";
+                    continue;
+                }
+
+                // El bloque de búsqueda solo busca en datos de la fila, no en los botones
                 const combinedText = `${codigo} ${material} ${proveedor}`;
                 const matches = terms.every(term => combinedText.includes(term));
                 
