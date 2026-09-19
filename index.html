@@ -68,12 +68,15 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
-                    <!-- BUSCADOR CORREGIDO (CON POINTER-EVENTS-NONE Y PL-9) -->
-                    <div class="relative w-64">
-                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-sm pointer-events-none"></i>
-                        <input type="text" id="smartSearchInput" placeholder="Buscar código o material..." oninput="handleSmartSearch(event)" class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:border-secondary">
+                    
+                    <!-- BUSCADOR REESTRUCTURADO SIN INTERFERENCIAS -->
+                    <div class="relative w-full sm:w-72">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </span>
+                        <input type="text" id="smartSearchInput" placeholder="Buscar código o material..." oninput="handleSmartSearch(event)" class="w-full pl-10 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg outline-none focus:border-secondary shadow-sm transition-colors">
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -356,10 +359,11 @@
                 `;
                 tbody.appendChild(tr);
             });
-            // Mantener el filtro activo si el usuario estaba escribiendo algo
-            const searchVal = document.getElementById('smartSearchInput').value;
-            if(searchVal) {
-                handleSmartSearch({ target: document.getElementById('smartSearchInput') });
+            
+            // Mantener el filtro de búsqueda activo si el usuario ya había escrito algo
+            const searchInput = document.getElementById('smartSearchInput');
+            if(searchInput && searchInput.value) {
+                handleSmartSearch({ target: searchInput });
             }
         }
 
@@ -681,9 +685,9 @@
 
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
         
-        // FUNCIÓN DE BÚSQUEDA EN TIEMPO REAL OPTIMIZADA
+        // FUNCIÓN DE FILTRADO INSTANTÁNEO EN TIEMPO REAL
         function handleSmartSearch(e) { 
-            const q = e.target.value.toUpperCase(); 
+            const q = e.target.value.toUpperCase().trim(); 
             const tr = document.getElementById('registrosTable').getElementsByTagName('tr'); 
             for(let i = 1; i < tr.length; i++) { 
                 tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; 
