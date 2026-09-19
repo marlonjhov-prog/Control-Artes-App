@@ -70,8 +70,9 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                     <h1 class="text-base font-bold text-slate-800">Bandeja de Recepción y Control</h1>
+                    <!-- BUSCADOR CORREGIDO (CON POINTER-EVENTS-NONE Y PL-9) -->
                     <div class="relative w-64">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-sm pointer-events-none"></i>
                         <input type="text" id="smartSearchInput" placeholder="Buscar código o material..." oninput="handleSmartSearch(event)" class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:border-secondary">
                     </div>
                 </div>
@@ -127,7 +128,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                 
-                <!-- 1. EVIDENCIA Y ARTE (DISEÑO VISUAL REESTILIZADO Y MODERNO) -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-image text-secondary"></i> Evidencia y Arte
@@ -159,7 +159,6 @@
                     </div>
                 </div>
 
-                <!-- 2. INGREDIENTES IA -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col shadow-sm">
                     <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3 flex-shrink-0">
                         <i class="fa-solid fa-list-check text-secondary"></i> Ingredientes IA
@@ -167,7 +166,6 @@
                     <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 flex-grow overflow-y-auto max-h-[170px] text-xs text-slate-700 leading-relaxed font-medium shadow-inner" id="ingredientes-text-view"></div>
                 </div>
 
-                <!-- 3. ALÉRGENOS -->
                 <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm">
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase flex items-center gap-2 mb-3">
@@ -188,7 +186,6 @@
             </div>
         </div>
         
-        <!-- MODAL DE ZOOM -->
         <div id="zoomModal" class="fixed inset-0 bg-slate-950/85 z-[9999] hidden flex-col items-center justify-center p-4">
             <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
                 <span id="zoomModalTitle" class="text-white font-bold text-xs bg-slate-900/85 px-3 py-2 rounded-lg border border-slate-700 shadow-lg"></span>
@@ -359,6 +356,11 @@
                 `;
                 tbody.appendChild(tr);
             });
+            // Mantener el filtro activo si el usuario estaba escribiendo algo
+            const searchVal = document.getElementById('smartSearchInput').value;
+            if(searchVal) {
+                handleSmartSearch({ target: document.getElementById('smartSearchInput') });
+            }
         }
 
         function getDriveFileViewUrl(url) {
@@ -678,7 +680,15 @@
         }
 
         function showDashboard() { currentItemCode = null; document.getElementById('detail-view').classList.add('hidden'); document.getElementById('dashboard-view').classList.remove('hidden'); loadData(); }
-        function handleSmartSearch(e) { const q = e.target.value.toUpperCase(), tr = document.getElementById('registrosTable').getElementsByTagName('tr'); for(let i=1; i<tr.length; i++) { tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; } }
+        
+        // FUNCIÓN DE BÚSQUEDA EN TIEMPO REAL OPTIMIZADA
+        function handleSmartSearch(e) { 
+            const q = e.target.value.toUpperCase(); 
+            const tr = document.getElementById('registrosTable').getElementsByTagName('tr'); 
+            for(let i = 1; i < tr.length; i++) { 
+                tr[i].style.display = (tr[i].innerText.toUpperCase().includes(q)) ? "" : "none"; 
+            } 
+        }
 
     </script>
 </body>
